@@ -1,0 +1,27 @@
+[project]
+name = "finlib"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic (>=2.13.4,<3.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "finlib", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "mypy (>=2.1.0,<3.0.0)",
+    "ruff (>=0.15.12,<0.16.0)",
+    "black (>=26.3.1,<27.0.0)",
+    "pytest (>=9.0.3,<10.0.0)"
+]
