@@ -1,9 +1,9 @@
 [project]
 name = "finlib"
 version = "0.1.0"
-description = ""
+description = "A library for financial data analysis"
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "simone",email = "284838112+bellinquente-a11y@users.noreply.github.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.12"
@@ -25,3 +25,14 @@ dev = [
     "black (>=26.3.1,<27.0.0)",
     "pytest (>=9.0.3,<10.0.0)"
 ]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+
+# Common errors:
+# Function is missing a return type annotation
+#   -> add -> None, -> str, -> float etc.
+# Argument has incompatible type
+#   -> your annotations don't match usage

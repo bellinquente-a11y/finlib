@@ -24,8 +24,11 @@ class Vector:
     def __rmul__(self, scalar: float) -> 'Vector':
         return self * scalar
 
-    def __eq__(self, other: 'Vector') -> bool:
-        return self.x == other.x and self.y == other.y
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Vector):
+            return False
+        else:
+            return self.x == other.x and self.y == other.y
 
     def __hash__(self) -> int:
         return hash((self.x, self.y))   # immutable objects (tuples) can be hashed. Not lists or dicts!
