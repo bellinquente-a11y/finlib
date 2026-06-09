@@ -32,3 +32,19 @@
 
 ### Still unclear
 - Whether dataclass and Pydantic are used in practice as opposed to numpy arrays
+
+
+## Week 1, day 3, 09/06
+
+### What I built
+- A `pydantic.BaseModel` `Portfolio` class of `Trades` with custom dunder methods
+- An `Instrument` ABC and two concrete subclasses 
+- A Protocol for `Priceable` instruments
+
+### Surprises
+- That there is a movement against inheritance and in favour of Protocols (more pythonic)
+
+### Still unclear
+- `@runtime_checkable` decorator for Protocols
+- how easy it is to keep mypy clean
+- how to maintain the `docs` folder

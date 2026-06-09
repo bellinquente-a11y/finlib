@@ -4,6 +4,8 @@ from typing import Literal
 from decimal import Decimal
 
 class Trade(BaseModel):
+    """Class representing a trade"""
+    
     model_config = {'frozen': True, 'str_strip_whitespace': True}
 
     symbol: str = Field(..., min_length=1, max_length=10)
@@ -21,8 +23,19 @@ class Trade(BaseModel):
 
     @property
     def notional(self) -> Decimal:
-        return self.quantity * self.price
+        """Calculate the notional value of the trade"""
 
-t = Trade(symbol='bhp', quantity='100', price='45.50', side='BUY')
-print(t.symbol)    # BHP
-print(t.notional)  # Decimal('4550.00')
+        if self.side == 'BUY':
+            return self.quantity * self.price
+        elif self.side == 'SELL':
+            return -1 * (self.quantity * self.price)    
+        else:
+            raise ValueError(f"Invalid side: {self.side}")
+
+    def __str__(self) -> str:
+        return f"Trade(symbol={self.symbol!r}, quantity={self.quantity!r}, price={self.price!r}, side={self.side!r}, timestamp={self.timestamp!r})"
+
+# t = Trade(symbol='bhp', quantity='100', price='45.50', side='BUY')
+# print(t.symbol)    # BHP
+# print(t.notional)  # Decimal('4550.00')
+
