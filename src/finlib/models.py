@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Literal, Protocol, runtime_checkable
 from decimal import Decimal
 
 class Trade(BaseModel):
@@ -32,10 +32,31 @@ class Trade(BaseModel):
         else:
             raise ValueError(f"Invalid side: {self.side}")
 
+    def lot_size(self) -> Decimal:
+        """Get the lot size of the trade"""
+        return self.quantity if self.side == 'BUY' else -1 * self.quantity
+
     def __str__(self) -> str:
         return f"Trade(symbol={self.symbol!r}, quantity={self.quantity!r}, price={self.price!r}, side={self.side!r}, timestamp={self.timestamp!r})"
 
-# t = Trade(symbol='bhp', quantity='100', price='45.50', side='BUY')
+
+@runtime_checkable
+class Tradeable(Protocol):
+    """Protocol for a generic trade"""
+
+    @property
+    def symbol(self) -> str: ...
+    @property
+    def price(self) -> Decimal: ...
+    def lot_size(self) -> Decimal: ...
+
+def is_valid_trade_size(instrument: Tradeable, notional: Decimal) -> bool:
+    """Check if a trade is a valid size"""
+
+    return bool(instrument.lot_size()*instrument.price == notional)
+
+t = Trade(symbol='bhp', quantity=Decimal('100'), price=Decimal('45.50'), side='BUY')
+print(is_valid_trade_size(t, Decimal('4550.00')))
 # print(t.symbol)    # BHP
 # print(t.notional)  # Decimal('4550.00')
 

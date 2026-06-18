@@ -48,3 +48,21 @@
 - `@runtime_checkable` decorator for Protocols
 - how easy it is to keep mypy clean
 - how to maintain the `docs` folder
+
+
+## Week 1, day 4 19/06
+
+### What I built
+- A **generator** function to lazily stream market data from a csv.
+- A **context_manager** timer to time a process.
+- A **decorator** to retry a function multiple times in case of exceptions.
+- A VWAP calculation function from CSV that fetches the data lazily.
+
+### Surprises
+- Iterables and iterators. The standard librbary allows to avoid reinventing the wheel.
+- Generators and the keyword `yield`. How they work. Their usefulness to fetch data lazily.
+- Context managers and the `with` keyword. How to build context managers from generators via `@contextlib.contextmanager`
+
+### Still unclear
+- Generalised usage of generators.
+- How to build test functions.
