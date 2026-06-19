@@ -74,19 +74,3 @@ def get_value(instrument: Priceable, qty: float) -> Decimal:
 
 # print(get_value(Equity("BHP", Decimal(130.0)), 10))
 # print(get_value(ThirdPartyInstrument(), 5))
-
-def value_portfolio(
-    positions: dict[str, tuple[Priceable, float]]
-) -> dict[str, Decimal]:
-    """Get the value of a portfolio"""
-
-    return {
-        name: instrument.price() * Decimal(qty)
-        for name, (instrument, qty) in positions.items()
-    }
-
-positions: dict[str, tuple[Priceable, float]] = {"BHP": (Equity("BHP", Decimal(131.)), 15.0), "XYZ": (ThirdPartyInstrument(), 11.0)}
-# positions = {"BHP": (Equity("BHP", Decimal(131.)), 15)}
-
-# print(value_portfolio(positions))
-print(sum(value_portfolio(positions).values()))
