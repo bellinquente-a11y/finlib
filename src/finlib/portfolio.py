@@ -1,8 +1,7 @@
 from pydantic import BaseModel, Field
 from decimal import Decimal
 from typing import Iterator
-from finlib import Trade, Priceable, Equity
-from finlib.instruments import ThirdPartyInstrument
+from finlib import Trade, Priceable
 
 class Portfolio(BaseModel):
     """Class representing a portfolio of trades"""

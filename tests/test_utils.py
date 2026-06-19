@@ -1,5 +1,4 @@
 from finlib.utils import retry
-import pytest
 
 def test_retry_does_not_affect_working_function():
     @retry(max_attempts=3, delay=0.5, exceptions=(ValueError,))

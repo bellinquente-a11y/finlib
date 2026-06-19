@@ -24,7 +24,8 @@ class Equity(Instrument):
     """Equity instrument"""
 
     def __init__(self, ticker: str, current_price: Decimal) -> None:
-        if not isinstance(current_price, Decimal): raise TypeError
+        if not isinstance(current_price, Decimal): 
+            raise TypeError
         self._symbol = ticker.upper()
         self._price = current_price
 
@@ -41,7 +42,8 @@ class Future(Instrument):
     """Future instrument"""
 
     def __init__(self, ticker: str, current_price: Decimal) -> None:
-        if not isinstance(current_price, Decimal): raise TypeError
+        if not isinstance(current_price, Decimal): 
+            raise TypeError
         self._symbol = ticker.upper()
         self._price = current_price
 
