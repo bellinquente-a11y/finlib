@@ -4,7 +4,7 @@ from finlib.utils import timer, retry
 from finlib.data import stream_ohlcv, OHLCVBar
 from typing import Generator
 
-@retry(max_attempts=3, delay=1.0, exceptions=(ValueError,))
+@retry(max_attempts=3, delay=0.1, exceptions=(ValueError,))
 def calculate_daily_vwap(path: Path, symbol: str, min_volume: int = 0) -> Decimal:
     """Calculate VWAP from CSV file"""
 
