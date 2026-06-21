@@ -1,11 +1,22 @@
-# Finlib
+# finlib
 
-## Purpose
+[![CI](https://github.com/bellinquente-a11y/finlib/actions/workflows/ci.yml/badge.svg)](...)
 
-A didactic project to refine software enegineering skills in algorithimc finance.
+Production-grade Python for financial data modelling.
 
-## Tech Stack
+## Features
+- Type-safe Trade model with Pydantic v2
+- Instrument hierarchy using ABCs and Protocols
+- Streaming OHLCV pipeline - O(1) memory
+- Portfolio valuation via structural subtyping
 
-- Python 3.12
-- Poetry
-- Pyenv
+## Installation
+  git clone https://github.com/bellinquente-a11y/finlib
+  cd finlib && poetry install
+
+## Quick start
+  from finlib import Trade, Equity
+  from decimal import Decimal
+  t = Trade(symbol='BHP', quantity=1000,
+            price=Decimal('45.50'), side='BUY')
+  print(t.notional)  # Decimal('45500.00')

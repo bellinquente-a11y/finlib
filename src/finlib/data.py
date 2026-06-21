@@ -3,7 +3,8 @@ from decimal import Decimal
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Generator
-
+from finlib import Trade
+from datetime import datetime
 
 EXAMPLE_PATH = "~/data/simulated_financial_data.csv"
 
@@ -41,3 +42,21 @@ def stream_ohlcv(path: Path, min_volume: int = 0) -> Generator[OHLCVBar, None, N
             )
             if bar.volume >= min_volume:
                 yield bar
+
+def stream_trades(path: Path, timestamp_format: str = '%Y-%m-%dT%H:%M:%S') -> Generator[Trade, None, None]:
+    """Stream trades from a CSV file"""
+
+    if not path.is_file():
+        raise ValueError(f"Missing path {path!s}")
+
+    with open(path, newline='') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            trade = Trade(
+                symbol = row['symbol'],
+                quantity=Decimal(row["volume"]),
+                price=Decimal(row["price"]),
+                side=row["side"],
+                timestamp=datetime.strptime(row["timestamp"], timestamp_format)
+            )
+            yield trade
