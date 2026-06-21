@@ -2,7 +2,7 @@ import csv
 from decimal import Decimal
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator
+from typing import Generator, Literal, cast
 from finlib import Trade
 from datetime import datetime
 
@@ -56,7 +56,7 @@ def stream_trades(path: Path, timestamp_format: str = '%Y-%m-%dT%H:%M:%S') -> Ge
                 symbol = row['symbol'],
                 quantity=Decimal(row["volume"]),
                 price=Decimal(row["price"]),
-                side=row["side"],
+                side=cast(Literal['BUY', 'SELL'], row['side']),
                 timestamp=datetime.strptime(row["timestamp"], timestamp_format)
             )
             yield trade

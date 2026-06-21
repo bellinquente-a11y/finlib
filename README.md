@@ -15,8 +15,11 @@ Production-grade Python for financial data modelling.
   cd finlib && poetry install
 
 ## Quick start
-  from finlib import Trade, Equity
-  from decimal import Decimal
-  t = Trade(symbol='BHP', quantity=1000,
+
+```python
+from finlib import Trade, Equity
+from decimal import Decimal
+t = Trade(symbol='BHP', quantity=1000,
             price=Decimal('45.50'), side='BUY')
-  print(t.notional)  # Decimal('45500.00')
+print(t.notional)  # Decimal('45500.00')
+```
