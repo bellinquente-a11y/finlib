@@ -66,3 +66,32 @@
 ### Still unclear
 - Generalised usage of generators.
 - How to build test functions.
+
+
+## Week 1, day 5 21/06 - week retrospective
+
+### Deliverables
+
+- pyenv + poetry project
+- Vector class (8+ dunder methods)
+- Trade model (Pydantic v2, validators, Literal)
+- Instrument hierarchy (ABC, abstract methods)
+- Priceable Protocol (structural subtyping)
+- OHLCV generator (streaming, constant memory)
+- Timer context manager
+- @retry decorator (exponential backoff)
+- Full test suite (>80% coverage)
+- GitHub Actions CI (lint -> typecheck -> test)
+- Portfolio analysis script
+
+### 3 concepts I now understand
+1. dunder methods
+2. generators
+3. context managers
+
+### What I would design differently
+Nothing.
+
+### Python OOP questions that remain unclear
+- dataclass vs Pydantic
+- usage of protocols
