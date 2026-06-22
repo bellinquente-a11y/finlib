@@ -15,6 +15,6 @@ jobs:
           python-version: '3.12'
       - run: pip install poetry
       - run: poetry install
-      - run: poetry run ruff check src/ tests/ /script
+      - run: poetry run ruff check src/ tests/ script/
       - run: poetry run mypy src/ --strict
       - run: poetry run pytest --cov=finlib --cov-fail-under=80 -vclear
