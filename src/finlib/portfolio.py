@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from decimal import Decimal
-from typing import Iterator
+from typing import Generator
 from finlib import Trade, Priceable
 
 class Portfolio(BaseModel):
@@ -21,12 +21,16 @@ class Portfolio(BaseModel):
         return len(self.trades)
 
     def __contains__(self, symbol: str) -> bool:
-        return any([symbol == trade.symbol for trade in self.trades])
+        for trade in self.trades:
+            if trade.symbol == symbol:
+                return True
+                break
+        return False
 
-    def iter_trades(self) -> Iterator[Trade]:
+    def __iter__(self) -> Generator[Trade, None, None]:  # type: ignore[override]
         """Iterate over the trades in the portfolio"""
-
-        return iter(self.trades)
+        for trade in self.trades:
+            yield trade
 
     def __getitem__(self, index: int) -> Trade:
         return self.trades[index]
@@ -40,20 +44,3 @@ def value_portfolio(
         name: instrument.price() * Decimal(qty)
         for name, (instrument, qty) in positions.items()
     }
-        
-
-# trades = [Trade(symbol='BHP', quantity=Decimal(100), price=Decimal('45.50'), side='BUY'), Trade(symbol='AAP', quantity=Decimal(200), price=Decimal('10.00'), side='SELL')]
-# p = Portfolio(name='My Portfolio', trades=trades)
-
-# print(len(p))
-# print('BHP' in p)
-# print('CBA' in p)
-# print([trade.symbol for trade in p.iter_trades()])
-# print(p[1])
-
-
-# positions: dict[str, tuple[Priceable, float]] = {"BHP": (Equity("BHP", Decimal(131.)), 15.0), "XYZ": (ThirdPartyInstrument(), 11.0)}
-# # positions = {"BHP": (Equity("BHP", Decimal(131.)), 15)}
-
-# # print(value_portfolio(positions))
-# print(sum(value_portfolio(positions).values()))

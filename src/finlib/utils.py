@@ -44,3 +44,15 @@ def retry(max_attempts: int = 3,
         return wrapper # type: ignore[return-value]
     return decorator
 
+
+def validate_inputs(min_quantity: int) -> Callable[[F], F]:
+    """Decorator to validate the minimum quantity input of a function"""
+    def decorator(func: F) -> F:
+        @functools.wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            quantity = kwargs.get('quantity', args[0] if args else None)
+            if quantity is not None and quantity<min_quantity:
+                raise ValueError(f"quantity {quantity} needs to be >= than {min_quantity}")
+            return func(*args, **kwargs)
+        return wrapper # type: ignore[return-value]
+    return decorator

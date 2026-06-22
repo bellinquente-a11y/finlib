@@ -95,3 +95,19 @@ Nothing.
 ### Python OOP questions that remain unclear
 - dataclass vs Pydantic
 - usage of protocols
+
+
+## Week 2, day 1 22/06
+
+### What I built
+- A utility that groups trades by symbol via `itertools.groupby` and `operator.attrgetter`
+- The corresponding print summary function
+- A validation decorator for the input of a function
+
+### Surprises
+- `pydantic.BaseModel` (`Trade` class) has many useful dunders already coded (`__eq__`, etc.)
+- The power of `itertools.groupby` and its `key` input. Remember sorting!!
+- The existence of the `operator` functions `attrgetter`, `itemgetter` and `methodcaller`
+
+### Still unclear
+- When to use the `opeartor` methods in practice and whether I will forget about them. 

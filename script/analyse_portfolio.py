@@ -15,7 +15,7 @@ def main(trades_csv: Path, prices_csv: Path) -> None:
 
     lot_size = {}
     for trade in trades:
-        if not (trade.symbol in lot_size):
+        if trade.symbol not in lot_size:
             lot_size[trade.symbol] = trade.lot_size()
         else:
             lot_size[trade.symbol] += trade.lot_size()
