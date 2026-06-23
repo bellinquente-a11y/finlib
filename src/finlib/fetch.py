@@ -30,7 +30,7 @@ for workers in (1, 2, 5, 10, 20):
                 errors[futures[f]] = e
         for k, v in results.items():
             print(f"{k} {v:.3e}")
-        for v in errors.values():
-            print(v)
+        for err in errors.values():
+            print(err)
 
     
