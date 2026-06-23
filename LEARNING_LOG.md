@@ -110,4 +110,29 @@ Nothing.
 - The existence of the `operator` functions `attrgetter`, `itemgetter` and `methodcaller`
 
 ### Still unclear
-- When to use the `opeartor` methods in practice and whether I will forget about them. 
+- When to use the `opeartor` methods in practice and whether I will forget about them.
+
+
+## Week 2, day 2 23/06
+
+### What I built
+- The fetching module `fetch.py` that simulates fetching data with latency from a network.
+- A thread pool via `concurrency.future.ThreadPoolExecutor` to implement concurrency in I/O operations.
+- I timed the fetching of 10 symbols as a function of the number of workers in the pool. Notice the diminishing returns.
+
+| number of workwers | processing time |
+|--------------------|-----------------|
+| 1 | 1.64 |
+| 2 | 0.82 |
+| 5 | 0.41 |
+| 10 | 0.21 |
+| 20 | 0.21 |
+
+### Surprises
+- Processes vs threads
+- Concurrency vs parallelism
+- The GIL (global interpreter lock)
+- Usefulness of concurrency in I/O operations
+
+### Still unclear
+- Exact mechanics of threading
