@@ -8,7 +8,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pydantic (>=2.13.4,<3.0.0)"
+    "pydantic (>=2.13.4,<3.0.0)",
+    "aiohttp (>=3.14.1,<4.0.0)"
 ]
 
 [tool.poetry]
@@ -26,6 +27,9 @@ dev = [
     "pytest (>=9.0.3,<10.0.0)",
     "pytest-cov (>=7.1.0,<8.0.0)",
     "ipykernel (>=7.3.0,<8.0.0)"
+]
+test = [
+    "requests (>=2.34.2,<3.0.0)"
 ]
 
 [tool.mypy]

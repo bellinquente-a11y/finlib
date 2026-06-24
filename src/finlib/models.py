@@ -53,9 +53,3 @@ def is_valid_trade_size(instrument: Tradeable, notional: Decimal) -> bool:
     """Check if a trade is a valid size"""
 
     return bool(instrument.lot_size()*instrument.price == notional)
-
-# t = Trade(symbol='bhp', quantity=Decimal('100'), price=Decimal('45.50'), side='BUY')
-# print(is_valid_trade_size(t, Decimal('4550.00')))
-# print(t.symbol)    # BHP
-# print(t.notional)  # Decimal('4550.00')
-

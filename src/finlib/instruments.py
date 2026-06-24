@@ -75,6 +75,3 @@ def get_value(instrument: Priceable, qty: float) -> Decimal:
     """Get the value of an instrument"""
 
     return instrument.price() * Decimal(qty)
-
-# print(get_value(Equity("BHP", Decimal(130.0)), 10))
-# print(get_value(ThirdPartyInstrument(), 5))

@@ -136,3 +136,20 @@ Nothing.
 
 ### Still unclear
 - Exact mechanics of threading
+
+
+## Week 2, day 3 24/06
+
+### What I built
+- A simulated data fetcher (using `await asyncio.sleep`) to simulate asynchronous data fetching using the `asyncio` module.
+- A real data fetcher applied to Binance data using asynchronous processing via `asyncio`.
+- Fetcher has been validated by using a `Pydantic` model at the boundary.
+- I compared the timing of the `asyncio` approach (0.16s) vs one implementing with threading via `concurrent.futures.ThreadPoolExecutor` (0.21s).
+
+### Surprises
+- How asynchronous (`asyncio` inparticular) processing can be very useful for data loading.
+- What a *coroutine* and the *event loop* are.
+- The subtle difference between threading and asynchronous processing.
+
+### Still unclear
+- When to use threading vs asynchronous processing.
