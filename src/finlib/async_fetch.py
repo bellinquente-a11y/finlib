@@ -41,7 +41,7 @@ async def validated_fetch_binance_one_symbol_one_row(session: aiohttp.ClientSess
     try:
         data = await fetch_binance_one_symbol_one_row(session, symbol, interval)
         return BinanceDataRow(**{k: v for k, v in zip(BINANCE_DATA_ROWS, data[0])})
-    except ValidationError as e:
+    except (ValidationError, aiohttp.client_exceptions.ClientResponseError) as e:
         log.warning(f"Bad response from {BINANCE_URL} for symbol {symbol}: {e}")
         return None
     except KeyError as e:
