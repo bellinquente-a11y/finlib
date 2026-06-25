@@ -155,7 +155,7 @@ Nothing.
 - I compared the timing of the `asyncio` approach (0.16s) vs one implementing with threading via `concurrent.futures.ThreadPoolExecutor` (0.21s).
 
 ### Surprises
-- How asynchronous (`asyncio` inparticular) processing can be very useful for data loading.
+- How asynchronous (`asyncio` in particular) processing can be very useful for data loading.
 - What a *coroutine* and the *event loop* are.
 - The subtle difference between threading and asynchronous processing.
 
@@ -181,3 +181,31 @@ Nothing.
 
 ### Still unclear
 - How to test different settings, given that the `settings` object is still defined globally.
+
+---
+
+ Week 2, day 5 26/06 - week retrospective
+
+ ### Deliverables
+- itertools.groupby trade analytics
+- Decorator with arguments (validate_inputs)
+- ThreadPoolExecutor fetcher + benchmark
+- asyncio + aiohttp fetcher with Pydantic validation
+- Repository pattern + DI (Protocol-based)
+- pydantic Settings for config
+- Vectorised NumPy + chained Pandas cleaning
+- End-to-end pipeline, tagged v0.2.0
+
+### 3 concepts I now understand
+- how `itertools.groupby` works
+- concurrency vs parallelism
+- threading as a form of concurrency
+- asynchronous processing as a form of concurrency
+- the repository pattern and the concept of DI (dependency injection)
+- Pandas chaining
+
+### What I would design differently
+- `Trades` where to icnlude the sign in the position and notional calculation?
+
+### Questions that remain unclear
+- how to test alternative settings

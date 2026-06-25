@@ -11,7 +11,14 @@ def _fetch_binance_data_per_product(symbol: str, interval: binance_interval, lim
         raise ValueError
     if limit <=0:
         raise ValueError
-    resp = requests.get(settings.binance.url, params={"symbol": symbol, "interval": interval, "limit": str(limit)})
+    resp = requests.get(settings.binance.url, 
+                        params={
+                            "symbol": symbol, 
+                            "interval": interval, 
+                            "limit": str(limit), 
+                            "timeout": str(settings.fetch_timeout_seconds)
+                            }
+                        )
     return resp.json()
 
 def _format_binance_output(data: list[list[Any]]) -> pd.DataFrame:
