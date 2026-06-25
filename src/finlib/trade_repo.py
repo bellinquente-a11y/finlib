@@ -41,10 +41,19 @@ class PortfolioService():
     def record_trade(self, trade: Trade) -> None:
         self._trade_repo.add(trade)
 
+    def get_notional(self, symbol: str) -> Decimal:
+        trades = self._trade_repo.get_by_symbol(symbol)
+        return Decimal(sum([t.notional for t in trades]))
+
     def get_position(self, symbol: str) -> Decimal:
         trades = self._trade_repo.get_by_symbol(symbol)
         return Decimal(sum([t.lot_size() for t in trades]))
 
-    def get_summary(self) -> dict[str, Decimal]:
+    def get_summary(self) -> dict[str, dict[str, Decimal]]:
         symbols = self._trade_repo.get_all_symbols()
-        return {symbol: self.get_position(symbol) for symbol in symbols}
+        return {
+            symbol: {"position": self.get_position(symbol),
+                     "notional": self.get_notional(symbol)
+                    } 
+                for symbol in symbols
+            }

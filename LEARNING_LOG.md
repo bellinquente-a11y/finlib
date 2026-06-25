@@ -1,5 +1,6 @@
 # Learning log
 
+---
 
 ## Week 1, day 1, 15/05/26
 
@@ -17,6 +18,7 @@
 - how to use pyend and poetry in practice
 - the full use of dunder methods within the language
 
+---
 
 ## Week 1, day 2, 18/05
 
@@ -33,6 +35,7 @@
 ### Still unclear
 - Whether dataclass and Pydantic are used in practice as opposed to numpy arrays
 
+---
 
 ## Week 1, day 3, 09/06
 
@@ -49,6 +52,7 @@
 - how easy it is to keep mypy clean
 - how to maintain the `docs` folder
 
+---
 
 ## Week 1, day 4 19/06
 
@@ -67,6 +71,7 @@
 - Generalised usage of generators.
 - How to build test functions.
 
+---
 
 ## Week 1, day 5 21/06 - week retrospective
 
@@ -96,6 +101,7 @@ Nothing.
 - dataclass vs Pydantic
 - usage of protocols
 
+---
 
 ## Week 2, day 1 22/06
 
@@ -112,6 +118,7 @@ Nothing.
 ### Still unclear
 - When to use the `opeartor` methods in practice and whether I will forget about them.
 
+---
 
 ## Week 2, day 2 23/06
 
@@ -137,6 +144,7 @@ Nothing.
 ### Still unclear
 - Exact mechanics of threading
 
+---
 
 ## Week 2, day 3 24/06
 
@@ -154,6 +162,7 @@ Nothing.
 ### Still unclear
 - When to use threading vs asynchronous processing.
 
+---
 
 ## Week 2, day 4 25/06
 
