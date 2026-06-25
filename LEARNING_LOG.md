@@ -153,3 +153,22 @@ Nothing.
 
 ### Still unclear
 - When to use threading vs asynchronous processing.
+
+
+## Week 2, day 4 25/06
+
+### What I built
+- A `TradeRepository` Protocol and its corresponding `InMemoryTradeRespoitory` implementation (for testing).
+- A `PortfolioService` class interfacing with the `TradeRepository` protocol at object creation.
+- A `config.py` file returning a `Setting` object from `pydantic_settings.BaseSettings`.
+- A `.env` file from which default settins are read.
+- Subsettings for Binance API via `pydantic.BaseModel`. 
+- Refactor the code to avoid global instatiated dependencies.
+
+### Surprises
+- *Repository*: an interface that hides where data actually lives from business logic; the interface is defined as a protocol.
+- *Dependency injection*: pass dependencies in via a constructor; not reach out and grab them globally.
+- *Environment* and *environment variables* to avoid code changes.
+
+### Still unclear
+- How to test different settings, given that the `settings` object is still defined globally.

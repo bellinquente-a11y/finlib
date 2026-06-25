@@ -6,8 +6,6 @@ from typing import Generator, Literal, cast
 from finlib import Trade
 from datetime import datetime
 
-EXAMPLE_PATH = "~/data/simulated_financial_data.csv"
-
 @dataclass(frozen=True)
 class OHLCVBar:
     """Dataclass representing an OHLCV bar"""
