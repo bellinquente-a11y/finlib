@@ -209,3 +209,16 @@ Nothing.
 
 ### Questions that remain unclear
 - how to test alternative settings
+
+--- 
+
+## Week 3, day 1 26/06
+
+### What I built
+- A 3 line drawdown calculation function from a list using `itertools.accumulate`
+- A multi-key grouping of Trade objects using `itertools.groupby` (remember sorting first!)
+- A `timer` and a `deprecated` decorator with tests.
+
+### Surprises
+- How quick is the drawdown calculation with `itertools`
+- How powerful is `groupby`

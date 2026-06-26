@@ -1,7 +1,7 @@
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from string import ascii_uppercase
-from finlib.utils import timer
+from finlib.context_managers import timer
 
 def fetch_price(symbol: str) -> float:
     """Function to simulate network latency"""

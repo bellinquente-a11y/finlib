@@ -1,23 +1,11 @@
 import time
-from typing import Generator, TypeVar, Callable, Any
-from contextlib import contextmanager
+from typing import TypeVar, Callable, Any
 import functools
 import logging
+import warnings
 
 log = logging.getLogger(__name__)
 F = TypeVar('F', bound=Callable[..., Any])
-
-@contextmanager
-def timer(label: str = "") -> Generator[None, None, None]:
-    """Context manager to time an operation"""
-
-    start_time = time.perf_counter()
-    try:
-        yield
-    finally:
-        end_time = time.perf_counter()
-        elapsed = end_time - start_time
-        print(f"{label}: {elapsed:.4f}s")
 
 
 def retry(max_attempts: int = 3, 
@@ -56,3 +44,23 @@ def validate_inputs(min_quantity: int) -> Callable[[F], F]:
             return func(*args, **kwargs)
         return wrapper # type: ignore[return-value]
     return decorator
+
+
+def timer(func: F) -> F:
+    @functools.wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        interval = time.perf_counter() - start
+        print(f"call to {func.__name__}: {interval:.3f}s")
+        return result
+    return wrapper # type: ignore[return-value]
+
+
+def deprecated(func: F) -> F:
+    @functools.wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        result = func(*args, **kwargs)
+        warnings.warn(f"Function {func.__name__} will not be supported in a future release", DeprecationWarning, stacklevel=2)
+        return result
+    return wrapper # type: ignore[return-value]

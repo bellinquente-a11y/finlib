@@ -4,7 +4,7 @@ from pathlib import Path
 from decimal import Decimal
 from finlib import Equity, value_portfolio
 from finlib.data import stream_ohlcv, stream_trades
-from finlib.utils import timer
+from finlib.context_managers import timer
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

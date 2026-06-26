@@ -1,6 +1,7 @@
 from pathlib import Path
 from decimal import Decimal
-from finlib.utils import timer, retry
+from finlib.context_managers import timer
+from finlib.decorators import retry
 from finlib.data import stream_ohlcv, OHLCVBar
 from typing import Generator
 from finlib import Trade
