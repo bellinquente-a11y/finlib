@@ -15,20 +15,20 @@ def _fetch_binance_data_per_product(symbol: str, interval: binance_interval, lim
                         params={
                             "symbol": symbol, 
                             "interval": interval, 
-                            "limit": str(limit), 
-                            "timeout": str(settings.fetch_timeout_seconds)
-                            }
+                            "limit": str(limit),
+                            },
+                        timeout = settings.fetch_timeout_seconds
                         )
     return resp.json()
 
 def _format_binance_output(data: list[list[Any]]) -> pd.DataFrame:
     if len(data) == 0:
         raise ValueError
-    if not all([len(row)==len(settings.binance.columns) for row in data]):
+    if not all(len(row)==len(settings.binance.columns) for row in data):
         raise ValueError
     for i, col in enumerate(settings.binance.columns):
         expected_type = settings.binance.columns_type[col]
-        if not all(isinstance(x,expected_type) for x in data[i]):
+        if not all(isinstance(x[i],expected_type) for x in data):
             raise ValueError(f"Binance data column {i}: not all data is {expected_type}")
     df = pd.DataFrame(data=data, columns=settings.binance.columns)
     return (
