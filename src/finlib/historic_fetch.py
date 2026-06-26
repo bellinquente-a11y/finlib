@@ -28,7 +28,7 @@ def _format_binance_output(data: list[list[Any]]) -> pd.DataFrame:
         raise ValueError
     for i, col in enumerate(settings.binance.columns):
         expected_type = settings.binance.columns_type[col]
-        if not all([isinstance(x,expected_type) for x in data[i]]):
+        if not all(isinstance(x,expected_type) for x in data[i]):
             raise ValueError(f"Binance data column {i}: not all data is {expected_type}")
     df = pd.DataFrame(data=data, columns=settings.binance.columns)
     return (
