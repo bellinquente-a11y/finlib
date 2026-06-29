@@ -24,14 +24,14 @@ class BinanceDataRow(BaseModel):
     ignore: str
 
 async def fetch_binance_one_symbol_one_row(session: aiohttp.ClientSession, symbol: str, interval: binance_interval) -> Any:
-    """Coroutine to fetch one data for one syumbol from Binance."""
+    """Coroutine to fetch one data for one symbol from Binance."""
     log.info(f"Fetching {interval} data for {symbol}")
     async with session.get(settings.binance.url, params={"symbol": symbol, "interval": interval, "limit": 1}) as resp:
         resp.raise_for_status()
         return await resp.json()
 
 async def validated_fetch_binance_one_symbol_one_row(session: aiohttp.ClientSession, symbol: str, interval: binance_interval) -> BinanceDataRow | None:
-    """Coroutine to fetch one data for one syumbol from Binance. Validated with Pydantic."""
+    """Coroutine to fetch one data for one symbol from Binance. Validated with Pydantic."""
     try:
         data = await fetch_binance_one_symbol_one_row(session, symbol, interval)
         return BinanceDataRow(**{k: v for k, v in zip(settings.binance.columns, data[0])})

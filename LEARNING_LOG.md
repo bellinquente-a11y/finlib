@@ -15,7 +15,7 @@
 
 ### Still unclear
 - how to customise `sys.path`
-- how to use pyend and poetry in practice
+- how to use pyenv and poetry in practice
 - the full use of dunder methods within the language
 
 ---
@@ -63,7 +63,7 @@
 - A VWAP calculation function from CSV that fetches the data lazily.
 
 ### Surprises
-- Iterables and iterators. The standard librbary allows to avoid reinventing the wheel.
+- Iterables and iterators. The standard library allows to avoid reinventing the wheel.
 - Generators and the keyword `yield`. How they work. Their usefulness to fetch data lazily.
 - Context managers and the `with` keyword. How to build context managers from generators via `@contextlib.contextmanager`
 
@@ -116,7 +116,7 @@ Nothing.
 - The existence of the `operator` functions `attrgetter`, `itemgetter` and `methodcaller`
 
 ### Still unclear
-- When to use the `opeartor` methods in practice and whether I will forget about them.
+- When to use the `operator` methods in practice and whether I will forget about them.
 
 ---
 
@@ -124,10 +124,10 @@ Nothing.
 
 ### What I built
 - The fetching module `fetch.py` that simulates fetching data with latency from a network.
-- A thread pool via `concurrency.future.ThreadPoolExecutor` to implement concurrency in I/O operations.
+- A thread pool via `concurrent.futures.ThreadPoolExecutor` to implement concurrency in I/O operations.
 - I timed the fetching of 10 symbols as a function of the number of workers in the pool. Notice the diminishing returns.
 
-| number of workwers | processing time |
+| number of workers | processing time |
 |--------------------|-----------------|
 | 1 | 1.64 |
 | 2 | 0.82 |
@@ -167,12 +167,12 @@ Nothing.
 ## Week 2, day 4 25/06
 
 ### What I built
-- A `TradeRepository` Protocol and its corresponding `InMemoryTradeRespoitory` implementation (for testing).
+- A `TradeRepository` Protocol and its corresponding `InMemoryTradeRepository` implementation (for testing).
 - A `PortfolioService` class interfacing with the `TradeRepository` protocol at object creation.
 - A `config.py` file returning a `Setting` object from `pydantic_settings.BaseSettings`.
-- A `.env` file from which default settins are read.
+- A `.env` file from which default settings are read.
 - Subsettings for Binance API via `pydantic.BaseModel`. 
-- Refactor the code to avoid global instatiated dependencies.
+- Refactor the code to avoid global instantiated dependencies.
 
 ### Surprises
 - *Repository*: an interface that hides where data actually lives from business logic; the interface is defined as a protocol.
@@ -205,7 +205,7 @@ Nothing.
 - Pandas chaining
 
 ### What I would design differently
-- `Trades` where to icnlude the sign in the position and notional calculation?
+- `Trades` where to include the sign in the position and notional calculation?
 
 ### Questions that remain unclear
 - how to test alternative settings
@@ -222,3 +222,31 @@ Nothing.
 ### Surprises
 - How quick is the drawdown calculation with `itertools`
 - How powerful is `groupby`
+
+---
+
+## Week 3, day 2 
+
+### What I built
+- I added `structlog.log` to the `fetch.py` module.
+- Wrote a benchmark script comparing sequential, threading and async. Results below. Conceptual discussion in [concurrency_benchmark.md](./docs/concurrency_benchmark.md).
+
+| process type | processing time |
+|-|-|
+| Sequential | 1.16s |
+| Threading 1 workers | 1.16s |
+| Threading 2 workers | 0.57s |
+| Threading 5 workers | 0.23s |
+| Threading 10 workers | 0.13s |
+| Threading 20 workers | 0.08s |
+| Threading 50 workers | 0.03s |
+| Threading 100 workers | 0.03s |
+| asyncio | 0.02s |
+
+### Surprises
+- How beautiful the output of `structlog` looks.
+- Preemptive vs cooperational concurrency (i.e., threading vs async).
+- Async runs on one thread.
+
+### Still unclear
+- The mechanical details of threads, processes, etc.

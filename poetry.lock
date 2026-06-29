@@ -2457,6 +2457,18 @@ pure-eval = "*"
 tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
+name = "structlog"
+version = "26.1.0"
+description = "Structured Logging for Python"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "structlog-26.1.0-py3-none-any.whl", hash = "sha256:e081a26d6c373e6d201eca24eede26d8ffab07f88f477822e679183428d3d91e"},
+    {file = "structlog-26.1.0.tar.gz", hash = "sha256:f63a716cbd1b1291cf7661de7794b455acfa4c43c5bcf1630e6ad5ddc1adb3b7"},
+]
+
+[[package]]
 name = "tornado"
 version = "6.5.7"
 description = "Tornado is a Python web framework and asynchronous networking library, originally developed at FriendFeed."
@@ -2684,4 +2696,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "610f8e5aa77654c551dc179f5c09d77ed356cf52825e1d61bb26d2b8352e3386"
+content-hash = "1ae084e467a1c8f495b5d4dd0d865894b06d3fce9004bd8bd63bc25ad6650170"
