@@ -22,6 +22,8 @@ class BinanceSettings(BaseModel):
                                                       "ignore": str
                                                       }
     first_date: datetime = datetime(2015,1,1)
+    max_number_concurrent_calls: int = 5
+    max_retry: int = 3
 
 class Settings(BaseSettings):
     """FINLIB project settings"""

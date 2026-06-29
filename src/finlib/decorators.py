@@ -1,10 +1,13 @@
 import time
 from typing import TypeVar, Callable, Any
 import functools
-import logging
 import warnings
+import aiohttp
+import asyncio
+import structlog
 
-log = logging.getLogger(__name__)
+log = structlog.get_logger(__name__)
+
 F = TypeVar('F', bound=Callable[..., Any])
 
 
@@ -24,7 +27,7 @@ def retry(max_attempts: int = 3,
                 except exceptions as e:
                     last_exc = e
                     wait_time = delay * 2**(attempt-1)
-                    log.warning(f"Attempt {attempt} failed, wait {wait_time}s")
+                    log.warning("Failed function call attempt", attempt=attempt, wait_time=wait_time)
                     time.sleep(wait_time)
                     attempt += 1
             raise RuntimeError(f"Failed after {max_attempts} attempts") from last_exc
@@ -64,3 +67,23 @@ def deprecated(func: F) -> F:
         warnings.warn(f"Function {func.__name__} will not be supported in a future release", DeprecationWarning, stacklevel=2)
         return result
     return wrapper # type: ignore[return-value]
+
+
+def async_retry(max_retry: int, delay: float = 1.) -> Callable[[F],F]:
+    def decorator(func: F) -> F:
+        @functools.wraps(func)
+        async def wrapper(*args: Any, **kwargs: Any) -> Any:
+            count=1
+            while count<=max_retry:
+                wait_time = delay * 2**(count-1)
+                try:
+                    result = await func(*args, **kwargs)
+                    return result
+                except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+                    last_exc = e
+                    log.info("Retry function call", func=func, count=count, wait=wait_time, exc=e)
+                    count+=1
+                    await asyncio.sleep(wait_time)
+            raise RuntimeError(f"Failed call to {func.__name__} after {count-1} attempts") from last_exc
+        return wrapper # type: ignore[return-value]
+    return decorator

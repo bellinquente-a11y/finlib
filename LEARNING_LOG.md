@@ -225,7 +225,7 @@ Nothing.
 
 ---
 
-## Week 3, day 2 
+## Week 3, day 2 29/06
 
 ### What I built
 - I added `structlog.log` to the `fetch.py` module.
@@ -250,3 +250,18 @@ Nothing.
 
 ### Still unclear
 - The mechanical details of threads, processes, etc.
+
+---
+
+## Week 3, day 2 29/06
+
+### What I built
+- Built a `retry` decorator and `timeout` handling to the async fetcher. As usual, asynchronous code requires particular care.
+- Introduced a `semaphore` to the asyc fetcher to avoid reaching the network API limit.
+- Introduced mock test to the async fetcher via `AsyncMock`.
+
+### Surprises
+- How easy and effective it is to simulate third party output via mocking. Extremely usueful for testing. 
+
+### Still unclear
+- How to avoid silly mistakes with async code.

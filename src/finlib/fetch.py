@@ -4,7 +4,7 @@ import time
 # from finlib.context_managers import timer
 import structlog
 
-log = structlog.get_logger()
+log = structlog.get_logger(__name__)
 
 def fetch_price(symbol: str) -> float | None:
     """Function to simulate network latency"""
