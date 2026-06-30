@@ -1,10 +1,11 @@
 import asyncio
 import aiohttp
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, field_validator
 import structlog
 from typing import Literal, TypeAlias, get_args, Any
-from finlib.config import settings
+from finlib.config import get_settings
 from finlib.decorators import async_retry
+from datetime import datetime
 
 log = structlog.get_logger(__name__)
 
@@ -12,30 +13,39 @@ binance_interval: TypeAlias = Literal["1m", "3m", "5m", "15m", "30m", "1h", "2h"
 
 class BinanceDataRow(BaseModel):
     """Pydantic class to capture a Binance data row"""
-    open_time: int = Field(..., gt=int(settings.binance.first_date.timestamp()*1000))
+    open_time: int
     open: str = Field(..., min_length=1)
     high: str = Field(..., min_length=1)
     low: str = Field(..., min_length=1)
     close: str = Field(..., min_length=1)
     volume: str = Field(..., min_length=1)
-    close_time: int = Field(..., gt=int(settings.binance.first_date.timestamp()*1000))
+    close_time: int
     quote_asset_volume: str = Field(..., min_length=1)
     number_of_trades: int = Field(..., gt=0)
     taker_buy_base_asset_volume: str = Field(..., min_length=1)
     taker_buy_quote_asset_volume: str = Field(..., min_length=1)
     ignore: str
 
+    @field_validator("open_time", "close_time")
+    @classmethod
+    def valid_unix_timestamp(cls, n: int) -> int:
+        if n<int(datetime(2015,1,1).timestamp()*1000):
+            raise ValueError
+        return n
+
 async def fetch_binance_one_symbol_one_row(session: aiohttp.ClientSession, symbol: str, interval: binance_interval) -> Any:
     """Coroutine to fetch one data for one symbol from Binance."""
+    settings = get_settings()
     log.info("Async fetching Binance data", interval=interval, symbol=symbol)
     async with asyncio.timeout(settings.fetch_timeout_seconds):
         async with session.get(settings.binance.url, params={"symbol": symbol, "interval": interval, "limit": 1}) as resp:
             resp.raise_for_status()
             return await resp.json()
 
-@async_retry(max_retry=settings.binance.max_retry, delay=1.)
+@async_retry(max_retry=3, delay=1.)
 async def validated_fetch_binance_one_symbol_one_row(session: aiohttp.ClientSession, symbol: str, interval: binance_interval, semaphore: asyncio.Semaphore) -> BinanceDataRow | None:
     """Coroutine to fetch one data for one symbol from Binance. Validated with Pydantic."""
+    settings = get_settings()
     async with semaphore:
         try:
             data = await fetch_binance_one_symbol_one_row(session, symbol, interval)
@@ -53,7 +63,7 @@ async def fetch_binance_data(symbols: list[str], interval: binance_interval) -> 
         raise TypeError
     if interval not in get_args(binance_interval):
         raise ValueError(f"Binance quantisation interval {interval} not available")
-
+    settings = get_settings()
     semaphore = asyncio.Semaphore(settings.binance.max_number_concurrent_calls)    
     async with aiohttp.ClientSession() as session:
         result = await asyncio.gather(*[validated_fetch_binance_one_symbol_one_row(session, symbol, interval, semaphore) for symbol in symbols])

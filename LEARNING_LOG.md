@@ -253,7 +253,7 @@ Nothing.
 
 ---
 
-## Week 3, day 2 29/06
+## Week 3, day 3 29/06
 
 ### What I built
 - Built a `retry` decorator and `timeout` handling to the async fetcher. As usual, asynchronous code requires particular care.
@@ -265,3 +265,23 @@ Nothing.
 
 ### Still unclear
 - How to avoid silly mistakes with async code.
+
+---
+
+## Week 3, day 4 29/06
+
+### What I built
+- An in-file trade repository in JSONL using the very useful `Pydantic.BaseModel` functions.
+- I rewrote the test for `trade_repo.py` by introducing parameterisation (via pytest fixture) of the implementation of the  `TradeRepository` protocol. This allows to make the tests implementation independent.
+- Looked for candidates to refactor hidden dependencies:
+    - decorators inputs in `analytics.py`, `async_fetch.py`
+    - `settings` module definition in `async_fetch.py`
+- Implemented refactorisation of settings via the new function `config.get_settings`. The latter caches the result to fix the values in a given environment. To test alternantive settings, ise `cache_clear`.
+
+### Surprises
+- How elegant the JSONL format is.
+- How easy is to read/write in JSONL using the Pydantic API.
+- The use of pytest fixtures to make a test implementation independent from its protocol.
+
+### Still unclear
+- General case to use pytest fixtures.

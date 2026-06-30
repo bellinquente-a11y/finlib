@@ -1,4 +1,4 @@
-from finlib.config import settings
+from finlib.config import get_settings
 import requests
 import pandas as pd
 from finlib.async_fetch import binance_interval
@@ -11,6 +11,7 @@ def _fetch_binance_data_per_product(symbol: str, interval: binance_interval, lim
         raise ValueError
     if limit <=0:
         raise ValueError
+    settings = get_settings()
     resp = requests.get(settings.binance.url, 
                         params={
                             "symbol": symbol, 
@@ -21,7 +22,9 @@ def _fetch_binance_data_per_product(symbol: str, interval: binance_interval, lim
                         )
     return resp.json()
 
-def _format_binance_output(data: list[list[Any]]) -> pd.DataFrame:
+def _format_binance_output(data: list[list[int|str]]) -> pd.DataFrame:
+    """Format the raw Binance data into a DataFrame"""
+    settings = get_settings()
     if len(data) == 0:
         raise ValueError
     if not all(len(row)==len(settings.binance.columns) for row in data):
@@ -54,4 +57,5 @@ def _format_binance_output(data: list[list[Any]]) -> pd.DataFrame:
     )
 
 def load_binance_data_per_product(symbol: str, interval: binance_interval, limit: int) -> pd.DataFrame:
+    """Load historic Binance data per product"""
     return _format_binance_output(_fetch_binance_data_per_product(symbol, interval, limit))

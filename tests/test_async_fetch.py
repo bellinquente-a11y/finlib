@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 import aiohttp
 import asyncio
-from finlib.config import settings
+from finlib.config import get_settings
 
 def test_stream_binance_data_interval():
     with pytest.raises(ValueError):
@@ -36,6 +36,7 @@ async def test_fetch_binance_data_client_response_error():
     assert result["SYM"] is None
 
 async def test_fetch_binance_semaphore():
+    settings = get_settings()
     max_concurrent = settings.binance.max_number_concurrent_calls
     active_count = 0
     peak_active = 0
@@ -60,7 +61,7 @@ async def test_fetch_binance_semaphore():
 
         
 async def test_fetch_binance_retry():
-    max_retry = settings.binance.max_retry
+    max_retry = 3
     count = 0
     lock = asyncio.Lock()
 

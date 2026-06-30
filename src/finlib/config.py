@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, BaseModel
-from datetime import datetime
+from functools import lru_cache
 
 class BinanceSettings(BaseModel):
     """Settings for loading data from Binance"""
@@ -21,7 +21,6 @@ class BinanceSettings(BaseModel):
                                                       "taker_buy_quote_asset_volume": str, 
                                                       "ignore": str
                                                       }
-    first_date: datetime = datetime(2015,1,1)
     max_number_concurrent_calls: int = 5
     max_retry: int = 3
 
@@ -35,4 +34,6 @@ class Settings(BaseSettings):
 
     binance: BinanceSettings = BinanceSettings()
 
-settings = Settings()  # auto-loads from .env or environment
+@lru_cache(1)
+def get_settings() -> Settings:
+    return Settings()

@@ -33,8 +33,6 @@ def calculate_vwap(bars: Generator[OHLCVBar, None, None]) -> Decimal:
 
 def group_trades_by_symbol(trades: list[Trade]) -> dict[str, list[Trade]]:
     """Groups a list of trades by symbol"""
-    if not isinstance(trades, list):
-        raise TypeError
     if trades == []:
         raise ValueError
     for trade in trades:
