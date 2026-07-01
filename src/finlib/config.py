@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, BaseModel
 from functools import lru_cache
+from pathlib import Path
 
 class BinanceSettings(BaseModel):
     """Settings for loading data from Binance"""
@@ -28,7 +29,7 @@ class Settings(BaseSettings):
     """FINLIB project settings"""
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", env_nested_delimiter="__",)
 
-    data_dir: str = Field(default='./data')
+    data_dir: Path = Field(default=Path('./data'))
     fetch_timeout_seconds: float = Field(default=10.0)
     log_level: str = Field(default='INFO')
 

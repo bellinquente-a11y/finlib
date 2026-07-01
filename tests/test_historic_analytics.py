@@ -1,0 +1,90 @@
+import pandas as pd
+import pytest
+from finlib.historic_analytics import resample_binance_data, add_rolling_stats
+
+_COLUMNS = [
+    "open_time", "open", "high", "low", "close", "volume",
+    "quote_asset_volume", "number_of_trades",
+    "taker_buy_base_asset_volume", "taker_buy_quote_asset_volume", "close_time",
+]
+
+def _make_binance_df(rows):
+    return pd.DataFrame(rows, columns=_COLUMNS)
+
+_INTRADAY_ROWS = [
+    [pd.Timestamp("2026-01-01 06:00"), 100.0, 110.0,  90.0, 105.0, 1000.0, 500.0, 10, 600.0, 300.0, pd.Timestamp("2026-01-01 12:00")],
+    [pd.Timestamp("2026-01-01 12:00"), 105.0, 115.0,  95.0, 108.0,  500.0, 250.0,  5, 300.0, 150.0, pd.Timestamp("2026-01-01 18:00")],
+    [pd.Timestamp("2026-01-02 00:00"), 108.0, 120.0, 100.0, 115.0,  800.0, 400.0,  8, 480.0, 240.0, pd.Timestamp("2026-01-02 12:00")],
+]
+
+
+# --- resample_binance_data ---
+
+def test_resample_preserves_columns():
+    df = _make_binance_df(_INTRADAY_ROWS)
+    result = resample_binance_data(df, freq="D")
+    assert list(result.columns) == _COLUMNS
+
+def test_resample_row_count():
+    df = _make_binance_df(_INTRADAY_ROWS)
+    result = resample_binance_data(df, freq="D")
+    assert len(result) == 2
+
+def test_resample_ohlcv_aggregation():
+    df = _make_binance_df(_INTRADAY_ROWS)
+    result = resample_binance_data(df, freq="D")
+    day1 = result.iloc[0]
+    assert day1["open"]   == pytest.approx(100.0)   # first open
+    assert day1["high"]   == pytest.approx(115.0)   # max high
+    assert day1["low"]    == pytest.approx(90.0)    # min low
+    assert day1["close"]  == pytest.approx(108.0)   # last close
+    assert day1["volume"] == pytest.approx(1500.0)  # summed volume
+
+def test_resample_number_of_trades_sum():
+    df = _make_binance_df(_INTRADAY_ROWS)
+    result = resample_binance_data(df, freq="D")
+    assert result.iloc[0]["number_of_trades"] == 15  # 10 + 5
+
+def test_resample_open_time_is_first():
+    df = _make_binance_df(_INTRADAY_ROWS)
+    result = resample_binance_data(df, freq="D")
+    assert result.iloc[0]["open_time"] == pd.Timestamp("2026-01-01 06:00")
+
+
+# --- add_rolling_stats ---
+
+def _close_df(closes):
+    return pd.DataFrame({"close": closes})
+
+def test_rolling_stats_adds_columns():
+    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0, 109.0]), intervals_per_year=252, window=2)
+    assert {"returns", "rolling_vol", "rolling_sharpe"}.issubset(result.columns)
+
+def test_rolling_stats_preserves_original_columns():
+    df = _close_df([100.0, 110.0, 99.0])
+    df["extra"] = 1
+    result = add_rolling_stats(df, intervals_per_year=4, window=2)
+    assert "close" in result.columns
+    assert "extra" in result.columns
+
+def test_rolling_stats_returns_values():
+    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0]), intervals_per_year=4, window=2)
+    assert pd.isna(result["returns"].iloc[0])
+    assert result["returns"].iloc[1] == pytest.approx(0.1)
+    assert result["returns"].iloc[2] == pytest.approx(-0.1)
+
+def test_rolling_stats_vol_calculation():
+    # returns at indices 1,2 = [0.1, -0.1]; sample std = sqrt(0.02); intervals_per_year=4
+    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0]), intervals_per_year=4, window=2)
+    expected = 2.0 * (0.02 ** 0.5)  # sqrt(4) * sqrt(0.02)
+    assert result["rolling_vol"].iloc[2] == pytest.approx(expected)
+
+def test_rolling_stats_sharpe_zero_when_mean_return_zero():
+    # returns [0.1, -0.1] have mean=0, so Sharpe=0
+    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0]), intervals_per_year=4, window=2)
+    assert result["rolling_sharpe"].iloc[2] == pytest.approx(0.0)
+
+def test_rolling_stats_first_rows_are_nan():
+    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0, 109.0]), intervals_per_year=252, window=3)
+    assert pd.isna(result["rolling_vol"].iloc[0])
+    assert pd.isna(result["rolling_vol"].iloc[1])

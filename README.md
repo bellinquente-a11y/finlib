@@ -9,9 +9,12 @@ Production-grade Python for financial data modelling.
 - Instrument hierarchy using ABCs and Protocols
 - Streaming OHLCV pipeline - O(1) memory
 - Portfolio valuation via structural subtyping
-- asynchronous fetching of data from Binance
+- Asynchronous fetching of data from Binance with retry on failure, per-request timeout and concurrency Semaphore
 - Portfolio service trade management using repository pattern DI
 - project settings managed via pydantic_settings
+- A trade repository with swappable backend (in memory vs JSONL)
+- An interval market-data repository with swappable backend (in memory vs CSV)
+
 
 ## Installation
   git clone https://github.com/bellinquente-a11y/finlib
@@ -23,6 +26,7 @@ Production-grade Python for financial data modelling.
 from finlib import Trade, Equity, PortfolioService
 from finlib.trade_repo import InMemoryTradeRepository
 from decimal import Decimal
+
 t = Trade(symbol='BHP', quantity=1000,
             price=Decimal('45.50'), side='BUY')
 trade_repo = InMemoryTradeRepository()
