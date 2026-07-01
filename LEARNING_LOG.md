@@ -285,3 +285,34 @@ Nothing.
 
 ### Still unclear
 - General case to use pytest fixtures.
+
+---
+
+ Week 3, day 5 1/07 - week retrospective
+
+ ### Deliverables
+- itertools.accumulate for running PnL and max drawdown
+- Multi-key groupby (symbol + date)
+- Decorator library: @timer, @deprecated, tested
+- ThreadPoolExecutor fetcher tested with mocks
+- structlog structured logging added
+- Concurrency benchmark written and explained
+- Async fetcher: retry, timeout, rate-limiting
+- pytest-asyncio: 5 async tests, no real network
+- FileTradeRepository (JSONL), same test suite
+- Parametrized repository tests (memory + file)
+- Resampling + rolling vol/Sharpe in method chain
+- pandas-stubs, mypy --strict passing
+- Full integration pipeline, tagged v0.3.0
+
+### 3 concepts I now understand
+- more fluent with generator expressions and `itertools` to load data lazily
+- deeper understanding of threading and asynchronous processing
+- more automated use of dataframe chaining
+
+### What I would design differently
+- OHLCV data management: there is doubling in the code
+- Trades and portfolio analytics modules are also a bit confused
+
+### Questions that remain unclear
+- How this will all fit in a prod environment.
