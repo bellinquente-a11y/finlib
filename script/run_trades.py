@@ -1,8 +1,9 @@
-from finlib.async_fetch import fetch_binance_data
+from finlib.async_fetch import fetch_binance
 from finlib.trade_repo import InMemoryTradeRepository, PortfolioService
 from finlib.models import Trade
 import asyncio
 import logging
+from datetime import datetime, timedelta
 
 log = logging.getLogger(__name__)
 
@@ -13,12 +14,12 @@ async def main() -> None:
               ("ETHUSDT", "SELL", 10), 
               ("BNBUSDT", "SELL", 10)]
     symbols = list(set([order[0] for order in orders])) 
-    market_data = await fetch_binance_data(symbols, "1m")
+    market_data = await fetch_binance(symbols, "1m", datetime.now()-timedelta(minutes=5))
 
     log.info("Add trades to repo")
     trades = [Trade(symbol=o[0], 
                     quantity=o[2], 
-                    price=market_data[o[0]].close, 
+                    price=market_data.query(f"symbol==\"{o[0]}\"")["close"].iloc[-1], 
                     side=o[1]) 
               for o in orders]
 

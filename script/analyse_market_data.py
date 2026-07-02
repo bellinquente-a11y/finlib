@@ -1,4 +1,4 @@
-from finlib.historic_fetch import load_binance_data_per_product
+from finlib.async_fetch import fetch_binance
 import logging
 from finlib.ohlcv_repo import FileOHLCVRepo
 from pathlib import Path
@@ -7,10 +7,11 @@ import pandas as pd
 from finlib.historic_analytics import add_rolling_stats
 import sys
 import subprocess
+import asyncio
 
 log = logging.getLogger(__name__)
 
-def main(filepath: str) -> None:
+async def main(filepath: str) -> None:
     
     repo_path = Path(filepath)
 
@@ -22,17 +23,8 @@ def main(filepath: str) -> None:
 
     log.info("Save market data in OHLCV repo")
     symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT"]
-    for s in symbols:
-        df = (
-            load_binance_data_per_product(s, "1h", 1_000)
-            .assign(
-                symbol=lambda d: s,
-                timestamp=lambda d: d["close_time"]
-            )
-            .astype({"symbol": "category"})
-            [["symbol", "timestamp", "open", "high", "low", "close", "volume"]]
-        )
-        repo.add_intervals_batch(df)
+    df = await fetch_binance(symbols, "1h", datetime.now() - timedelta(days=30))
+    repo.add_intervals_batch(df, {"close_time": "timestamp"})
 
     log.info("Extract market data from repo")
     mdata = pd.DataFrame()
@@ -49,4 +41,4 @@ def main(filepath: str) -> None:
 
 
 if __name__=="__main__":
-    main(sys.argv[1])
+    asyncio.run(main(sys.argv[1]))
