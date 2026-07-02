@@ -5,7 +5,7 @@ from pathlib import Path
 
 class BinanceSettings(BaseModel):
     """Settings for loading data from Binance"""
-    url: str = "https://api.binance.com/api/v3/klines"
+    url: str = Field(default="https://api.binance.com/api/v3/klines")
     columns: tuple[str, ...] = ("open_time", "open", "high", "low", "close", "volume", "close_time", 
                                 "quote_asset_volume", "number_of_trades", "taker_buy_base_asset_volume", 
                                 "taker_buy_quote_asset_volume", "ignore")
@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     log_level: str = Field(default='INFO')
 
     binance: BinanceSettings = BinanceSettings()
+
+    freq: str = Field(default="10m")
+    mkt_data_repo_prefix: str = Field(default="mkt_data")
 
 @lru_cache(1)
 def get_settings() -> Settings:

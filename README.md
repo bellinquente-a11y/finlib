@@ -20,17 +20,29 @@ Production-grade Python for financial data modelling.
   git clone https://github.com/bellinquente-a11y/finlib
   cd finlib && poetry install
 
-## Quick start
+## Pipeline
 
-```python
-from finlib import Trade, Equity, PortfolioService
-from finlib.trade_repo import InMemoryTradeRepository
-from decimal import Decimal
+The pipeline provides historic analysis of the portfolio performance.
 
-t = Trade(symbol='BHP', quantity=1000,
-            price=Decimal('45.50'), side='BUY')
-trade_repo = InMemoryTradeRepository()
-service = PortfolioService(trade_repo)
-service.record_trade(t)
-summary = service.get_summary()
+### Features
+- Historic trades are read from a JSONL file.
+- Market data inputs read from config.
+- Historic market data fetched asynchronously and stored in a local CSV repository.
+- Calculation of market data analysics.
+- Calculation of portfolio analytics.
+- Summary results printed on the CLI.
+
+### `trades.jsonl` format
+
+```text
+{"symbol":"BBB","quantity":"10","price":"1000","side":"BUY","timestamp":"2026-06-30T01:14:46.306031Z"}
+{"symbol":"BBB","quantity":"30","price":"1000","side":"SELL","timestamp":"2026-06-30T01:14:46.306152Z"}
+{"symbol":"AAA","quantity":"15","price":"1000","side":"SELL","timestamp":"2026-06-30T01:14:46.306192Z"}
 ```
+
+### Quick start
+
+Input the JSONL trades file path as a CLI argument.
+
+```bash
+poetry run python -m finlib.pipeline ~/data/my_trades.jsonl

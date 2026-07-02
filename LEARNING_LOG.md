@@ -316,3 +316,13 @@ Nothing.
 
 ### Questions that remain unclear
 - How this will all fit in a prod environment.
+
+---
+
+Week 4, day 1 3/07
+
+### What I built
+- Simplified the project structure by keep only the async data fetcher, now loading multiple rows of data.
+- Improved flexibility of the OHLCVO repo (mapping of input dataframe fields; avoiding double entries).
+- Design of the architecture of the pipeline for portfolio performance analysis.
+- Written stubs for the pipeline.
