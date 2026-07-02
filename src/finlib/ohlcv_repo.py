@@ -53,7 +53,7 @@ class OHLCVInterval:
 
 class OHLCVRepo(Protocol):
     def add_interval(self, data: OHLCVInterval) -> None: ...
-    def add_intervals_batch(self, data: pd.DataFrame) -> None: ...
+    def add_intervals_batch(self, data: pd.DataFrame, columns_map: dict[str, str] | None=None) -> None: ...
     def get_data(self, symbol: str, start: datetime | None = None, end: datetime | None = None) -> pd.DataFrame: ...
 
 class InMemoryOHLCVRepo:
@@ -64,8 +64,10 @@ class InMemoryOHLCVRepo:
     def add_interval(self, data: OHLCVInterval) -> None:
         self._data.append(data)
 
-    def add_intervals_batch(self, data: pd.DataFrame) -> None:
-        for row in data.itertuples():
+    def add_intervals_batch(self, df: pd.DataFrame, columns_map: dict[str, str] | None = None) -> None:
+        if columns_map is not None:
+            df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
+        for row in df.itertuples():
             self.add_interval(
                 OHLCVInterval(**{k:getattr(row,k) for k in  self._fieldnames})
             )
@@ -97,8 +99,10 @@ class FileOHLCVRepo:
         with self._filepath.open("a") as f:
             f.write(data.to_string() + "\n")
 
-    def add_intervals_batch(self, data: pd.DataFrame) -> None:
-        for row in data.itertuples():
+    def add_intervals_batch(self, df: pd.DataFrame, columns_map: dict[str, str] | None = None) -> None:
+        if columns_map is not None:
+            df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
+        for row in df.itertuples():
             ohlcv_int = OHLCVInterval(**{k:getattr(row,k) for k in self._fieldnames})
             self.add_interval(ohlcv_int)
 
@@ -121,3 +125,13 @@ class FileOHLCVRepo:
                             continue
                     data.append([getattr(row_data,f) for f in self._fieldnames])
         return pd.DataFrame(data, columns=self._fieldnames)
+
+def _reformat_dataframe_for_batch_input(df: pd.DataFrame, repo_field_names: list[str], columns_map: dict[str, str]) -> pd.DataFrame:
+    """Rename columns of the input dataframe to match repo expectations"""
+    # Validate column_map
+    if not set(columns_map.keys()) <= set(df.columns):
+        raise ValueError
+    if not set(columns_map.values()) <= set(repo_field_names):
+        raise ValueError
+    # Rename columns and keep only the required ones
+    return df.rename(columns=columns_map)[repo_field_names]

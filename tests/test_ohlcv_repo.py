@@ -31,7 +31,10 @@ def test_in_memory_repo_output(repo: OHLCVRepo):
 def test_in_memory_repo_add_batch(repo: OHLCVRepo):
     _intervals = [_int1, _int2, _int3, _int4]
     fieldnames = [f.name for f in dataclasses.fields(OHLCVInterval)]
-    data = pd.DataFrame([[getattr(i,f) for f in fieldnames] for i in _intervals], columns=fieldnames)
-    repo = InMemoryOHLCVRepo()
-    repo.add_intervals_batch(data)
-    assert (repo.get_data("SYM1") == data.query('symbol == "SYM1"')).all().all()
+    map = {"datetime": "timestamp", "open_price": "open"}
+    inv_map = {v:k for k,v in map.items()}
+    columns = [inv_map[f] if f in inv_map.keys() else f for f in fieldnames]
+    df = pd.DataFrame([[getattr(i,f) for f in fieldnames] for i in _intervals], columns=columns)
+    repo.add_intervals_batch(df, map)
+    df_out = repo.get_data("SYM1") 
+    assert (df_out == df.query('symbol == "SYM1"').rename(columns=map)).all().all()
