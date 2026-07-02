@@ -1,6 +1,6 @@
 import asyncio
 import aiohttp
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import BaseModel, Field, ValidationError
 import structlog
 from typing import Literal, TypeAlias, get_args, Any
 from finlib.config import get_settings
@@ -8,6 +8,7 @@ from finlib.decorators import async_retry
 from datetime import datetime, timedelta
 import pandas as pd
 from decimal import Decimal
+from dateutil.parser import parse
 
 log = structlog.get_logger(__name__)
 
@@ -28,7 +29,7 @@ class BinanceDataRow(BaseModel):
     taker_buy_quote_asset_volume: Decimal = Field(..., gt=0)
     ignore: str
 
-async def _fetch_binance_one_symbol(session: aiohttp.ClientSession, symbol: str, interval: binance_interval, limit: int) -> list[list[Any]]:
+async def _fetch_binance_one_symbol(session: aiohttp.ClientSession, symbol: str, interval: binance_interval, limit: int) -> Any:
     """Coroutine to fetch one data for one symbol from Binance."""
     settings = get_settings()
     log.info("Async fetching Binance data", interval=interval, symbol=symbol, limit=limit)
@@ -49,7 +50,7 @@ async def _validated_fetch_binance_one_symbol(session: aiohttp.ClientSession, sy
             for row in data:
                 try:
                     result.append(BinanceDataRow(**{k: v for k, v in zip(settings.binance.columns, row)}))
-                except ValidationError as e:
+                except ValidationError:
                     invalid_rows_count+=0
             if invalid_rows_count>0:
                 log.warning("Invalid Binance data", symbol=symbol, invalid_rows_count=invalid_rows_count)
@@ -76,18 +77,19 @@ async def _fetch_binance_raw_data(symbols: list[str], interval: binance_interval
 def _convert_binance_data_to_DataFrame(data: dict[str, list[BinanceDataRow] | None]) -> pd.DataFrame:
     result = pd.DataFrame()
     columns = BinanceDataRow.model_fields
-    for symbol, symbol_data in filter(lambda d: d[1] is not None, data.items()):
-        df = (
-            pd.DataFrame([row.model_dump() for row in symbol_data], columns=columns)
-            .assign(symbol=symbol)
-            [["symbol", *columns]]
-            .drop(columns=["ignore"])
-            .astype({"symbol": "category"})
-        )
-        result = pd.concat((result, df), axis=0)
+    for symbol, symbol_data in data.items():
+        if symbol_data is not None:
+            df = (
+                pd.DataFrame([row.model_dump() for row in symbol_data])
+                .assign(symbol=symbol)
+                [["symbol", *columns]]
+                .drop(columns=["ignore"])
+                .astype({"symbol": "category"})
+            )
+            result = pd.concat((result, df), axis=0)
     return result.sort_values(["open_time", "symbol"])
 
-def fetch_binance(symbols: list[str], interval: binance_interval, start: datetime | str) -> pd.DataFrame:
+async def fetch_binance(symbols: list[str], interval: binance_interval, start: datetime | str) -> pd.DataFrame:
     match interval[-1]:
         case "s":
             deltat = timedelta(seconds=float(interval[:-1]))
@@ -100,8 +102,9 @@ def fetch_binance(symbols: list[str], interval: binance_interval, start: datetim
         case _:
             raise NotImplementedError
 
-    start = datetime.strptime(start) if isinstance(start, str) else start
-    limit = (datetime.now() - start) / deltat
 
-    data = asyncio.run(_fetch_binance_raw_data(symbols, interval, limit))
+    start = parse(start) if isinstance(start, str) else start
+    limit = max(int((datetime.now() - start) / deltat),1)
+
+    data = await _fetch_binance_raw_data(symbols, interval, limit)
     return _convert_binance_data_to_DataFrame(data)

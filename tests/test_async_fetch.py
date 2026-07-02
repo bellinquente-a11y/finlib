@@ -14,13 +14,13 @@ _EX_STR = "0"
 
 _EX_ROW = [_EX_DT, _EX_DEC, _EX_DEC, _EX_DEC, _EX_DEC, _EX_DEC, _EX_DT, _EX_DEC, _EX_INT, _EX_DEC, _EX_DEC, _EX_STR]
 
-def test_stream_binance_data_interval():
+async def test_stream_binance_data_interval():
     with pytest.raises(ValueError):
-        _ = fetch_binance(["BTCUSDT"], "13m", _EX_DT)
+        _ = await fetch_binance(["BTCUSDT"], "13m", _EX_DT)
 
-def test_stream_binance_data_symbol_type():
+async def test_stream_binance_data_symbol_type():
     with pytest.raises(TypeError):
-        _ = fetch_binance("BTCUSDT", "1m", _EX_DT)
+        _ = await fetch_binance("BTCUSDT", "1m", _EX_DT)
 
 async def test_fetch_binance_data_happy_path():
     with patch('finlib.async_fetch._fetch_binance_one_symbol', new_callable=AsyncMock) as mock:
