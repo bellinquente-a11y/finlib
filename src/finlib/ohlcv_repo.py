@@ -5,6 +5,9 @@ from dataclasses import dataclass, fields
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
+import structlog
+
+log = structlog.get_logger(__name__)
 
 @dataclass(frozen=True)
 class OHLCVInterval:
@@ -67,10 +70,17 @@ class InMemoryOHLCVRepo:
     def add_intervals_batch(self, df: pd.DataFrame, columns_map: dict[str, str] | None = None) -> None:
         if columns_map is not None:
             df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
-        for row in df.itertuples():
-            self.add_interval(
-                OHLCVInterval(**{k:getattr(row,k) for k in  self._fieldnames})
-            )
+
+        symbols = set(df["symbol"].to_list())
+        for symbol in symbols:
+            ts = self._get_last_timestamp(symbol)
+            query = f"symbol==@symbol"
+            if ts is not None:
+                query = f"{query} and timestamp>@ts"
+            for row in df.query(query).itertuples():
+                self.add_interval(
+                    OHLCVInterval(**{k:getattr(row,k) for k in  self._fieldnames})
+                )
 
     def get_data(self, symbol: str, start: datetime | None = None, end: datetime | None = None) -> pd.DataFrame:
         filtered_data = filter(lambda b: b.symbol==symbol, self._data)
@@ -78,7 +88,17 @@ class InMemoryOHLCVRepo:
             filtered_data = filter(lambda b: b.timestamp>=start, filtered_data)
         if end is not None:
             filtered_data = filter(lambda b: b.timestamp<=end, filtered_data)
-        return pd.DataFrame([[getattr(i, f) for f in self._fieldnames] for i in filtered_data], columns=self._fieldnames)
+        return pd.DataFrame([[getattr(i, f) for f in self._fieldnames] for i in filtered_data], columns=self._fieldnames).sort_values(["timestamp", "symbol"])
+
+    def _get_last_timestamp(self, symbol: str) -> datetime | None:
+        ts = None
+        for row in self._data:
+            if row.symbol==symbol:
+                    if ts is None:
+                        ts = row.timestamp
+                    else:
+                        ts = max(ts, row.timestamp)
+        return ts
 
 class FileOHLCVRepo:
     def __init__(self, filepath: Path) -> None:
@@ -102,9 +122,17 @@ class FileOHLCVRepo:
     def add_intervals_batch(self, df: pd.DataFrame, columns_map: dict[str, str] | None = None) -> None:
         if columns_map is not None:
             df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
-        for row in df.itertuples():
-            ohlcv_int = OHLCVInterval(**{k:getattr(row,k) for k in self._fieldnames})
-            self.add_interval(ohlcv_int)
+
+        symbols = set(df["symbol"].to_list())
+        for symbol in symbols:
+            log.info("adding intervals", symbol=symbol)
+            ts = self._get_last_timestamp(symbol)
+            query = f"symbol==@symbol"
+            if ts is not None:
+                query = f"{query} and timestamp>@ts"
+            for row in df.query(query).itertuples():
+                ohlcv_int = OHLCVInterval(**{k:getattr(row,k) for k in self._fieldnames})
+                self.add_interval(ohlcv_int)
 
     def get_data(self, symbol: str, start: datetime | None = None, end: datetime | None = None) -> pd.DataFrame:
         data = []
@@ -124,7 +152,22 @@ class FileOHLCVRepo:
                         if row_data.timestamp>end:
                             continue
                     data.append([getattr(row_data,f) for f in self._fieldnames])
-        return pd.DataFrame(data, columns=self._fieldnames)
+        return pd.DataFrame(data, columns=self._fieldnames).sort_values(["timestamp", "symbol"])
+
+    def _get_last_timestamp(self, symbol: str) -> datetime | None:
+        ts = None
+        with self._filepath.open() as f:
+            for i, row in enumerate(f):
+                if i==0:
+                    continue
+                row_data = OHLCVInterval.from_string(row)
+                if row_data.symbol==symbol:
+                    if ts is None:
+                        ts = row_data.timestamp
+                    else:
+                        ts = max(ts, row_data.timestamp)
+        return ts
+
 
 def _reformat_dataframe_for_batch_input(df: pd.DataFrame, repo_field_names: list[str], columns_map: dict[str, str]) -> pd.DataFrame:
     """Rename columns of the input dataframe to match repo expectations"""
