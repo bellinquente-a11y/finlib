@@ -38,13 +38,17 @@ async def _fetch_binance_one_symbol(session: aiohttp.ClientSession, symbol: str,
             resp.raise_for_status()
             return await resp.json()
 
-@async_retry(max_retry=3, delay=1.)
+@async_retry(max_retry=3, delay=1., exceptions=(aiohttp.ClientError, asyncio.TimeoutError, aiohttp.client_exceptions.ClientResponseError))
+async def _fetch_binance_one_symbol_with_retry(session: aiohttp.ClientSession, symbol: str, interval: binance_interval, limit: int) -> Any:
+    return await _fetch_binance_one_symbol(session, symbol, interval, limit)
+
+
 async def _validated_fetch_binance_one_symbol(session: aiohttp.ClientSession, symbol: str, interval: binance_interval, limit: int, semaphore: asyncio.Semaphore) -> list[BinanceDataRow] | None:
     """Coroutine to fetch one data for one symbol from Binance. Validated with Pydantic."""
     settings = get_settings()
     async with semaphore:
         try:
-            data = await _fetch_binance_one_symbol(session, symbol, interval, limit)
+            data = await _fetch_binance_one_symbol_with_retry(session, symbol, interval, limit)
             result = []
             invalid_rows_count=0
             for row in data:
@@ -55,11 +59,8 @@ async def _validated_fetch_binance_one_symbol(session: aiohttp.ClientSession, sy
             if invalid_rows_count>0:
                 log.warning("Invalid Binance data", symbol=symbol, invalid_rows_count=invalid_rows_count)
             return result
-        except (ValidationError, aiohttp.client_exceptions.ClientResponseError) as e:
-            log.warning("Bad response", url=settings.binance.url, symbol=symbol, exc=e)
-            return None
-        except KeyError as e:
-            log.warning("Missing data", url=settings.binance.url, symbol=symbol, exc=e)
+        except RuntimeError as e:
+            log.warning("Unable to fetch Binance data", url=settings.binance.url, symbol=symbol, exc=e)
             return None
 
 async def _fetch_binance_raw_data(symbols: list[str], interval: binance_interval, limit: int) -> dict[str, list[BinanceDataRow] | None]:

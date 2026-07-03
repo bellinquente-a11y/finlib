@@ -69,7 +69,9 @@ def deprecated(func: F) -> F:
     return wrapper # type: ignore[return-value]
 
 
-def async_retry(max_retry: int, delay: float = 1.) -> Callable[[F],F]:
+def async_retry(max_retry: int, 
+                delay: float = 1., 
+                exceptions: tuple[type[Exception], ...] = (Exception, )) -> Callable[[F],F]:
     def decorator(func: F) -> F:
         @functools.wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -79,7 +81,7 @@ def async_retry(max_retry: int, delay: float = 1.) -> Callable[[F],F]:
                 try:
                     result = await func(*args, **kwargs)
                     return result
-                except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+                except exceptions as e:
                     last_exc = e
                     log.info("Retry function call", func=func, count=count, wait=wait_time, exc=e)
                     count+=1
