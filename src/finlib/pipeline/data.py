@@ -21,12 +21,16 @@ def fetch_trades(trade_repo: TradeRepository) -> tuple[list[Trade], list[str], d
         symbols |= {trade.symbol}
         first_dt = min(first_dt, trade.timestamp)
 
+    log.info(f"Trades loaded    = {len(trades)}")
+    log.info(f"Symbols          = {", ".join([s for s in symbols])}")
+    log.info(f"First time stamp = {first_dt!s}")
+
     return trades, list(symbols), first_dt
 
 
 async def fetch_market_data(symbols: list[str], interval: binance_interval, start: datetime) -> pd.DataFrame:
     """Fetch market data."""
-    log.info(f"Fetching {interval} market data for symbols: {", ".join(symbols)}")
+    log.info(f"Fetching {interval} market data for symbols: {", ".join(symbols)} from {start!s}")
     return await fetch_binance(symbols, interval, start)
 
 
