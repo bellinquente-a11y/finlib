@@ -349,3 +349,21 @@ Week 4, day 2 3/07
 
 ### Surprises
 - I need to declare explicitly the submodule import in the module's `__init__.py`.
+
+### REMEMBER
+Production data pipelines die from silent failures. Every failure mode in the fetch store path should either log-and-skip or fail loudly. Nothing should swallow an error and return plausible-looking empty output.
+
+---
+
+Week 4, day 3 3/07
+
+### What I built
+- `analytics` module in the `pipeline` to calculate rolling stats of marlet data
+- `cli` module to run the pipeline from CLI
+
+### Surprises
+- Usefulness of the `argparse` module for parsing input via CLI.
+- It is required to explicitly import submodules in the module's `__init__.py`.
+
+### Still unclear
+- Logging best practices.

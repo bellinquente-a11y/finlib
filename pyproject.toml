@@ -46,3 +46,6 @@ warn_return_any = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+
+[tool.poetry.scripts]
+finlib-pipeline = "finlib.pipeline.cli:main"

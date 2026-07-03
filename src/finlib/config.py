@@ -35,9 +35,6 @@ class Settings(BaseSettings):
 
     binance: BinanceSettings = BinanceSettings()
 
-    freq: str = Field(default="10m")
-    mkt_data_repo_prefix: str = Field(default="mkt_data")
-
 @lru_cache(1)
 def get_settings() -> Settings:
     return Settings()
