@@ -74,6 +74,7 @@ class InMemoryOHLCVRepo:
             raise ValueError
 
         symbols = set(df["symbol"].to_list())
+        count=0
         for symbol in symbols:
             ts = self._get_last_timestamp(symbol)
             query = "symbol==@symbol"
@@ -83,6 +84,8 @@ class InMemoryOHLCVRepo:
                 self.add_interval(
                     OHLCVInterval(**{k:getattr(row,k) for k in  self._fieldnames})
                 )
+                count+=1
+        log.info("Added rows to trade repo", count=count)
 
     def get_data(self, symbol: str, start: datetime | None = None, end: datetime | None = None) -> pd.DataFrame:
         filtered_data = filter(lambda b: b.symbol==symbol, self._data)
@@ -128,15 +131,23 @@ class FileOHLCVRepo:
             raise ValueError
 
         symbols = set(df["symbol"].to_list())
+        count=0
         for symbol in symbols:
-            log.info("adding intervals", symbol=symbol)
             ts = self._get_last_timestamp(symbol)
+
             query = "symbol==@symbol"
             if ts is not None:
                 query = f"{query} and timestamp>@ts"
+                log.info("adding intervals", symbol=symbol, first_timestamp=ts)
+            else:
+                log.info("adding intervals", symbol=symbol)
+
             for row in df.query(query).itertuples():
                 ohlcv_int = OHLCVInterval(**{k:getattr(row,k) for k in self._fieldnames})
                 self.add_interval(ohlcv_int)
+                count+=1
+
+        log.info("Added rows to trade repo", count=count)
 
     def get_data(self, symbol: str, start: datetime | None = None, end: datetime | None = None) -> pd.DataFrame:
         data = []
@@ -156,7 +167,7 @@ class FileOHLCVRepo:
                         if row_data.timestamp>end:
                             continue
                     data.append([getattr(row_data,f) for f in self._fieldnames])
-        return pd.DataFrame(data, columns=self._fieldnames).sort_values(["timestamp", "symbol"])
+        return pd.DataFrame(data, columns=self._fieldnames).sort_values(by="timestamp")
 
     def _get_last_timestamp(self, symbol: str) -> datetime | None:
         ts = None
