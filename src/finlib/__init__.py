@@ -4,7 +4,7 @@ from finlib.portfolio import value_portfolio, Portfolio
 from finlib.analytics import calculate_daily_vwap
 from finlib.trade_repo import PortfolioService, TradeRepository
 from finlib.trade_repo import InFileTradeRepository
-from finlib.ohlcv_repo import FileOHLCVRepo
+from finlib.ohlcv_repo import OHLCVRepo
 import logging
 from finlib import pipeline
 
@@ -16,6 +16,6 @@ __all__ = ['Trade',
            'calculate_daily_vwap',
            'PortfolioService', 'TradeRepository',
            'InFileTradeRepository',
-           'FileOHLCVRepo',
+           'OHLCVRepo',
            'pipeline'
            ]
