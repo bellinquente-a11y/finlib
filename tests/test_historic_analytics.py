@@ -1,20 +1,18 @@
 import pandas as pd
 import pytest
-from finlib.historic_analytics import resample_binance_data, add_rolling_stats
+from finlib.historic_analytics import resample_dataframe, add_rolling_stats
 
 _COLUMNS = [
-    "open_time", "open", "high", "low", "close", "volume",
-    "quote_asset_volume", "number_of_trades",
-    "taker_buy_base_asset_volume", "taker_buy_quote_asset_volume", "close_time",
+    "timestamp", "open", "high", "low", "close", "volume",
 ]
 
 def _make_binance_df(rows):
     return pd.DataFrame(rows, columns=_COLUMNS)
 
 _INTRADAY_ROWS = [
-    [pd.Timestamp("2026-01-01 06:00"), 100.0, 110.0,  90.0, 105.0, 1000.0, 500.0, 10, 600.0, 300.0, pd.Timestamp("2026-01-01 12:00")],
-    [pd.Timestamp("2026-01-01 12:00"), 105.0, 115.0,  95.0, 108.0,  500.0, 250.0,  5, 300.0, 150.0, pd.Timestamp("2026-01-01 18:00")],
-    [pd.Timestamp("2026-01-02 00:00"), 108.0, 120.0, 100.0, 115.0,  800.0, 400.0,  8, 480.0, 240.0, pd.Timestamp("2026-01-02 12:00")],
+    [pd.Timestamp("2026-01-01 06:00"), 100.0, 110.0,  90.0, 105.0, 1000.0],
+    [pd.Timestamp("2026-01-01 12:00"), 105.0, 115.0,  95.0, 108.0,  500.0],
+    [pd.Timestamp("2026-01-02 00:00"), 108.0, 120.0, 100.0, 115.0,  800.0],
 ]
 
 
@@ -22,17 +20,17 @@ _INTRADAY_ROWS = [
 
 def test_resample_preserves_columns():
     df = _make_binance_df(_INTRADAY_ROWS)
-    result = resample_binance_data(df, freq="D")
+    result = resample_dataframe(df, freq="D")
     assert list(result.columns) == _COLUMNS
 
 def test_resample_row_count():
     df = _make_binance_df(_INTRADAY_ROWS)
-    result = resample_binance_data(df, freq="D")
+    result = resample_dataframe(df, freq="D")
     assert len(result) == 2
 
 def test_resample_ohlcv_aggregation():
     df = _make_binance_df(_INTRADAY_ROWS)
-    result = resample_binance_data(df, freq="D")
+    result = resample_dataframe(df, freq="D")
     day1 = result.iloc[0]
     assert day1["open"]   == pytest.approx(100.0)   # first open
     assert day1["high"]   == pytest.approx(115.0)   # max high
@@ -40,15 +38,15 @@ def test_resample_ohlcv_aggregation():
     assert day1["close"]  == pytest.approx(108.0)   # last close
     assert day1["volume"] == pytest.approx(1500.0)  # summed volume
 
-def test_resample_number_of_trades_sum():
+def test_resample_volume():
     df = _make_binance_df(_INTRADAY_ROWS)
-    result = resample_binance_data(df, freq="D")
-    assert result.iloc[0]["number_of_trades"] == 15  # 10 + 5
+    result = resample_dataframe(df, freq="D")
+    assert result.iloc[0]["volume"] == 1500
 
 def test_resample_open_time_is_first():
     df = _make_binance_df(_INTRADAY_ROWS)
-    result = resample_binance_data(df, freq="D")
-    assert result.iloc[0]["open_time"] == pd.Timestamp("2026-01-01 06:00")
+    result = resample_dataframe(df, freq="D")
+    assert result.iloc[0]["timestamp"] == pd.Timestamp("2026-01-02 00:00")
 
 
 # --- add_rolling_stats ---

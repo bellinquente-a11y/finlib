@@ -1,24 +1,19 @@
 import pandas as pd
 
 
-def resample_binance_data(df: pd.DataFrame, freq: str = "d") -> pd.DataFrame:
+def resample_dataframe(df: pd.DataFrame, freq: str = "D") -> pd.DataFrame:
     columns = list(df.columns)
     return (
         df
-        .set_index("close_time")
+        .set_index("timestamp")
         .sort_index()
         .resample(freq, label="right")
         .agg(            
-            open_time=("open_time", "first"),
             open=("open", "first"),
             high=("high", "max"),
             low=("low", "min"),
             close=("close", "last"),
             volume=("volume", "sum"),
-            quote_asset_volume=("quote_asset_volume", "sum"),
-            number_of_trades=("number_of_trades", "sum"),
-            taker_buy_base_asset_volume=("taker_buy_base_asset_volume", "sum"),
-            taker_buy_quote_asset_volume=("taker_buy_quote_asset_volume", "sum"),
         )
         .dropna()
         .reset_index()
