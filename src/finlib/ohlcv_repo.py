@@ -78,7 +78,7 @@ class InMemoryOHLCVRepo:
             ts = self._get_last_timestamp(symbol)
             query = "symbol==@symbol"
             if ts is not None:
-                query = "{query} and timestamp>@ts"
+                query = f"{query} and timestamp>@ts"
             for row in df.query(query).itertuples():
                 self.add_interval(
                     OHLCVInterval(**{k:getattr(row,k) for k in  self._fieldnames})
@@ -133,7 +133,7 @@ class FileOHLCVRepo:
             ts = self._get_last_timestamp(symbol)
             query = "symbol==@symbol"
             if ts is not None:
-                query = "{query} and timestamp>@ts"
+                query = f"{query} and timestamp>@ts"
             for row in df.query(query).itertuples():
                 ohlcv_int = OHLCVInterval(**{k:getattr(row,k) for k in self._fieldnames})
                 self.add_interval(ohlcv_int)
