@@ -1,6 +1,6 @@
 """Trades and market data fetching and storing"""
 
-from finlib import InFileTradeRepository, OHLCVRepo, Trade, TradeRepository
+from finlib import OHLCVRepo, Trade, TradeRepository
 from finlib.async_fetch import fetch_binance, binance_interval
 import logging
 import pandas as pd
@@ -10,10 +10,10 @@ log = logging.getLogger(__name__)
 
 def fetch_trades(trade_repo: TradeRepository) -> tuple[list[Trade], list[str], datetime]:
     """Load trades from in file repository and return list of symbols and first trade timestamp."""
-    log.info(f"Loading trades from the trade repository")
+    log.info("Loading trades from the trade repository")
     trades = trade_repo.get_all()
     if trades == []:
-        raise RuntimeError(f"No trades in trade repository")
+        raise RuntimeError("No trades in trade repository")
 
     symbols = set()
     first_dt = datetime(2100,1,1,tzinfo=timezone.utc)
@@ -32,7 +32,7 @@ async def fetch_market_data(symbols: list[str], interval: binance_interval, star
 
 def store_market_data(ohlcv_repo: OHLCVRepo, df: pd.DataFrame) -> None:
     """"Store market data in the OHLCV repository."""
-    log.info(f"Storing market data in OHLCV repository")
+    log.info("Storing market data in OHLCV repository")
     if df.shape[0]==0:
         raise ValueError("Empty market data DataFrame")
     columns_map = {"close_time": "timestamp"}

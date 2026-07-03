@@ -2,7 +2,6 @@ import time
 from typing import TypeVar, Callable, Any
 import functools
 import warnings
-import aiohttp
 import asyncio
 import structlog
 
