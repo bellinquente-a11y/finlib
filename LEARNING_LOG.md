@@ -326,3 +326,26 @@ Week 4, day 1 3/07
 - Improved flexibility of the OHLCVO repo (mapping of input dataframe fields; avoiding double entries).
 - Design of the architecture of the pipeline for portfolio performance analysis.
 - Written stubs for the pipeline.
+
+---
+
+Week 4, day 2 3/07
+
+### What I built
+- module for data handling in `pipeline/data.py`.
+
+### Failure modes of the data management process
+
+| Failure | Caught by | Effect |
+|---------|-----------|--------|
+| Empty/non existent trades repo file | `finlib.pipeline.data.fetch_trades` | `RuntimeError` |
+| Malformed trade data | `finlib.models.Trade` | `ValidationError` |
+| Client/timeout error from Binance network | `finlib.async_fetch._fetch_binance_one_symbol_with_retry` | Retry 3 times, else log warning |
+| Malformed row of data from Binance | `finlib.async_fetch._validated_fetch_binance_one_symbol` | log warning with the number of malformed rows |
+| Missing data | `finlib.async_fetch._validated_fetch_binance_one_symbol` | log warning and output empty |
+| Runtime error in loading from Binance network | `finlib.async_fetch._validated_fetch_binance_one_symbol` | log warning and output empty |
+| Empty market data DataFrame | `finlib.pipeline.store_market_data` | `ValueError` |
+| OHLCV repo file exists with wrong header | `finlib.ohlcv_repo.__init__` | `FileEsistsError` |
+
+### Surprises
+- I need to declare explicitly the submodule import in the module's `__init__.py`.

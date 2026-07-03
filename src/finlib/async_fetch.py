@@ -58,6 +58,8 @@ async def _validated_fetch_binance_one_symbol(session: aiohttp.ClientSession, sy
                     invalid_rows_count+=0
             if invalid_rows_count>0:
                 log.warning("Invalid Binance data", symbol=symbol, invalid_rows_count=invalid_rows_count)
+            if result == []:
+                log.warning("Unable to fetch Binance data", url=settings.binance.url, symbol=symbol, exc=e)
             return result
         except RuntimeError as e:
             log.warning("Unable to fetch Binance data", url=settings.binance.url, symbol=symbol, exc=e)

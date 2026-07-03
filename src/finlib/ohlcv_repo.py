@@ -70,6 +70,8 @@ class InMemoryOHLCVRepo:
     def add_intervals_batch(self, df: pd.DataFrame, columns_map: dict[str, str] | None = None) -> None:
         if columns_map is not None:
             df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
+        if not (set(df.columns) <= set(self._fieldnames)):
+            raise ValueError
 
         symbols = set(df["symbol"].to_list())
         for symbol in symbols:
@@ -122,6 +124,8 @@ class FileOHLCVRepo:
     def add_intervals_batch(self, df: pd.DataFrame, columns_map: dict[str, str] | None = None) -> None:
         if columns_map is not None:
             df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
+        if not (set(df.columns) <= set(self._fieldnames)):
+            raise ValueError
 
         symbols = set(df["symbol"].to_list())
         for symbol in symbols:
