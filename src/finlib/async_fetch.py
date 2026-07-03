@@ -5,7 +5,7 @@ import structlog
 from typing import Literal, TypeAlias, get_args, Any
 from finlib.config import get_settings
 from finlib.decorators import async_retry
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import pandas as pd
 from decimal import Decimal
 from dateutil.parser import parse
@@ -105,9 +105,12 @@ async def fetch_binance(symbols: list[str], interval: binance_interval, start: d
         case _:
             raise NotImplementedError
 
-
     start = parse(start) if isinstance(start, str) else start
-    limit = max(int((datetime.now() - start) / deltat),1)
+    if start.tzinfo is None:
+        diffdt = datetime.now() - start
+    else:
+        diffdt = datetime.now(tz=timezone.utc) - start
+    limit = max(int(diffdt / deltat),1)
 
     data = await _fetch_binance_raw_data(symbols, interval, limit)
     return _convert_binance_data_to_DataFrame(data)
