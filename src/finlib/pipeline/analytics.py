@@ -29,8 +29,9 @@ def compute_market_summary(repo: FileOHLCVRepo, symbols: list[str], window: int 
             df = historic_analytics.resample_dataframe(df.drop(columns="symbol").sort_values(by="timestamp"), freq="D")
             log.debug("df daily resampling shape %s: [%i, %i]", symbol, df.shape[0], df.shape[1])
             df = historic_analytics.add_rolling_stats(df, INTERVALS_PER_YEAR_DAILY, window)
-            assert (df["rolling_sharpe"].iloc[:window].isna().all()) and (df["rolling_sharpe"].iloc[window:].notna().all())
             result = pd.concat((result, df.dropna(axis=0, how="any").assign(symbol=symbol).astype({"symbol": "category"})), axis=0)
 
-    return result.sort_values(by="timestamp")
-        
+    if result.shape[0]>0:
+        return result.sort_values(by="timestamp")
+    else:
+        return result

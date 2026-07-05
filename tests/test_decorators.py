@@ -40,7 +40,7 @@ def test_timer_prints_output(capsys: pytest.CaptureFixture[str]) -> None:
         return a + b
     add(1, 2)
     out = capsys.readouterr().out
-    assert "call to add:" in out
+    assert "timed call to function" in out
 
 def test_deprecated_warning() -> None:
     @deprecated

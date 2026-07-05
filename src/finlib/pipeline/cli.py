@@ -1,7 +1,9 @@
 """CLI to run the finlib pipeline"""
 
-from finlib.pipeline import data, analytics, output
-import asyncio, logging, argparse
+from finlib.pipeline import data, analytics
+import asyncio
+import logging
+import argparse
 from finlib.config import get_settings
 from finlib.ohlcv_repo import FileOHLCVRepo
 from finlib.trade_repo import InFileTradeRepository
