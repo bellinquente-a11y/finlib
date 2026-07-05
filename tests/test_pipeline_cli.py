@@ -1,7 +1,5 @@
 
 from unittest.mock import patch
-import finlib
-from finlib import ohlcv_repo
 from finlib.pipeline.cli import main
 from finlib import Trade
 from decimal import Decimal
