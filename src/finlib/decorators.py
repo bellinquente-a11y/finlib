@@ -54,7 +54,7 @@ def timer(func: F) -> F:
         start = time.perf_counter()
         result = func(*args, **kwargs)
         interval = time.perf_counter() - start
-        print(f"call to {func.__name__}: {interval:.3f}s")
+        log.info("timed call to function", func=func.__name__, elapsed=interval)
         return result
     return wrapper # type: ignore[return-value]
 
@@ -62,8 +62,8 @@ def timer(func: F) -> F:
 def deprecated(func: F) -> F:
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
-        result = func(*args, **kwargs)
         warnings.warn(f"Function {func.__name__} will not be supported in a future release", DeprecationWarning, stacklevel=2)
+        result = func(*args, **kwargs)
         return result
     return wrapper # type: ignore[return-value]
 

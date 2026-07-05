@@ -115,9 +115,8 @@ class FileOHLCVRepo:
                 f.write(first_row)
         else:
             with self._filepath.open() as f:
-                for row in f:
-                    break
-                if row != first_row:
+                row = f.readline()
+                if row and row != first_row:
                     raise FileExistsError
 
     def add_interval(self, data: OHLCVInterval) -> None:
