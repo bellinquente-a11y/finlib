@@ -1,5 +1,7 @@
 
 from unittest.mock import patch
+import finlib
+from finlib import ohlcv_repo
 from finlib.pipeline.cli import main
 from finlib import Trade
 from decimal import Decimal
@@ -14,7 +16,8 @@ def test_main_wiring():
     ts = datetime(2026,2,2,2,2,2)
     trade = Trade(symbol="AAA", quantity=10, price=100., side="BUY", timestamp=ts)
 
-    with (patch("finlib.pipeline.data.fetch_trades") as mock_fetch_trades,
+    with (patch("finlib.ohlcv_repo.FileOHLCVRepo.__init__", return_value=None),
+          patch("finlib.pipeline.data.fetch_trades") as mock_fetch_trades,
           patch("finlib.pipeline.data.fetch_market_data") as mock_fetch_market_data,
           patch("finlib.pipeline.data.store_market_data"),
           patch("finlib.pipeline.analytics.compute_market_summary", return_value = summary),
