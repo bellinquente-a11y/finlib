@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field
 from decimal import Decimal
 from typing import Generator
 from finlib import Trade, Priceable
+import pandas as pd
+from itertools import groupby
 
 class Portfolio(BaseModel):
     """Class representing a portfolio of trades"""
@@ -34,6 +36,74 @@ class Portfolio(BaseModel):
 
     def __getitem__(self, index: int) -> Trade:
         return self.trades[index]
+
+    def historic_position(self) -> pd.DataFrame:
+        """
+        Returns a DataFrame with the historic position of the porfolio in number of contracts
+            index: timestamp associated to the tarde
+            columns: symbols of the contracts in the portfolio
+        """
+        sorted_trades = sorted(self.trades, key=lambda t: (t.symbol, t.timestamp))
+        dhld = pd.DataFrame()
+        for key, group in groupby(sorted_trades, key=lambda t: t.symbol):
+            group_trades = [*group]
+            dhld_symbol = pd.DataFrame(
+                data = [[t.lot_size()] for t in group_trades], 
+                columns=[key], 
+                index = [t.timestamp for t in group_trades]
+                )
+            dhld = pd.concat((dhld, dhld_symbol), axis=1, sort=True)
+        return dhld.fillna(value=Decimal(0)).cumsum(axis=0)
+
+    def historic_cost_basis(self) -> pd.DataFrame:
+        """
+        Returns the costs basis of the portfolio. This is equal to MINUS the cumulative 
+        sum of the signed notional of all trades at execution price.
+            index: timestamp associated to the tarde
+            columns: symbols of the contracts in the portfolio
+        """
+        sorted_trades = sorted(self.trades, key=lambda t: (t.symbol, t.timestamp))
+        dhld = pd.DataFrame()
+        for key, group in groupby(sorted_trades, key=lambda t: t.symbol):
+            group_trades = [*group]
+            dhld_symbol = pd.DataFrame(
+                data = [[t.notional] for t in group_trades], 
+                columns=[key], 
+                index = [t.timestamp for t in group_trades]
+                )
+            dhld = pd.concat((dhld, dhld_symbol), axis=1, sort=True)
+        return -dhld.fillna(value=Decimal(0)).cumsum(axis=0)
+
+    def historic_market_value(self, price: pd.DataFrame) -> pd.DataFrame:
+        """
+        Returns the historic market value of the portfolio from marking-to-market prices. 
+        Both input and output have:
+            index: timestamp associated to the tarde
+            columns: symbols of the contracts in the portfolio
+        """
+        holdings = self.historic_position()
+        symbols = holdings.columns
+
+        if not set(symbols) <= set(price.columns):
+            missing_symbols = list(set(symbols) - set(price.columns))
+            raise ValueError("price missing for: %s", ", ".join(missing_symbols))
+
+        holdings_resampled = holdings.reindex(price.index, method="ffill").fillna(Decimal(0))
+        return holdings_resampled * price[symbols]
+
+    def historic_pnl(self, price) -> pd.DataFrame:
+        """
+        Returns the historic PnL associated with the portfolio from marking-to-market prices. 
+        Both input and output have:
+            index: timestamp associated to the trade
+            columns: symbols of the contracts in the portfolio
+        """
+        cost_basis = (
+            self.historic_cost_basis()
+            .reindex(price.index, method="ffill")
+            .fillna(Decimal(0))
+        )
+        return self.historic_market_value(price) + cost_basis
 
 def value_portfolio(
     positions: dict[str, tuple[Priceable, float]]
