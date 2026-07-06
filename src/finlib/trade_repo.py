@@ -2,12 +2,19 @@ from typing import Protocol, runtime_checkable
 from finlib.models import Trade
 from decimal import Decimal
 from pathlib import Path
+from datetime import datetime
+from collections.abc import Iterator
+
+from script.concurrency_benchmark import symbols
 
 @runtime_checkable
 class TradeRepository(Protocol):
+    _symbols: set
     def add(self, trade: Trade) -> None: ...
     def get_all(self) -> list[Trade]: ...
     def get_by_symbol(self, symbol: str) -> list[Trade]: ...
+    def get_timestamp(self, first: bool, symbol: str | None = None) -> datetime | None: ...
+    def get_all_symbols(self) -> set[str]: ...
 
 class InMemoryTradeRepository:
     def __init__(self) -> None:
@@ -21,18 +28,29 @@ class InMemoryTradeRepository:
 
     def get_by_symbol(self, symbol: str) -> list[Trade]:
         return [*filter(lambda t: t.symbol==symbol, self._trades)]
-    
 
-def _asserts_in_memory_trade_repo(x: InMemoryTradeRepository) -> TradeRepository:
-    return x
+    def get_timestamp(self, first: bool, symbol: str | None = None) -> datetime | None:
+        trades = (t for t in self._trades) 
+        if symbol is not None:
+            trades = filter(lambda t: t.symbol==symbol, trades)
+        return _get_extreme_timestamp(trades, first)
+
+    def get_all_symbols(self) -> list[str]:
+        symbols = set()
+        for t in self._trades:
+            symbols |= {t.symbol}
+        return symbols
+
 
 class InFileTradeRepository:
     def __init__(self, filepath: Path) -> None:
         self._filepath = filepath
+        self._symbols: set[str] = set()
 
     def add(self, trade: Trade) -> None:
         with self._filepath.open("a") as f:
             f.write(trade.model_dump_json() + "\n")
+        self._symbols |= {trade.symbol}
     
     def get_all(self) -> list[Trade]:
         if not self._filepath.exists():
@@ -42,12 +60,37 @@ class InFileTradeRepository:
                 return [Trade.model_validate_json(line) for line in f if line.strip()]
     
     def get_by_symbol(self, symbol: str) -> list[Trade]:
-        if not self._filepath.exists():
-            return []
+        with self._filepath.open() as f:
+            all_trades = (Trade.model_validate_json(line) for line in f if line.strip())
+            return [*filter(lambda t: t.symbol==symbol, all_trades)]    
+
+    def get_timestamp(self, first: bool, symbol: str | None = None) -> datetime | None:
+        with self._filepath.open() as f:
+            trades = (Trade.model_validate_json(line) for line in f if line.strip())
+            if symbol is not None:
+                trades = filter(lambda t: t.symbol==symbol, trades)
+            return _get_extreme_timestamp(trades, first)
+
+    def get_all_symbols(self) -> set[str]:
+        symbols = set()
+        with self._filepath.open() as f:
+            for line in f:
+                if line.strip():
+                    symbols |= {Trade.model_validate_json(line).symbol}
+        return symbols
+
+    @property
+    def symbols(self) -> list[str]: ...
+
+def _get_extreme_timestamp(trades: Iterator[Trade], first: bool) -> datetime | None:
+    which = min if first else max
+    ts = None
+    for t in trades:
+        if ts is None:
+            ts = t.timestamp
         else:
-            with self._filepath.open() as f:
-                all_trades = (Trade.model_validate_json(line) for line in f if line.strip())
-                return [*filter(lambda t: t.symbol==symbol, all_trades)]    
+            ts = which(ts, t.timestamp)
+    return ts
 
 
 class PortfolioService():
