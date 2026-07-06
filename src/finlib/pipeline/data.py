@@ -28,7 +28,16 @@ def fetch_trades(trade_repo: TradeRepository) -> tuple[list[Trade], list[str], d
 
 
 async def fetch_market_data(symbols: list[str], interval: binance_interval, start: datetime) -> pd.DataFrame:
-    """Fetch market data."""
+    """Fetch OHLCV market data from Binance for the given symbols.
+
+    Args:
+        symbols: Trading pair symbols to fetch (e.g. ``["BTCUSDT", "ETHUSDT"]``).
+        interval: Candlestick interval (e.g. ``"1h"``, ``"1d"``).
+        start: Earliest timestamp to include in the returned data.
+
+    Returns:
+        DataFrame with one row per symbol/interval combination.
+    """
     log.info(f"Fetching {interval} market data for symbols: {", ".join(symbols)} from {start!s}")
     return await fetch_binance(symbols, interval, start)
 

@@ -11,6 +11,13 @@ from pathlib import Path
 from datetime import timedelta
 
 def main() -> None:
+    """Entry point for the finlib pipeline CLI.
+
+    Parses a trade repository path and a market data frequency, fetches OHLCV
+    data from Binance starting just before the first trade, stores it locally,
+    then prints a market summary and portfolio performance tables (market value,
+    cost basis, cumulative PnL) to stdout.
+    """
     parser = argparse.ArgumentParser(description="Fetch and analyse trades and market data from Binance")
     parser.add_argument("trade_repo_path", help="Path of the JSONL trade repo")
     parser.add_argument("frequency", type=str, help="Market data quantisation frequency")
