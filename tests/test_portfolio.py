@@ -71,7 +71,7 @@ def test_portfolio_historic_position():
     columns=["AAA", "BHP"], index = [_TIMESTAMP1, _TIMESTAMP2, _TIMESTAMP3, _TIMESTAMP4, _TIMESTAMP5])
     assert (pos==exp_pos).all().all()
 
-def test_portfolio_historic_position():
+def test_portfolio_historic_cost_basis():
     p = Portfolio(name="My portfolio", trades=[_TRADE3, _TRADE4, _TRADE1, _TRADE5, _TRADE2])
     cost = p.historic_cost_basis()
     exp_cost = -pd.DataFrame(data = [

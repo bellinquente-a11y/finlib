@@ -53,7 +53,7 @@ class Portfolio(BaseModel):
                 index = [t.timestamp for t in group_trades]
                 )
             dhld = pd.concat((dhld, dhld_symbol), axis=1, sort=True)
-        return dhld.fillna(value=Decimal(0)).cumsum(axis=0)
+        return dhld.fillna(value=0).cumsum(axis=0)
 
     def historic_cost_basis(self) -> pd.DataFrame:
         """
@@ -72,7 +72,7 @@ class Portfolio(BaseModel):
                 index = [t.timestamp for t in group_trades]
                 )
             dhld = pd.concat((dhld, dhld_symbol), axis=1, sort=True)
-        return -dhld.fillna(value=Decimal(0)).cumsum(axis=0)
+        return -dhld.fillna(value=0).cumsum(axis=0)
 
     def historic_market_value(self, price: pd.DataFrame) -> pd.DataFrame:
         """
@@ -88,10 +88,10 @@ class Portfolio(BaseModel):
             missing_symbols = list(set(symbols) - set(price.columns))
             raise ValueError("price missing for: %s", ", ".join(missing_symbols))
 
-        holdings_resampled = holdings.reindex(price.index, method="ffill").fillna(Decimal(0))
+        holdings_resampled = holdings.reindex(price.index, method="ffill").fillna(0)
         return holdings_resampled * price[symbols]
 
-    def historic_pnl(self, price) -> pd.DataFrame:
+    def historic_pnl(self, price: pd.DataFrame) -> pd.DataFrame:
         """
         Returns the historic PnL associated with the portfolio from marking-to-market prices. 
         Both input and output have:
@@ -101,7 +101,7 @@ class Portfolio(BaseModel):
         cost_basis = (
             self.historic_cost_basis()
             .reindex(price.index, method="ffill")
-            .fillna(Decimal(0))
+            .fillna(0)
         )
         return self.historic_market_value(price) + cost_basis
 

@@ -4,7 +4,7 @@ from finlib import OHLCVRepo, Trade, TradeRepository
 from finlib.async_fetch import fetch_binance, binance_interval
 import logging
 import pandas as pd
-from datetime import datetime, timezone
+from datetime import datetime
 
 log = logging.getLogger(__name__)
 
@@ -15,17 +15,16 @@ def fetch_trades(trade_repo: TradeRepository) -> tuple[list[Trade], list[str], d
     if trades == []:
         raise RuntimeError("No trades in trade repository")
 
-    symbols = set()
-    first_dt = datetime(2100,1,1,tzinfo=timezone.utc)
-    for trade in trades:
-        symbols |= {trade.symbol}
-        first_dt = min(first_dt, trade.timestamp)
-
+    symbols = trade_repo.get_all_symbols()
+    first_ts, _ = trade_repo.get_extreme_timestamps()
+    if first_ts is None:
+        raise ValueError
+        
     log.info(f"Trades loaded    = {len(trades)}")
     log.info(f"Symbols          = {", ".join([s for s in symbols])}")
-    log.info(f"First time stamp = {first_dt!s}")
+    log.info(f"First time stamp = {first_ts!r}")
 
-    return trades, list(symbols), first_dt
+    return trades, list(symbols), first_ts
 
 
 async def fetch_market_data(symbols: list[str], interval: binance_interval, start: datetime) -> pd.DataFrame:

@@ -5,15 +5,12 @@ from pathlib import Path
 from datetime import datetime
 from collections.abc import Iterator
 
-from script.concurrency_benchmark import symbols
-
 @runtime_checkable
 class TradeRepository(Protocol):
-    _symbols: set
     def add(self, trade: Trade) -> None: ...
     def get_all(self) -> list[Trade]: ...
     def get_by_symbol(self, symbol: str) -> list[Trade]: ...
-    def get_extreme_timestamps(self, symbol: str | None = None) -> (datetime | None, datetime | None): ...
+    def get_extreme_timestamps(self, symbol: str | None = None) -> tuple[datetime | None, datetime | None]: ...
     def get_all_symbols(self) -> set[str]: ...
 
 class InMemoryTradeRepository:
@@ -29,13 +26,13 @@ class InMemoryTradeRepository:
     def get_by_symbol(self, symbol: str) -> list[Trade]:
         return [*filter(lambda t: t.symbol==symbol, self._trades)]
 
-    def get_extreme_timestamps(self, symbol: str | None = None) -> (datetime | None, datetime | None):
-        trades = (t for t in self._trades) 
+    def get_extreme_timestamps(self, symbol: str | None = None) -> tuple[datetime | None, datetime | None]:
+        trades: Iterator[Trade] = (t for t in self._trades) 
         if symbol is not None:
             trades = filter(lambda t: t.symbol==symbol, trades)
         return _get_extreme_timestamps(trades)
 
-    def get_all_symbols(self) -> list[str]:
+    def get_all_symbols(self) -> set[str]:
         symbols = set()
         for t in self._trades:
             symbols |= {t.symbol}
@@ -64,9 +61,9 @@ class InFileTradeRepository:
             all_trades = (Trade.model_validate_json(line) for line in f if line.strip())
             return [*filter(lambda t: t.symbol==symbol, all_trades)]    
 
-    def get_extreme_timestamps(self, symbol: str | None = None) -> (datetime | None, datetime | None):
+    def get_extreme_timestamps(self, symbol: str | None = None) -> tuple[datetime | None, datetime | None]:
         with self._filepath.open() as f:
-            trades = (Trade.model_validate_json(line) for line in f if line.strip())
+            trades: Iterator[Trade] = (Trade.model_validate_json(line) for line in f if line.strip())
             if symbol is not None:
                 trades = filter(lambda t: t.symbol==symbol, trades)
             return _get_extreme_timestamps(trades)
@@ -79,10 +76,7 @@ class InFileTradeRepository:
                     symbols |= {Trade.model_validate_json(line).symbol}
         return symbols
 
-    @property
-    def symbols(self) -> list[str]: ...
-
-def _get_extreme_timestamps(trades: Iterator[Trade]) -> (datetime | None, datetime | None):
+def _get_extreme_timestamps(trades: Iterator[Trade]) -> tuple[datetime | None, datetime | None]:
     min_ts, max_ts = None, None
     for t in trades:
         if min_ts is None:
