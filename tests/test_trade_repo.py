@@ -29,12 +29,9 @@ def test_trade_repo_get_symbols(trade_repo: TradeRepository):
 def test_trade_repo_get_timestamp(trade_repo: TradeRepository):
     for trade in _TRADES:
         trade_repo.add(trade)
-    assert trade_repo.get_timestamp(first=True) == _TIMESTAMP1
-    assert trade_repo.get_timestamp(first=False) == _TIMESTAMP3
-    assert trade_repo.get_timestamp(first=True, symbol="BBB") == _TIMESTAMP1
-    assert trade_repo.get_timestamp(first=False, symbol="BBB") == _TIMESTAMP2
-    assert trade_repo.get_timestamp(first=True, symbol="AAA") == _TIMESTAMP3
-    assert trade_repo.get_timestamp(first=False, symbol="AAA") == _TIMESTAMP3
+    assert trade_repo.get_extreme_timestamps() == (_TIMESTAMP1, _TIMESTAMP3)
+    assert trade_repo.get_extreme_timestamps("AAA") == (_TIMESTAMP3, _TIMESTAMP3)
+    assert trade_repo.get_extreme_timestamps("BBB") == (_TIMESTAMP1, _TIMESTAMP2)
 
 def test_portfolio_service_position_calculation(trade_repo: TradeRepository):
     for trade in _TRADES:

@@ -13,7 +13,7 @@ class TradeRepository(Protocol):
     def add(self, trade: Trade) -> None: ...
     def get_all(self) -> list[Trade]: ...
     def get_by_symbol(self, symbol: str) -> list[Trade]: ...
-    def get_timestamp(self, first: bool, symbol: str | None = None) -> datetime | None: ...
+    def get_extreme_timestamps(self, symbol: str | None = None) -> (datetime | None, datetime | None): ...
     def get_all_symbols(self) -> set[str]: ...
 
 class InMemoryTradeRepository:
@@ -29,11 +29,11 @@ class InMemoryTradeRepository:
     def get_by_symbol(self, symbol: str) -> list[Trade]:
         return [*filter(lambda t: t.symbol==symbol, self._trades)]
 
-    def get_timestamp(self, first: bool, symbol: str | None = None) -> datetime | None:
+    def get_extreme_timestamps(self, symbol: str | None = None) -> (datetime | None, datetime | None):
         trades = (t for t in self._trades) 
         if symbol is not None:
             trades = filter(lambda t: t.symbol==symbol, trades)
-        return _get_extreme_timestamp(trades, first)
+        return _get_extreme_timestamps(trades)
 
     def get_all_symbols(self) -> list[str]:
         symbols = set()
@@ -64,12 +64,12 @@ class InFileTradeRepository:
             all_trades = (Trade.model_validate_json(line) for line in f if line.strip())
             return [*filter(lambda t: t.symbol==symbol, all_trades)]    
 
-    def get_timestamp(self, first: bool, symbol: str | None = None) -> datetime | None:
+    def get_extreme_timestamps(self, symbol: str | None = None) -> (datetime | None, datetime | None):
         with self._filepath.open() as f:
             trades = (Trade.model_validate_json(line) for line in f if line.strip())
             if symbol is not None:
                 trades = filter(lambda t: t.symbol==symbol, trades)
-            return _get_extreme_timestamp(trades, first)
+            return _get_extreme_timestamps(trades)
 
     def get_all_symbols(self) -> set[str]:
         symbols = set()
@@ -82,15 +82,14 @@ class InFileTradeRepository:
     @property
     def symbols(self) -> list[str]: ...
 
-def _get_extreme_timestamp(trades: Iterator[Trade], first: bool) -> datetime | None:
-    which = min if first else max
-    ts = None
+def _get_extreme_timestamps(trades: Iterator[Trade]) -> (datetime | None, datetime | None):
+    min_ts, max_ts = None, None
     for t in trades:
-        if ts is None:
-            ts = t.timestamp
+        if min_ts is None:
+            min_ts, max_ts = t.timestamp, t.timestamp
         else:
-            ts = which(ts, t.timestamp)
-    return ts
+            min_ts, max_ts = min(min_ts, t.timestamp), max(min_ts, t.timestamp)
+    return min_ts, max_ts
 
 
 class PortfolioService():
