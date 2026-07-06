@@ -51,7 +51,7 @@ Below is the expected format of the JSONL file reporting the trades of the portf
 ### Quick start
 
 ```bash
-poetry run python src/finlib/pipeline/cli.py ~/data/trades20260703.jsonl 1h
+poetry run finlib-pipeline ~/data/trades20260703.jsonl 1h
 ```
 
 ```text

@@ -184,7 +184,7 @@ Nothing.
 
 ---
 
- Week 2, day 5 26/06 - week retrospective
+ ## Week 2, day 5 26/06 - week retrospective
 
  ### Deliverables
 - itertools.groupby trade analytics
@@ -288,7 +288,7 @@ Nothing.
 
 ---
 
- Week 3, day 5 1/07 - week retrospective
+ ## Week 3, day 5 1/07 - week retrospective
 
  ### Deliverables
 - itertools.accumulate for running PnL and max drawdown
@@ -319,7 +319,7 @@ Nothing.
 
 ---
 
-Week 4, day 1 3/07
+## Week 4, day 1 3/07
 
 ### What I built
 - Simplified the project structure by keep only the async data fetcher, now loading multiple rows of data.
@@ -329,7 +329,7 @@ Week 4, day 1 3/07
 
 ---
 
-Week 4, day 2 3/07
+## Week 4, day 2 3/07
 
 ### What I built
 - module for data handling in `pipeline/data.py`.
@@ -355,7 +355,7 @@ Production data pipelines die from silent failures. Every failure mode in the fe
 
 ---
 
-Week 4, day 3 3/07
+## Week 4, day 3 3/07
 
 ### What I built
 - `analytics` module in the `pipeline` to calculate rolling stats of marlet data
@@ -367,3 +367,34 @@ Week 4, day 3 3/07
 
 ### Still unclear
 - Logging best practices.
+
+---
+
+## Week 4, day 4 5/07
+
+### What I built
+- Minor bug fixes
+- Tests
+
+---
+
+## Week 4, day 5 7/07 - week retrospective
+
+### Deliverables
+
+- [x] Architecture diagram drawn before coding
+- [x] pipeline/ package: data.py, analytics.py, output.py cli.py
+- [x] fetch_all_history — async, start timestamp, Semaphore, @async_retry
+- [x] store_all — DataFrame -> OHLCVInterval adapter
+- [x] compute_summary — resample + rolling vol/Sharpe per symbol
+- [x] CLI entry point: poetry run finlib-pipeline
+- [x] mypy --strict clean across pipeline/
+- [x] Three targeted bug fixes (deprecated, timer, FileOHLCVRepo)
+- [x] >80% coverage on finlib/pipeline/
+- [x] Tests: fetch, store, analytics, CLI — none hit the network
+- [x] README pipeline section + docstrings
+- [x] BUFFER: pipeline/pnl.py — portfolio P&L join (if time permitted)
+- [ ] BUFFER: max_drawdown in analytics.py (if pnl.py done too)
+
+### Hardest design decision
+- Whether to add further functionality in `finlib` or `finlib.pipeline`.
