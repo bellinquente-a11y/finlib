@@ -82,7 +82,7 @@ def _get_extreme_timestamps(trades: Iterator[Trade]) -> tuple[datetime | None, d
         if min_ts is None:
             min_ts, max_ts = t.timestamp, t.timestamp
         else:
-            min_ts, max_ts = min(min_ts, t.timestamp), max(min_ts, t.timestamp)
+            min_ts, max_ts = min(min_ts, t.timestamp), max(max_ts, t.timestamp)
     return min_ts, max_ts
 
 

@@ -55,7 +55,7 @@ async def _validated_fetch_binance_one_symbol(session: aiohttp.ClientSession, sy
                 try:
                     result.append(BinanceDataRow(**{k: v for k, v in zip(settings.binance.columns, row)}))
                 except ValidationError:
-                    invalid_rows_count+=0
+                    invalid_rows_count+=1
             if invalid_rows_count>0:
                 log.warning("Invalid Binance data", symbol=symbol, invalid_rows_count=invalid_rows_count)
             if result == []:
