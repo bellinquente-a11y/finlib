@@ -398,3 +398,12 @@ Production data pipelines die from silent failures. Every failure mode in the fe
 
 ### Hardest design decision
 - Whether to add further functionality in `finlib` or `finlib.pipeline`.
+
+---
+
+## Week 5, day 1 8/7
+
+### Tasks
+- Study and exercise on time complexity
+- Focus and arrays hashing (hash-map pattern)
+- Thinking about complexity forces me to stop and breathe before coding.
