@@ -1,6 +1,7 @@
 import pandas as pd
 import pytest
-from finlib.historic_analytics import resample_dataframe, add_rolling_stats
+from finlib.historic_analytics import resample_dataframe, add_rolling_stats, maximum_drawdown
+from hypothesis import given, strategies as st
 
 _COLUMNS = [
     "timestamp", "open", "high", "low", "close", "volume",
@@ -86,3 +87,27 @@ def test_rolling_stats_first_rows_are_nan():
     result = add_rolling_stats(_close_df([100.0, 110.0, 99.0, 109.0]), intervals_per_year=252, window=3)
     assert pd.isna(result["rolling_vol"].iloc[0])
     assert pd.isna(result["rolling_vol"].iloc[1])
+
+## max drawdown
+
+def test_maximum_drawdown_zeros():
+    returns = pd.Series(5*[0.])
+    assert maximum_drawdown(returns)==0.
+
+def test_maximum_drawdown_calc():
+    cumpnl = [100., 120., 110., 80., 140., 130., 150.]
+    returns = pd.Series([cumpnl[i]/cumpnl[i-1]-1. for i in range(1, len(cumpnl))])
+    assert abs(maximum_drawdown(returns) - (80./120.-1.)) <1.e-14
+
+
+@given(st.lists(st.floats(min_value=-0.5, max_value=0.5), min_size=1))
+def test_maximum_drawdown_negative(returns):
+    assert maximum_drawdown(pd.Series(returns))<=0.
+
+@given(st.lists(st.floats(min_value=0., max_value=0.5), min_size=1))
+def test_maximum_drawdown_zero_for_positive_returns(returns):
+    assert maximum_drawdown(pd.Series(returns))==0.
+
+@given(st.lists(st.floats(min_value=-0.5, max_value=0.5), min_size=1, max_size=1))
+def test_maximum_drawdown_zero_for_one_elements(returns):
+    assert maximum_drawdown(pd.Series(returns))==0.
