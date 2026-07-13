@@ -1,4 +1,4 @@
-from finlib.async_fetch import BinanceDataRow, fetch_binance, _fetch_binance_raw_data, _convert_binance_data_to_DataFrame
+from finlib.async_fetch import BinanceDataRow, fetch_binance, _fetch_binance_raw_data, _convert_binance_data_to_DataFrame, _validated_fetch_binance_one_symbol
 import pytest
 from unittest.mock import AsyncMock, patch
 import aiohttp
@@ -6,6 +6,7 @@ import asyncio
 from finlib.config import get_settings
 from datetime import datetime
 from decimal import Decimal
+from structlog.testing import capture_logs
 
 _EX_DT = datetime(2026,7,1,0,0,0)
 _EX_DEC = Decimal(103.5)
@@ -87,3 +88,17 @@ async def test_fetch_binance_retry():
 def test_convert_binance_data_to_DataFrame_symbol_data_missing():
     brow = BinanceDataRow(**{k:v for k,v in zip(BinanceDataRow.model_fields, _EX_ROW)})
     assert (_convert_binance_data_to_DataFrame({"SYM1": [brow], "SYM2": None}) == _convert_binance_data_to_DataFrame({"SYM1": [brow]})).all().all()
+
+
+async def test_validated_fetch_binance_one_symbol_invalid_rows_count():
+    semaphore = asyncio.Semaphore(1)
+
+    async def malformed_rows(session, symbol, interval, limit):
+        result = [_EX_ROW, _EX_ROW[1:], _EX_ROW[1:], _EX_ROW, _EX_ROW]
+        return result
+
+    with patch('finlib.async_fetch._fetch_binance_one_symbol_with_retry', new_callable=AsyncMock) as mock:
+        mock.side_effect = malformed_rows
+        with capture_logs() as logs:
+            _ = await _validated_fetch_binance_one_symbol(None, "AAA", None, None, semaphore)
+            assert logs[0]["invalid_rows_count"]==2
