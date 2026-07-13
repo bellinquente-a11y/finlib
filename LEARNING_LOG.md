@@ -403,7 +403,37 @@ Production data pipelines die from silent failures. Every failure mode in the fe
 
 ## Week 5, day 1 8/7
 
-### Tasks
+### Focus
 - Study and exercise on time complexity
 - Focus and arrays hashing (hash-map pattern)
 - Thinking about complexity forces me to stop and breathe before coding.
+
+---
+
+## Week 5, day 2 9/7
+
+### Focus
+
+- Binary search trees (BST): inorder, preorder and postorder search
+- Graphs: Breadth First Seacrh (BFS) and Depth First Search (DFS)
+
+### Surprises
+
+- The beauty of the abstraction
+
+### Still unclear
+
+- Whether I will recognise such patterns in real life.
+
+---
+
+## Week 5, day 3 13/07
+
+### What I built
+
+- A fully vectorised max drawdown function of Pandas Series (using `cumprod` and `cummax`).
+- Corresponding tests using the `Hypothesis` library.
+
+### Surprises
+
+- The elegance of the `Hypothesis` library. Very useful to test a function with random inputs.
