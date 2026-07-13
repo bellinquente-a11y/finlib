@@ -79,10 +79,11 @@ class InFileTradeRepository:
 def _get_extreme_timestamps(trades: Iterator[Trade]) -> tuple[datetime | None, datetime | None]:
     min_ts, max_ts = None, None
     for t in trades:
-        if min_ts is None:
+        if min_ts is None or max_ts is None:
             min_ts, max_ts = t.timestamp, t.timestamp
         else:
-            min_ts, max_ts = min(min_ts, t.timestamp), max(max_ts, t.timestamp)
+            min_ts = min(min_ts, t.timestamp)
+            max_ts = max(max_ts, t.timestamp)
     return min_ts, max_ts
 
 
