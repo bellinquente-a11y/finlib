@@ -46,3 +46,6 @@ dist/
 # Logs
 *.log
 nb.ipynb
+
+# Claude Code local settings
+.claude/
