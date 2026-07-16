@@ -10,7 +10,7 @@ from itertools import groupby
 
 @retry(max_attempts=3, delay=0.1, exceptions=(ValueError,))
 def calculate_daily_vwap(path: Path, symbol: str, min_volume: int = 0) -> Decimal:
-    """Calculate VWAP from CSV file"""
+    """Calculate VWAP from CSV file. It assumes the file reports data for one day only."""
 
     with timer(f"VWAP for ticker {symbol}"):
         bars = (bar for bar in stream_ohlcv(path, min_volume) if bar.symbol==symbol)

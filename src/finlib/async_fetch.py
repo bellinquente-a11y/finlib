@@ -30,7 +30,7 @@ class BinanceDataRow(BaseModel):
     ignore: str
 
 async def _fetch_binance_one_symbol(session: aiohttp.ClientSession, symbol: str, interval: binance_interval, limit: int) -> Any:
-    """Coroutine to fetch one data for one symbol from Binance."""
+    """Coroutine to fetch data for one symbol from Binance."""
     settings = get_settings()
     log.info("Async fetching Binance data", interval=interval, symbol=symbol, limit=limit)
     async with asyncio.timeout(settings.fetch_timeout_seconds):
@@ -44,7 +44,7 @@ async def _fetch_binance_one_symbol_with_retry(session: aiohttp.ClientSession, s
 
 
 async def _validated_fetch_binance_one_symbol(session: aiohttp.ClientSession, symbol: str, interval: binance_interval, limit: int, semaphore: asyncio.Semaphore) -> list[BinanceDataRow] | None:
-    """Coroutine to fetch one data for one symbol from Binance. Validated with Pydantic."""
+    """Coroutine to fetch data for one symbol from Binance. Validated with Pydantic."""
     settings = get_settings()
     async with semaphore:
         try:
