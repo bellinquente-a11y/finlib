@@ -73,13 +73,13 @@ class InMemoryOHLCVRepo:
         if not (set(df.columns) <= set(self._fieldnames)):
             raise ValueError
 
+        last_timestamp = self._get_last_timestamps()
         symbols = set(df["symbol"].to_list())
         count=0
         for symbol in symbols:
-            ts = self._get_last_timestamp(symbol)
             query = "symbol==@symbol"
-            if ts is not None:
-                query = f"{query} and timestamp>@ts"
+            if symbol in last_timestamp.keys():
+                query = f"{query} and timestamp>@last_timestamp[symbol]"
             for row in df.query(query).itertuples():
                 self.add_interval(
                     OHLCVInterval(**{k:getattr(row,k) for k in  self._fieldnames})
@@ -95,15 +95,14 @@ class InMemoryOHLCVRepo:
             filtered_data = filter(lambda b: b.timestamp<=end, filtered_data)
         return pd.DataFrame([[getattr(i, f) for f in self._fieldnames] for i in filtered_data], columns=self._fieldnames).sort_values(["timestamp", "symbol"])
 
-    def _get_last_timestamp(self, symbol: str) -> datetime | None:
-        ts = None
+    def _get_last_timestamps(self) -> dict[str, datetime]:
+        res = {}
         for row in self._data:
-            if row.symbol==symbol:
-                    if ts is None:
-                        ts = row.timestamp
-                    else:
-                        ts = max(ts, row.timestamp)
-        return ts
+            if row.symbol not in res.keys():
+                res[row.symbol] = row.timestamp
+            else:
+                res[row.symbol] = max(res[row.symbol], row.timestamp)
+        return res
 
 class FileOHLCVRepo:
     def __init__(self, filepath: Path) -> None:
@@ -130,14 +129,14 @@ class FileOHLCVRepo:
             raise ValueError
 
         symbols = set(df["symbol"].to_list())
+        last_timestamp = self._get_last_timestamps()
         count=0
         for symbol in symbols:
-            ts = self._get_last_timestamp(symbol)
 
             query = "symbol==@symbol"
-            if ts is not None:
-                query = f"{query} and timestamp>@ts"
-                log.info("adding intervals", symbol=symbol, first_timestamp=ts)
+            if symbol in last_timestamp.keys():
+                query = f"{query} and timestamp>@last_timestamp[symbol]"
+                log.info("adding intervals", symbol=symbol, first_timestamp=last_timestamp[symbol])
             else:
                 log.info("adding intervals", symbol=symbol)
 
@@ -168,19 +167,17 @@ class FileOHLCVRepo:
                     data.append([getattr(row_data,f) for f in self._fieldnames])
         return pd.DataFrame(data, columns=self._fieldnames).sort_values(by="timestamp")
 
-    def _get_last_timestamp(self, symbol: str) -> datetime | None:
-        ts = None
+    def _get_last_timestamps(self) -> dict[str, datetime]:
+        res = {}
         with self._filepath.open() as f:
-            for i, row in enumerate(f):
-                if i==0:
-                    continue
+            _ = f.readline()
+            for row in f:
                 row_data = OHLCVInterval.from_string(row)
-                if row_data.symbol==symbol:
-                    if ts is None:
-                        ts = row_data.timestamp
-                    else:
-                        ts = max(ts, row_data.timestamp)
-        return ts
+                if row_data.symbol not in res.keys():
+                    res[row_data.symbol] = row_data.timestamp
+                else:
+                    res[row_data.symbol] = max(row_data.timestamp, res[row_data.symbol])
+        return res
 
 
 def _reformat_dataframe_for_batch_input(df: pd.DataFrame, repo_field_names: list[str], columns_map: dict[str, str]) -> pd.DataFrame:

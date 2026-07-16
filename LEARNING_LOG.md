@@ -437,3 +437,39 @@ Production data pipelines die from silent failures. Every failure mode in the fe
 ### Surprises
 
 - The elegance of the `Hypothesis` library. Very useful to test a function with random inputs.
+
+---
+
+## Week 5, day 4 14/07
+
+### Study of the `FastAPI` library
+
+Patterns recognised in `fastapi.routing`.
+
+1. `APIRoute` is a Repository-pattern client. It does not know where the data comes from. It just stores `path` (`str`) and `endpoint` (`Callable`) and the dependencies. The analogy in `finlib` is `trade_repo.PortfolioService`, which is created with the input of a `TradeRepo` protocol: it doesn't know what it is, it just calls its methods.
+
+2. `@app.get(path)` is a three-level decorator factory. It is similar to the decorators in `finlib.decorators` that require inputs.
+
+3. `response_model` parameter applies Pydantic validation on the output, in the same way that we find in `finlib.async_fetch`.
+
+Notes on `fastapi.dependencies.utils`.
+
+- `get_dependant` extracts dependencies (recursively) at decoration time from function signatures.
+
+- `Depends()` allows for dependency injection (DI) at request time, rather than startup.
+
+- FastAPI allows to automate dependency injection.  
+
+### Code review
+
+- `instruments.py`: besides the didactic aspect, what's the utility? Minor.
+
+- `data.py`: besides the didactic aspect, what's the utility? Minor.
+
+- `ohlcv_repo.py`: `OHLCVInterval` objects methods a bit too convoluted? Minor.
+
+- `ohlcv_repo.py`: `_get_last_timestamp` in `add_intervals_batch`. Instead of search separately for every symbol (O(n^2)), I should create a dict for each symbol (O(n)). Medium. Fixed.
+
+- `ohlcv_repo.py`: `FileOHLCVRepo.get_data` maybe should load lazily? is it already? Medium. Resolved: it is lazy at the I/O level, which is the best that can be done.
+ 
+- `portfolio.py`: `value_portfolio` was didactic and probably out of date. Minor.
