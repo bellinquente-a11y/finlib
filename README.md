@@ -2,57 +2,62 @@
 
 [![CI](https://github.com/bellinquente-a11y/finlib/actions/workflows/ci.yml/badge.svg)](https://github.com/bellinquente-a11y/finlib/actions/workflows/ci.yml)
 
-Production-grade Python for financial data modelling.
+Production-grade Python for financial data modelling. 
+- Strict type annotations (mypy --strict)
+- Protocol-based dependency injection
+- structured logging (structlog)
+- property-based testing (Hypothesis)
 
-## Features
-- Type-safe Trade model with Pydantic v2
-- Instrument hierarchy using ABCs and Protocols
-- Streaming OHLCV pipeline - O(1) memory
-- Portfolio valuation via structural subtyping
-- Asynchronous fetching of data from Binance with retry on failure, per-request timeout and concurrency Semaphore
-- Portfolio service trade management using repository pattern DI
-- project settings managed via pydantic_settings
-- A trade repository with swappable backend (in memory vs JSONL)
-- An interval market-data repository with swappable backend (in memory vs CSV)
+## Design decisions
 
+- **Protocol-based repositories** — `OHLCVRepo` and `TradeRepository` are structural subtypes. Backends (in-memory vs CSV/JSONL) are swappable without touching callers.
+- **mypy --strict** clean across `src/` and `tests/`.
+- **Async concurrency** — `asyncio.gather` with a rate-limiting `Semaphore`, plus exponential-backoff retry on both sync and async callables.
+- **O(1) memory streaming** — OHLCV data is consumed as a generator; no materialising full datasets before processing.
+- **Property-based testing** via Hypothesis — invariants on numeric functions (e.g. `maximum_drawdown ≤ 0` for any valid return series).
+
+## Modules
+
+| Module | What it does |
+|---|---|
+| `models.py` | `Trade` model with Pydantic v2 field constraints |
+| `instruments.py` | Instrument hierarchy (ABCs + Protocols); portfolio valuation via structural subtyping |
+| `data.py` | Streaming OHLCV parser; validates rows at the ingestion boundary |
+| `async_fetch.py` | Async Binance fetcher: aiohttp, asyncio.gather, Semaphore, validated response parsing |
+| `decorators.py` | `@retry` / `@async_retry` (exp. backoff), `@timer`, `@deprecated`, `@validate_inputs` |
+| `context_managers.py` | `timer` context manager for profiling code blocks |
+| `analytics.py` | VWAP; uses `@retry` and `@validate_inputs` to enforce caller contracts |
+| `historic_analytics.py` | `resample_dataframe`, `add_rolling_stats` (annualised vol + Sharpe), `maximum_drawdown` |
+| `trade_repo.py` | `TradeRepository` Protocol; in-memory and JSONL-backed implementations |
+| `ohlcv_repo.py` | `OHLCVRepo` Protocol; in-memory and CSV-backed implementations |
+| `portfolio.py` | `PortfolioService` with injected `TradeRepository`; trade management and valuation |
+| `report.py` | `daily_trade_summary` — daily notional and trade count aggregated by symbol |
+| `config.py` | pydantic-settings config with `.env` support |
+| `pipeline/` | CLI entry point, data orchestration, analytics, formatted output |
 
 ## Installation
-  git clone https://github.com/bellinquente-a11y/finlib
-  cd finlib && poetry install
+
+```bash
+git clone https://github.com/bellinquente-a11y/finlib
+cd finlib && poetry install
+```
 
 ## Portfolio analysis pipeline
 
-This script provides historic analysis of the portfolio performance.
+Reads historic trades from a JSONL file, fetches OHLCV market data from Binance, caches it locally as CSV, and computes portfolio analytics.
 
-### Features
-- Historic trades are read from a JSONL file.
-- Market data inputs read from config and CLI.
-- Historic market data fetched asynchronously and stored in a local CSV repository.
-- Calculation of market data analysics.
-- Calculation of portfolio analytics.
-- Summary results printed on the CLI.
+```bash
+poetry run finlib-pipeline ~/data/trades.jsonl 1h
+```
 
-### CLI inputs
-
-- string path of the trades.jsonl file
-- quantisation frequency of the market data
-- (optional) string path of the directory where the CSV market data is saved 
-
-### `trades.jsonl` format
-
-Below is the expected format of the JSONL file reporting the trades of the portfolio.
+### trades.jsonl format
 
 ```text
 {"symbol": "BTCUSDT", "quantity": "3", "price": "75539.5", "side": "BUY", "timestamp": "2026-05-22T07:08:47.107473Z"}
-{"symbol": "BNBUSDT", "quantity": "117", "price": "653.22", "side": "BUY", "timestamp": "2026-05-22T14:37:17.848749Z"}
-{"symbol": "BTCUSDT", "quantity": "2", "price": "76790.59", "side": "BUY", "timestamp": "2026-05-22T17:12:45.681453Z"}
+{"symbol": "BNBUSDT", "quantity": "117", "price": "653.22", "side": "BUY", "timestamp": "2026-05-22T14:37:17.848747Z"}
 ```
 
-### Quick start
-
-```bash
-poetry run finlib-pipeline ~/data/trades20260703.jsonl 1h
-```
+### Example output
 
 ```text
 
@@ -101,8 +106,26 @@ timestamp
 Total PnL =  169,711
 ```
 
-### Testing
+## Testing
+
+### Full suite with coverage
 
 ```bash
-poetry run pytest --cov=finlib.pipeline
+poetry run pytest --cov=finlib -v
 ```
+
+### Type-checking
+
+```bash
+poetry run mypy src/ --strict
+```
+
+### Linting
+
+```bash
+poetry run ruff check src/ tests/ script/
+```
+
+### CI
+
+CI enforces ≥80% pytest coverage, mypy --strict, and ruff on every push.
