@@ -1,6 +1,4 @@
 import pandas as pd
-from operator import mul
-from itertools import accumulate
 
 def resample_dataframe(df: pd.DataFrame, freq: str = "D") -> pd.DataFrame:
     columns = list(df.columns)
@@ -35,6 +33,6 @@ def add_rolling_stats(df: pd.DataFrame, intervals_per_year: int, window: int) ->
 
 def maximum_drawdown(returns: pd.Series) -> float:
     """Returns the maximum drawdown of a (cumulative) PnL series."""
-    cum_pnl = (returns + 1.).cumprod()
+    cum_pnl = (returns.astype(float) + 1.).cumprod()
     max_cum_pnl = cum_pnl.cummax()
     return min(cum_pnl/max_cum_pnl-1.)

@@ -96,7 +96,7 @@ class InMemoryOHLCVRepo:
         return pd.DataFrame([[getattr(i, f) for f in self._fieldnames] for i in filtered_data], columns=self._fieldnames).sort_values(["timestamp", "symbol"])
 
     def _get_last_timestamps(self) -> dict[str, datetime]:
-        res = {}
+        res: dict[str, datetime] = {}
         for row in self._data:
             if row.symbol not in res.keys():
                 res[row.symbol] = row.timestamp
@@ -168,7 +168,7 @@ class FileOHLCVRepo:
         return pd.DataFrame(data, columns=self._fieldnames).sort_values(by="timestamp")
 
     def _get_last_timestamps(self) -> dict[str, datetime]:
-        res = {}
+        res : dict[str, datetime] = {}
         with self._filepath.open() as f:
             _ = f.readline()
             for row in f:
