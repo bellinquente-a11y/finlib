@@ -86,7 +86,7 @@ class Portfolio(BaseModel):
 
         if not set(symbols) <= set(price.columns):
             missing_symbols = list(set(symbols) - set(price.columns))
-            raise ValueError("price missing for: %s", ", ".join(missing_symbols))
+            raise ValueError(f"price missing for: {", ".join(missing_symbols)}")
 
         holdings_resampled = holdings.reindex(price.index, method="ffill").fillna(0)
         return holdings_resampled * price[symbols]

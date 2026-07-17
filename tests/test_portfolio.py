@@ -1,6 +1,14 @@
-from finlib import value_portfolio, Equity, Portfolio
+from pydantic_core import ValidationError
+from finlib import value_portfolio, Equity, Portfolio, Trade
 from decimal import Decimal
 import pandas as pd
+import pytest
+from datetime import datetime
+
+def test_portfolio_empty_trade_list_validation_error():
+    with pytest.raises(ValidationError):
+        _ = Portfolio(name="MyPortfolio", trades = [])
+
 
 def test_value_portfolio_calculation():
     positions = {"BHP": (Equity("BHP", Decimal(130.)), 10.), 
@@ -11,13 +19,25 @@ def test_value_portfolio_calculation():
 def test_portfolio_len(sample_portfolio):
     assert len(sample_portfolio)==6
 
-def test_portfolio_contains(sample_portfolio):
-    assert ("BBB" in sample_portfolio) and ("CBA" not in sample_portfolio)
+@pytest.mark.parametrize("symbol,expected", [("BBB", True), ("CBA", False)], ids=["present", "missing"])
+def test_portfolio_contains(sample_portfolio, symbol, expected):
+    assert (symbol in sample_portfolio) == expected
 
-def test_portfolio_iter(sample_trades):
+def test_portfolio_name_missing(sample_trades):
+    with pytest.raises(ValidationError):
+        _ = Portfolio(name="", trades=sample_trades)
+
+def test_portfolio_iter_trades_order(sample_trades):
     p = Portfolio(name='My Portfolio', trades=sample_trades)
     for i, trade in enumerate(p):
         assert trade == sample_trades[i]
+
+def test_portfolio_get_item_out_of_range(sample_portfolio):
+    with pytest.raises(IndexError):
+        sample_portfolio[99]
+
+def test_portfolio_notional_calculation(sample_portfolio):
+    assert abs(sample_portfolio.notional-Decimal(1_281.41)) <1e-12
 
 def test_portfolio_historic_position(sample_historic_portfolio):
     pos = sample_historic_portfolio.historic_position()
@@ -72,3 +92,8 @@ def test_historic_pnl_calculation(sample_historic_portfolio, sample_market_makin
         index = sample_market_making_prices.index
     )
     assert (pnl == exp_pnl).all().all()
+
+def test_historic_market_value_missing_symbol(sample_historic_portfolio, sample_market_making_prices):
+    sample_historic_portfolio.trades.append(Trade(symbol="ZZZ", quantity=10., price=10., side="BUY", timestamp=datetime(2026,2,1,13,4,56)))
+    with pytest.raises(ValueError, match="price missing for: ZZZ"):
+        _ = sample_historic_portfolio.historic_market_value(sample_market_making_prices)
