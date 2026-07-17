@@ -1,6 +1,6 @@
 from finlib.async_fetch import fetch_binance
 import logging
-from finlib.ohlcv_repo import FileOHLCVRepo
+from finlib.ohlcv_repo import FileOHLCVRepository
 from pathlib import Path
 from datetime import timedelta, datetime, timezone
 import pandas as pd
@@ -19,7 +19,7 @@ async def main(filepath: str) -> None:
     if repo_path.exists():
         subprocess.run(["rm", filepath])
 
-    repo = FileOHLCVRepo(Path(repo_path))
+    repo = FileOHLCVRepository(Path(repo_path))
 
     log.info("Save market data in OHLCV repo")
     symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT"]

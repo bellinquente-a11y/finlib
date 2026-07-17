@@ -54,12 +54,12 @@ class OHLCVInterval:
         return cls(**data)
 
 
-class OHLCVRepo(Protocol):
+class OHLCVRepository(Protocol):
     def add_interval(self, data: OHLCVInterval) -> None: ...
     def add_intervals_batch(self, data: pd.DataFrame, columns_map: dict[str, str] | None=None) -> None: ...
     def get_data(self, symbol: str, start: datetime | None = None, end: datetime | None = None) -> pd.DataFrame: ...
 
-class InMemoryOHLCVRepo:
+class InMemoryOHLCVRepository:
     def __init__(self) -> None:
         self._data: list[OHLCVInterval] = []
         self._fieldnames = [f.name for f in fields(OHLCVInterval)]
@@ -104,7 +104,7 @@ class InMemoryOHLCVRepo:
                 res[row.symbol] = max(res[row.symbol], row.timestamp)
         return res
 
-class FileOHLCVRepo:
+class FileOHLCVRepository:
     def __init__(self, filepath: Path) -> None:
         self._filepath = filepath
         self._fieldnames = [f.name for f in fields(OHLCVInterval)]

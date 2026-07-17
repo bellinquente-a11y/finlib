@@ -565,7 +565,7 @@ Production data pipelines die from silent failures. Every failure mode in the fe
 - [x] compute_summary — resample + rolling vol/Sharpe per symbol
 - [x] CLI entry point: poetry run finlib-pipeline
 - [x] mypy --strict clean across pipeline/
-- [x] Three targeted bug fixes (deprecated, timer, FileOHLCVRepo)
+- [x] Three targeted bug fixes (deprecated, timer, FileOHLCVRepository)
 - [x] >80% coverage on finlib/pipeline/
 - [x] Tests: fetch, store, analytics, CLI — none hit the network
 - [x] README pipeline section + docstrings
@@ -666,7 +666,7 @@ Notes on `fastapi.dependencies.utils`.
 - `data.py`: besides the didactic aspect, what's the utility? Minor.
 - `ohlcv_repo.py`: `OHLCVInterval` objects methods a bit too convoluted? Minor.
 - `ohlcv_repo.py`: `_get_last_timestamp` in `add_intervals_batch`. Instead of search separately for every symbol (O(n^2)), I should create a dict for each symbol (O(n)). Medium. Fixed.
-- `ohlcv_repo.py`: `FileOHLCVRepo.get_data` maybe should load lazily? is it already? Medium. Resolved: it is lazy at the I/O level, which is the best that can be done.
+- `ohlcv_repo.py`: `FileOHLCVRepository.get_data` maybe should load lazily? is it already? Medium. Resolved: it is lazy at the I/O level, which is the best that can be done.
 - `portfolio.py`: `value_portfolio` was didactic and probably out of date. Minor.
 
 ---

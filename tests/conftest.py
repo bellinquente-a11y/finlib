@@ -3,7 +3,7 @@ from finlib import Trade, Portfolio
 from decimal import Decimal
 from datetime import datetime
 import pandas as pd
-from finlib.trade_repo import TradeRepository, InFileTradeRepository, InMemoryTradeRepository
+from finlib.trade_repo import TradeRepository, FileTradeRepository, InMemoryTradeRepository
 
 @pytest.fixture
 def sample_trades() -> list[Trade]:
@@ -60,7 +60,7 @@ def tmp_trade_repo(request, tmp_path) -> TradeRepository:
     if request.param=="memory":
         repo = InMemoryTradeRepository()
     elif request.param=="jsonl":
-        repo = InFileTradeRepository(tmp_path / "trade_repo.jsonl")
+        repo = FileTradeRepository(tmp_path / "trade_repo.jsonl")
     trades =[
         Trade(symbol="BBB", quantity=Decimal(10.), price=Decimal(1_000.), side="BUY", timestamp=datetime(2026,2,1,13,4,56)),
         Trade(symbol="BBB", quantity=Decimal(30.), price=Decimal(1_000.), side="SELL", timestamp=datetime(2026,3,1,13,4,56)),

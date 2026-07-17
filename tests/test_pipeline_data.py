@@ -1,5 +1,5 @@
 from finlib.trade_repo import InMemoryTradeRepository
-from finlib.ohlcv_repo import InMemoryOHLCVRepo
+from finlib.ohlcv_repo import InMemoryOHLCVRepository
 from finlib import Trade
 from decimal import Decimal
 from datetime import datetime, timezone, timedelta
@@ -30,7 +30,7 @@ def test_store_market_data_ordered_output():
         data[i][1] = data[i][1] + timedelta(minutes=1)
     df = pd.DataFrame(data, columns=columns)
     df_inv = df.sort_values(by="close_time", ascending=False)
-    ohlcv_repo = InMemoryOHLCVRepo()
+    ohlcv_repo = InMemoryOHLCVRepository()
     store_market_data(ohlcv_repo, df_inv)
     df_out = ohlcv_repo.get_data("AAA")
     assert (df_out.rename(columns={"timestamp": "close_time"})==df).all().all()

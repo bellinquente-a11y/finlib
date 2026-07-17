@@ -10,7 +10,7 @@ Production-grade Python for financial data modelling.
 
 ## Design decisions
 
-- **Protocol-based repositories** — `OHLCVRepo` and `TradeRepository` are structural subtypes. Backends (in-memory vs CSV/JSONL) are swappable without touching callers.
+- **Protocol-based repositories** — `OHLCVRepository` and `TradeRepository` are structural subtypes. Backends (in-memory vs CSV/JSONL) are swappable without touching callers.
 - **mypy --strict** clean across `src/` and `tests/`.
 - **Async concurrency** — `asyncio.gather` with a rate-limiting `Semaphore`, plus exponential-backoff retry on both sync and async callables.
 - **O(1) memory streaming** — OHLCV data is consumed as a generator; no materialising full datasets before processing.
@@ -29,7 +29,7 @@ Production-grade Python for financial data modelling.
 | `analytics.py` | VWAP; uses `@retry` and `@validate_inputs` to enforce caller contracts |
 | `historic_analytics.py` | `resample_dataframe`, `add_rolling_stats` (annualised vol + Sharpe), `maximum_drawdown` |
 | `trade_repo.py` | `TradeRepository` Protocol; in-memory and JSONL-backed implementations |
-| `ohlcv_repo.py` | `OHLCVRepo` Protocol; in-memory and CSV-backed implementations |
+| `ohlcv_repo.py` | `OHLCVRepository` Protocol; in-memory and CSV-backed implementations |
 | `portfolio.py` | `PortfolioService` with injected `TradeRepository`; trade management and valuation |
 | `report.py` | `daily_trade_summary` — daily notional and trade count aggregated by symbol |
 | `config.py` | pydantic-settings config with `.env` support |

@@ -2,7 +2,7 @@
 
 from finlib import historic_analytics
 import pandas as pd
-from finlib.ohlcv_repo import OHLCVRepo
+from finlib.ohlcv_repo import OHLCVRepository
 from finlib.trade_repo import TradeRepository
 from finlib.portfolio import Portfolio
 import logging
@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 INTERVALS_PER_YEAR_DAILY = 252
 
-def compute_market_summary(ohlcv_repo: OHLCVRepo, symbols: list[str], window: int = 24) -> pd.DataFrame:
+def compute_market_summary(ohlcv_repo: OHLCVRepository, symbols: list[str], window: int = 24) -> pd.DataFrame:
     """
     Pull OHLCV data from the repo, resample to daily, and compute
     rolling statistics for each symbol.
@@ -39,7 +39,7 @@ def compute_market_summary(ohlcv_repo: OHLCVRepo, symbols: list[str], window: in
     else:
         return result
 
-def get_market_price(ohlcv_repo: OHLCVRepo, symbols: list[str], first_ts: datetime) -> pd.DataFrame:
+def get_market_price(ohlcv_repo: OHLCVRepository, symbols: list[str], first_ts: datetime) -> pd.DataFrame:
     """
     Returns a DataFrame of close prices from the OHLCV repo. 
         - index: timestamps starting from first_ts
@@ -68,7 +68,7 @@ def get_market_price(ohlcv_repo: OHLCVRepo, symbols: list[str], first_ts: dateti
         return result
 
 
-def compute_portfolio_performance_metrics(trade_repo: TradeRepository, ohlcv_repo: OHLCVRepo
+def compute_portfolio_performance_metrics(trade_repo: TradeRepository, ohlcv_repo: OHLCVRepository
     ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Returns 3 DataFrames (cumulative Pnl, market value, cost basis) associated to a trade repository by 

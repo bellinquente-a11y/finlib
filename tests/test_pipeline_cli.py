@@ -19,7 +19,7 @@ def test_main_wiring(tmp_path: Path):
     with trades_path.open("a") as f:
         f.write(trade.model_dump_json())
 
-    with (patch("finlib.ohlcv_repo.FileOHLCVRepo.__init__", return_value=None),
+    with (patch("finlib.ohlcv_repo.FileOHLCVRepository.__init__", return_value=None),
           patch("finlib.pipeline.data.fetch_trades") as mock_fetch_trades,
           patch("finlib.pipeline.data.fetch_market_data") as mock_fetch_market_data,
           patch("finlib.pipeline.data.store_market_data"),

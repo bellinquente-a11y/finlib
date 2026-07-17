@@ -39,7 +39,7 @@ class InMemoryTradeRepository:
         return symbols
 
 
-class InFileTradeRepository:
+class FileTradeRepository:
     def __init__(self, filepath: Path) -> None:
         self._filepath = filepath
         self._symbols: set[str] = set()

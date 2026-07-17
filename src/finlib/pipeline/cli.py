@@ -5,8 +5,8 @@ import asyncio
 import logging
 import argparse
 from finlib.config import get_settings
-from finlib.ohlcv_repo import FileOHLCVRepo
-from finlib.trade_repo import InFileTradeRepository
+from finlib.ohlcv_repo import FileOHLCVRepository
+from finlib.trade_repo import FileTradeRepository
 from pathlib import Path
 from datetime import timedelta
 
@@ -27,8 +27,8 @@ def main() -> None:
     logging.basicConfig(level=settings.log_level)
 
     # Create repo objects
-    trade_repo = InFileTradeRepository(Path(args.trade_repo_path))
-    mkt_repo = FileOHLCVRepo(settings.data_dir / f"mkt_data_{args.frequency}.csv")
+    trade_repo = FileTradeRepository(Path(args.trade_repo_path))
+    mkt_repo = FileOHLCVRepository(settings.data_dir / f"mkt_data_{args.frequency}.csv")
 
     # Fetch and store market data
     _, symbols, first_ts = data.fetch_trades(trade_repo)

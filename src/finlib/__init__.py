@@ -3,8 +3,8 @@ from finlib.instruments import Instrument, Equity, Future, Priceable
 from finlib.portfolio import value_portfolio, Portfolio
 from finlib.analytics import calculate_daily_vwap
 from finlib.trade_repo import PortfolioService, TradeRepository
-from finlib.trade_repo import InFileTradeRepository
-from finlib.ohlcv_repo import OHLCVRepo
+from finlib.trade_repo import FileTradeRepository
+from finlib.ohlcv_repo import OHLCVRepository
 import logging
 from finlib import pipeline
 
@@ -15,7 +15,7 @@ __all__ = ['Trade',
            'value_portfolio', 'Portfolio',
            'calculate_daily_vwap',
            'PortfolioService', 'TradeRepository',
-           'InFileTradeRepository',
-           'OHLCVRepo',
+           'FileTradeRepository',
+           'OHLCVRepository',
            'pipeline'
            ]

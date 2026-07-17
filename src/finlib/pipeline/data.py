@@ -1,6 +1,6 @@
 """Trades and market data fetching and storing"""
 
-from finlib import OHLCVRepo, Trade, TradeRepository
+from finlib import OHLCVRepository, Trade, TradeRepository
 from finlib.async_fetch import fetch_binance, binance_interval
 import logging
 import pandas as pd
@@ -42,7 +42,7 @@ async def fetch_market_data(symbols: list[str], interval: binance_interval, star
     return await fetch_binance(symbols, interval, start)
 
 
-def store_market_data(ohlcv_repo: OHLCVRepo, df: pd.DataFrame) -> None:
+def store_market_data(ohlcv_repo: OHLCVRepository, df: pd.DataFrame) -> None:
     """"Store market data in the OHLCV repository."""
     log.info("Storing market data in OHLCV repository")
     if df.shape[0]==0:
