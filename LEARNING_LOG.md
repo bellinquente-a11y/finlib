@@ -696,3 +696,30 @@ Notes on `fastapi.dependencies.utils`.
 - When to use the `operator` methods `attrgetter`, `itemgetter` and `methodcaller` in practice and whether I will forget about them
 - hot to properly log
 - general use of *fixtures*
+
+---
+
+## Week 6, day 1: 17/07
+
+### Studied
+
+- `pytest` fixtures
+- their scope: function (def); class; module; system
+- parametrizing tests via `pytest.mark.parametrize`
+- using `match` in `pytest.raises` to make sure that an error message is useful (important!) 
+
+### Built
+
+- Simplified the test suite by introducing a `conftest.py` file
+- Added new tests.
+
+### Surprises
+
+- Exception message need to be inpur as f-strings: it is a BUG to input them in logging style
+
+### Current pytest coverrage
+
+- TOTAL = 92%
+- src/finlib/async_fetch.py = 83%
+- src/finlib/ohlcv_repo.py = 85%
+- src/finlib/instruments.py = 89%
