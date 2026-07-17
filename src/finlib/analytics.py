@@ -49,5 +49,5 @@ def trade_summary(trades: list[Trade]) -> None:
         symbol_trades = trades_by_group[symbol]
         quantity = sum([trade.quantity for trade in symbol_trades])
         notional = sum([trade.notional for trade in symbol_trades])
-        print(f"{symbol}: {len(symbol_trades)} trades; quantity = {quantity}; notional = {notional}")
+        print(f"{symbol}: {len(symbol_trades)} trades; quantity = {quantity:,.2f}; notional = {notional:,.2f}")
     return
