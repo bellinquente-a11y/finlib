@@ -1,12 +1,14 @@
-from finlib.async_fetch import BinanceDataRow, fetch_binance, _fetch_binance_raw_data, _convert_binance_data_to_DataFrame, _validated_fetch_binance_one_symbol
+from finlib.async_fetch import BinanceDataRow, fetch_binance, _fetch_binance_raw_data, _convert_binance_data_to_DataFrame, _validated_fetch_binance_one_symbol, _fetch_binance_one_symbol_with_retry
+from finlib import async_fetch
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 import aiohttp
 import asyncio
 from finlib.config import get_settings
 from datetime import datetime
 from decimal import Decimal
 from structlog.testing import capture_logs
+from finlib.config import get_settings
 
 _EX_DT = datetime(2026,7,1,0,0,0)
 _EX_DEC = Decimal(103.5)
@@ -102,3 +104,54 @@ async def test_validated_fetch_binance_one_symbol_invalid_rows_count():
         with capture_logs() as logs:
             _ = await _validated_fetch_binance_one_symbol(None, "AAA", None, None, semaphore)
             assert logs[0]["invalid_rows_count"]==2
+
+async def test_validated_fetch_binance_one_symbol_invalid_rows_remaining_output():
+    semaphore = asyncio.Semaphore(1)
+    settings = get_settings()
+
+    async def malformed_rows(session, symbol, interval, limit):
+        result = [_EX_ROW, _EX_ROW[1:], _EX_ROW[1:], _EX_ROW, _EX_ROW]
+        return result
+
+    with patch('finlib.async_fetch._fetch_binance_one_symbol_with_retry', new_callable=AsyncMock) as mock:
+        mock.side_effect = malformed_rows
+        result = await _validated_fetch_binance_one_symbol(None, "AAA", None, None, semaphore)
+        assert result == 3*[BinanceDataRow(**{k: v for k, v in zip(settings.binance.columns, _EX_ROW)})]
+
+@pytest.mark.parametrize("exception", [aiohttp.ClientError, asyncio.TimeoutError])
+async def test_fetch_binance_one_symbol_with_retry_timeout_retry(exception):
+    mock_response = AsyncMock()
+    mock_response.raise_for_status = MagicMock()
+    mock_response.json = AsyncMock(return_value=[_EX_ROW])
+
+    mock_get_cm = AsyncMock()
+    mock_get_cm.__aenter__.return_value = mock_response
+
+    session = AsyncMock()
+    session.get = MagicMock(side_effect=[exception, mock_get_cm])
+
+    res = await _fetch_binance_one_symbol_with_retry(session, "SYM", "1m", 1)
+    assert res == [_EX_ROW]
+
+async def test_fetch_binance_raw_data_malformed_rows_skipped():
+
+    def make_get_cm(url, params, **kwargs):
+        rows = [_EX_ROW[1:], _EX_ROW[1:]] if params["symbol"] == "AAA" else [_EX_ROW, _EX_ROW]
+        mock_response = AsyncMock()
+        mock_response.raise_for_status = MagicMock()
+        mock_response.json = AsyncMock(return_value=rows)
+
+        mock_get_cm = AsyncMock()
+        mock_get_cm.__aenter__.return_value = mock_response
+        return mock_get_cm
+
+    session = AsyncMock()
+    session.get = MagicMock(side_effect=make_get_cm)
+
+    settings = get_settings()
+
+    with patch("finlib.async_fetch.aiohttp.ClientSession") as mock:
+        mock.return_value.__aenter__ = AsyncMock(return_value=session)
+        res = await _fetch_binance_raw_data(["AAA", "BBB"], "1m", 2)
+        assert res["AAA"] == []
+        assert res["BBB"] == 2*[BinanceDataRow(**{k: v for k, v in zip(settings.binance.columns, _EX_ROW)})]
