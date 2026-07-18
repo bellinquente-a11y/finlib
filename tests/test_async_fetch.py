@@ -1,5 +1,4 @@
 from finlib.async_fetch import BinanceDataRow, fetch_binance, _fetch_binance_raw_data, _convert_binance_data_to_DataFrame, _validated_fetch_binance_one_symbol, _fetch_binance_one_symbol_with_retry
-from finlib import async_fetch
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 import aiohttp
@@ -8,7 +7,6 @@ from finlib.config import get_settings
 from datetime import datetime
 from decimal import Decimal
 from structlog.testing import capture_logs
-from finlib.config import get_settings
 
 _EX_DT = datetime(2026,7,1,0,0,0)
 _EX_DEC = Decimal(103.5)
