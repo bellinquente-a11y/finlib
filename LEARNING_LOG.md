@@ -723,3 +723,41 @@ Notes on `fastapi.dependencies.utils`.
 - src/finlib/async_fetch.py = 83%
 - src/finlib/ohlcv_repo.py = 85%
 - src/finlib/instruments.py = 89%
+
+---
+
+## Week 6, day 2: 18/07
+
+### Mocking review in finlilb
+
+- `finlib.async_fetch`: notice that I mock my own function `finlib.async_fetch._fetch_binance_one_symbol`, where I should probably mock the interface of the library I don't own, namely `finlib.async_fetch.aiohttp.ClientSession.get`.
+
+- `finlib.pipeline.cli` mocks my own functions, but it does so for wiring.
+
+- Otehrwise, I use the repository framework to test my own code.
+
+- `autospec` is never used!!!
+
+### Test driven development (TDD)
+
+- used the TDD framework to dev `finlib.sizing.kelly_criterion`
+
+- clunky, but useful to include edge cases that I would have not considered (negative b; positivity of the result)
+
+- leads to more confidence in the result
+
+- TDD is is useful when we already know the output and edge cases; it would be wasteful in research and exploratory context
+
+### Lessons
+
+1. Mock at the interface what you do *not* own; if you own it, fake it instead.
+
+2. TDD when the interface is the hard part; test after if the exploration is the hard part.
+
+### Suprises
+
+- That TDD feels almost natural as an approach.
+
+### Still unclear
+
+- How to select in practice `mock` vs `patch`.
