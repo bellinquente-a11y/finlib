@@ -18,6 +18,7 @@ poetry.toml
 # Environment variables / secrets
 .env
 .env.*
+.envrc
 
 # macOS
 .DS_Store
@@ -49,3 +50,6 @@ nb.ipynb
 
 # Claude Code local settings
 .claude/
+
+# dev
+dev/*
