@@ -761,3 +761,39 @@ Notes on `fastapi.dependencies.utils`.
 ### Still unclear
 
 - How to select in practice `mock` vs `patch`.
+
+---
+
+## Week 6, day 3: 20/07
+
+### Focus
+
+- Deep dive into `hypothesis.strategy`
+
+- `st.builds`: build a new strategy from an existing class
+
+- `st.composite`: build a new strategy by composing exisiting strategies in a function
+
+- `settings` control the parameters of `hypothesis` tests
+
+### What I built
+
+- several `hypothesis` based tests for `portfolio` and `sizing` modules
+
+### Bugs found with the new test suite
+
+- nothing new
+
+- I noticed that the tests feeling most reliable are those that:
+  1. require less specification regarding the form the inputs
+  2. are most restrictive in terms of the requirements of the outputs
+
+### Surprises
+
+- the level of customizability of the hypothesis library
+
+### TO REMEMBER
+
+*Look for invariants to test with the `hypothesis` library*
+
+That helps finding the bug I didn't think about.
