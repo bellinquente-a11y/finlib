@@ -58,9 +58,8 @@ class FileTradeRepository:
     def get_all(self) -> list[Trade]:
         if not self._filepath.exists():
             return []
-        else:
-            with self._filepath.open() as f:
-                return [Trade.model_validate_json(line) for line in f if line.strip()]
+        with self._filepath.open() as f:
+            return [Trade.model_validate_json(line) for line in f if line.strip()]
     
     def get_by_symbol(self, symbol: str) -> list[Trade]:
         with self._filepath.open() as f:

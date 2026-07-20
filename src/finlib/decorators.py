@@ -65,8 +65,7 @@ def deprecated[F: Callable[..., Any]](func: F) -> F:
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         warnings.warn(f"Function {func.__name__} will not be supported in a future release", 
                       DeprecationWarning, stacklevel=2)
-        result = func(*args, **kwargs)
-        return result
+        return func(*args, **kwargs)
     return wrapper # type: ignore[return-value]
 
 
@@ -81,8 +80,7 @@ def async_retry[F: Callable[..., Any]](
             while count<=max_retry:
                 wait_time = delay * 2**(count-1)
                 try:
-                    result = await func(*args, **kwargs)
-                    return result
+                    return await func(*args, **kwargs)
                 except exceptions as e:
                     last_exc = e
                     log.info("Retry function call", func=func, count=count, wait=wait_time, exc=e)

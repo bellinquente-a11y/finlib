@@ -50,15 +50,13 @@ _TRADES = [
 def ohlcv_repo(request, tmp_path) -> OHLCVRepository:
     if request.param == "memory":
         return InMemoryOHLCVRepository()
-    if request.param == "csv":
-        return FileOHLCVRepository(tmp_path / "ohlcv_repo.csv")
+    return FileOHLCVRepository(tmp_path / "ohlcv_repo.csv")
 
 @pytest.fixture(params = ("memory", "jsonl"))
 def trade_repo(request, tmp_path) -> TradeRepository:
     if request.param=="memory":
         return InMemoryTradeRepository()
-    elif request.param=="jsonl":
-        return FileTradeRepository(tmp_path / "trade_repo.jsonl")
+    return FileTradeRepository(tmp_path / "trade_repo.jsonl")
 
 def test_compute_market_summary_empty_repo(ohlcv_repo: OHLCVRepository):
     columns = ["symbol", "timestamp", "open", "high", "low", "close", "volume"]

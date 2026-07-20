@@ -29,8 +29,7 @@ _int4 = OHLCVInterval(symbol="SYM2", timestamp=datetime(2026,6,4,1,2,3), open=De
 def repo(request, tmp_path) -> OHLCVRepository:
     if request.param == "memory":
         return InMemoryOHLCVRepository()
-    if request.param == "csv":
-        return FileOHLCVRepository(tmp_path / "ohlcv_repo.csv")
+    return FileOHLCVRepository(tmp_path / "ohlcv_repo.csv")
 
 def test_in_memory_repo_output(repo: OHLCVRepository):
     for i in [_int1, _int2, _int3, _int4]:

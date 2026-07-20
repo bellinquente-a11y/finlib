@@ -50,8 +50,7 @@ def compute_market_summary(ohlcv_repo: OHLCVRepository,
 
     if result.shape[0]>0:
         return result.sort_values(by="timestamp")
-    else:
-        return result
+    return result
 
 def get_market_price(ohlcv_repo: OHLCVRepository, 
                      symbols: list[str], first_ts: datetime) -> pd.DataFrame:
@@ -79,8 +78,7 @@ def get_market_price(ohlcv_repo: OHLCVRepository,
 
     if result.shape[0]>0:
         return result.sort_values(by="timestamp")
-    else:
-        return result
+    return result
 
 
 def compute_portfolio_performance_metrics(trade_repo: TradeRepository, ohlcv_repo: OHLCVRepository

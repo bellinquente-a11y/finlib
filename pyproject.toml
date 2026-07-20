@@ -62,5 +62,5 @@ select = [
   'B',        # bugbear — likely-bug patterns
   'UP',       # pyupgrade — modern syntax
   'SIM',      # simplify
-#   'RET',      # return-statement hygiene
+  'RET',      # return-statement hygiene
 ]

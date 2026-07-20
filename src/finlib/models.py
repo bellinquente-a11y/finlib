@@ -29,10 +29,9 @@ class Trade(BaseModel):
 
         if self.side == 'BUY':
             return self.quantity * self.price
-        elif self.side == 'SELL':
+        if self.side == 'SELL':
             return -1 * (self.quantity * self.price)    
-        else:
-            raise ValueError(f"Invalid side: {self.side}")
+        raise ValueError(f"Invalid side: {self.side}")
 
     def lot_size(self) -> Decimal:
         """Get the lot size of the trade"""

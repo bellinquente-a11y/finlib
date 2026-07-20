@@ -51,7 +51,7 @@ class OHLCVInterval:
                                                                    strict=True):
             if ftype is str:
                 continue
-            elif ftype is datetime:
+            if ftype is datetime:
                 data[fname] = datetime.fromisoformat(data[fname])
             elif ftype is Decimal:
                 data[fname] = Decimal(data[fname])

@@ -29,8 +29,7 @@ def calculate_vwap(bars: Generator[OHLCVBar, None, None]) -> Decimal:
         total_volume += bar.volume
     if total_volume==Decimal(0):
         raise ValueError("Missing trading volume")
-    else:
-        return Decimal(numerator/total_volume)
+    return Decimal(numerator/total_volume)
 
 
 def group_trades_by_symbol(trades: list[Trade]) -> dict[str, list[Trade]]:

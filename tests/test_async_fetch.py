@@ -91,8 +91,7 @@ async def test_fetch_binance_retry():
             count +=1
         if count<max_retry:
             raise aiohttp.ClientError
-        else:
-            return [_EX_ROW]
+        return [_EX_ROW]
 
     with patch('finlib.async_fetch._fetch_binance_one_symbol', 
                           new_callable=AsyncMock) as mock:
@@ -114,8 +113,7 @@ async def test_validated_fetch_binance_one_symbol_invalid_rows_count():
     semaphore = asyncio.Semaphore(1)
 
     async def malformed_rows(session, symbol, interval, limit):
-        result = [_EX_ROW, _EX_ROW[1:], _EX_ROW[1:], _EX_ROW, _EX_ROW]
-        return result
+        return [_EX_ROW, _EX_ROW[1:], _EX_ROW[1:], _EX_ROW, _EX_ROW]
 
     with patch('finlib.async_fetch._fetch_binance_one_symbol_with_retry', 
                           new_callable=AsyncMock) as mock:
@@ -129,8 +127,7 @@ async def test_validated_fetch_binance_one_symbol_invalid_rows_remaining_output(
     settings = get_settings()
 
     async def malformed_rows(session, symbol, interval, limit):
-        result = [_EX_ROW, _EX_ROW[1:], _EX_ROW[1:], _EX_ROW, _EX_ROW]
-        return result
+        return [_EX_ROW, _EX_ROW[1:], _EX_ROW[1:], _EX_ROW, _EX_ROW]
 
     with patch('finlib.async_fetch._fetch_binance_one_symbol_with_retry', 
                           new_callable=AsyncMock) as mock:
