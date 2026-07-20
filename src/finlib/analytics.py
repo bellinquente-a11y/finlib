@@ -39,7 +39,8 @@ def group_trades_by_symbol(trades: list[Trade]) -> dict[str, list[Trade]]:
         if not isinstance(trade, Trade):
             raise TypeError
     sorted_trades = sorted(trades, key=attrgetter("symbol"))
-    return {symbol: list(group) for symbol, group in groupby(sorted_trades, key=attrgetter("symbol"))}
+    return {symbol: list(group) 
+            for symbol, group in groupby(sorted_trades, key=attrgetter("symbol"))}
 
 def trade_summary(trades: list[Trade]) -> None:
     """"Prints a summary of a list of trades, aggregated by symbol"""
@@ -49,5 +50,6 @@ def trade_summary(trades: list[Trade]) -> None:
         symbol_trades = trades_by_group[symbol]
         quantity = sum([trade.quantity for trade in symbol_trades])
         notional = sum([trade.notional for trade in symbol_trades])
-        print(f"{symbol}: {len(symbol_trades)} trades; quantity = {quantity:,.2f}; notional = {notional:,.2f}")
+        print((f"{symbol}: {len(symbol_trades)} trades; quantity = {quantity:,.2f}; "
+               f"notional = {notional:,.2f}"))
     return

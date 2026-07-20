@@ -1,5 +1,7 @@
-from finlib.pipeline.analytics import compute_market_summary, get_market_price, compute_portfolio_performance_metrics
-from finlib.ohlcv_repo import InMemoryOHLCVRepository, OHLCVInterval, OHLCVRepository, FileOHLCVRepository
+from finlib.pipeline.analytics import compute_market_summary, get_market_price, \
+    compute_portfolio_performance_metrics
+from finlib.ohlcv_repo import InMemoryOHLCVRepository, OHLCVInterval, OHLCVRepository, \
+    FileOHLCVRepository
 from finlib.trade_repo import TradeRepository, FileTradeRepository, InMemoryTradeRepository
 from finlib import Trade
 import pandas as pd
@@ -24,17 +26,15 @@ _OHLCVINT = [
                     low=Decimal(100.8), close=Decimal(103.9), volume=Decimal(1_342)),
 ]
 
-# _TIMESTAMP1 = datetime(2026,2,1,3,0,0)
-# _TIMESTAMP2 = datetime(2026,2,4,2,9,0)
-# _TIMESTAMP3 = datetime(2026,2,6,3,5,0)
-# _TIMESTAMP4 = datetime(2026,2,8,3,44,0)
-# _TIMESTAMP5 = datetime(2026,2,11,3,33,0)
 _TRADES = [
-    Trade(symbol="BHP", quantity=Decimal(100), price=Decimal(45.), side="BUY", timestamp=_TIMESTAMP1),
-    Trade(symbol="BHP", quantity=Decimal(40), price=Decimal(48.), side="SELL", timestamp=_TIMESTAMP3),
-# _TRADE3 = Trade(symbol="BHP", quantity=Decimal(90), price=Decimal(52.), side="SELL", timestamp=_TIMESTAMP5)
-    Trade(symbol="AAA", quantity=Decimal(100), price=Decimal(12.), side="SELL", timestamp=_TIMESTAMP2),
-    Trade(symbol="AAA", quantity=Decimal(100), price=Decimal(19.), side="SELL", timestamp=_TIMESTAMP4),
+    Trade(symbol="BHP", quantity=Decimal(100), price=Decimal(45.), 
+          side="BUY", timestamp=_TIMESTAMP1),
+    Trade(symbol="BHP", quantity=Decimal(40), price=Decimal(48.), 
+          side="SELL", timestamp=_TIMESTAMP3),
+    Trade(symbol="AAA", quantity=Decimal(100), price=Decimal(12.), 
+          side="SELL", timestamp=_TIMESTAMP2),
+    Trade(symbol="AAA", quantity=Decimal(100), price=Decimal(19.), 
+          side="SELL", timestamp=_TIMESTAMP4),
 ]
 
 @pytest.fixture(params=["memory", "csv"])
@@ -53,7 +53,8 @@ def trade_repo(request, tmp_path) -> TradeRepository:
 
 def test_compute_market_summary_empty_repo(ohlcv_repo: OHLCVRepository):
     columns = ["symbol", "timestamp", "open", "high", "low", "close", "volume"]
-    df = pd.DataFrame([["AAA", datetime(2026,2,1,13,4,10), *[Decimal(100.) for _ in range(5)]]], columns=columns)
+    df = pd.DataFrame([["AAA", datetime(2026,2,1,13,4,10), *[Decimal(100.) for _ in range(5)]]], 
+                      columns=columns)
     ohlcv_repo.add_intervals_batch(df)
     df = compute_market_summary(ohlcv_repo, ["CCC", "BBB"])
     assert (df == pd.DataFrame()).all().all()
@@ -67,7 +68,8 @@ def test_compute_market_summary_rolling_sharpe(ohlcv_repo: OHLCVRepository):
     df = pd.DataFrame(data, columns=columns)
     ohlcv_repo.add_intervals_batch(df)
     result = compute_market_summary(ohlcv_repo, ["AAA"], window)
-    assert (result["rolling_sharpe"].iloc[:window].isna().all()) and (result["rolling_sharpe"].iloc[window:].notna().all())
+    assert (result["rolling_sharpe"].iloc[:window].isna().all()) and \
+        (result["rolling_sharpe"].iloc[window:].notna().all())
 
 def test_get_market_price_calculation(ohlcv_repo: OHLCVRepository):
     for oint in _OHLCVINT:
@@ -85,7 +87,8 @@ def test_get_market_price_calculation(ohlcv_repo: OHLCVRepository):
     assert (df.isna()==exp_df.isna()).all().all()
     assert (df.fillna(Decimal(0)) == exp_df.fillna(Decimal(0))).all().all()
 
-def test_compute_portfolio_performance_metrics(ohlcv_repo: OHLCVRepository, trade_repo: TradeRepository):
+def test_compute_portfolio_performance_metrics(ohlcv_repo: OHLCVRepository, 
+                                               trade_repo: TradeRepository):
     for oint in _OHLCVINT:
         ohlcv_repo.add_interval(oint)
     for t in _TRADES:

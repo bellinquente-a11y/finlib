@@ -18,7 +18,9 @@ class OHLCVBar:
     volume: Decimal
 
     def __repr__(self) -> str:
-        return f"OHLCVBar(symbol={self.symbol!r}, timestamp={self.timestamp!r}, open={self.open!r}, high={self.high!r}, low={self.low!r}, close={self.close!r}, volume={self.volume!r})"
+        return (f"OHLCVBar(symbol={self.symbol!r}, timestamp={self.timestamp!r}, "
+        f"open={self.open!r}, high={self.high!r}, low={self.low!r}, close={self.close!r}, "
+        f"volume={self.volume!r})")
 
 def stream_ohlcv(path: Path, min_volume: int = 0) -> Generator[OHLCVBar, None, None]:
     """Stream OHLCV bars from a CSV file"""
@@ -41,7 +43,8 @@ def stream_ohlcv(path: Path, min_volume: int = 0) -> Generator[OHLCVBar, None, N
             if bar.volume >= min_volume:
                 yield bar
 
-def stream_trades(path: Path, timestamp_format: str = '%Y-%m-%dT%H:%M:%S') -> Generator[Trade, None, None]:
+def stream_trades(path: Path, 
+                  timestamp_format: str = '%Y-%m-%dT%H:%M:%S') -> Generator[Trade, None, None]:
     """Stream trades from a CSV file"""
 
     if not path.is_file():

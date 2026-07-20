@@ -56,8 +56,13 @@ class OHLCVInterval:
 
 class OHLCVRepository(Protocol):
     def add_interval(self, data: OHLCVInterval) -> None: ...
-    def add_intervals_batch(self, data: pd.DataFrame, columns_map: dict[str, str] | None=None) -> None: ...
-    def get_data(self, symbol: str, start: datetime | None = None, end: datetime | None = None) -> pd.DataFrame: ...
+    def add_intervals_batch(self, 
+                            data: pd.DataFrame, 
+                            columns_map: dict[str, str] | None=None) -> None: ...
+    def get_data(self, 
+                 symbol: str, 
+                 start: datetime | None = None, 
+                 end: datetime | None = None) -> pd.DataFrame: ...
 
 class InMemoryOHLCVRepository:
     def __init__(self) -> None:
@@ -67,7 +72,9 @@ class InMemoryOHLCVRepository:
     def add_interval(self, data: OHLCVInterval) -> None:
         self._data.append(data)
 
-    def add_intervals_batch(self, df: pd.DataFrame, columns_map: dict[str, str] | None = None) -> None:
+    def add_intervals_batch(self, 
+                            df: pd.DataFrame, 
+                            columns_map: dict[str, str] | None = None) -> None:
         if columns_map is not None:
             df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
         if not (set(df.columns) <= set(self._fieldnames)):
@@ -87,13 +94,17 @@ class InMemoryOHLCVRepository:
                 count+=1
         log.info("Added rows to trade repo", count=count)
 
-    def get_data(self, symbol: str, start: datetime | None = None, end: datetime | None = None) -> pd.DataFrame:
+    def get_data(self, 
+                 symbol: str, 
+                 start: datetime | None = None, 
+                 end: datetime | None = None) -> pd.DataFrame:
         filtered_data = filter(lambda b: b.symbol==symbol, self._data)
         if start is not None:
             filtered_data = filter(lambda b: b.timestamp>=start, filtered_data)
         if end is not None:
             filtered_data = filter(lambda b: b.timestamp<=end, filtered_data)
-        return pd.DataFrame([[getattr(i, f) for f in self._fieldnames] for i in filtered_data], columns=self._fieldnames).sort_values(["timestamp", "symbol"])
+        return pd.DataFrame([[getattr(i, f) for f in self._fieldnames] for i in filtered_data], 
+                            columns=self._fieldnames).sort_values(["timestamp", "symbol"])
 
     def _get_last_timestamps(self) -> dict[str, datetime]:
         res: dict[str, datetime] = {}
@@ -122,7 +133,9 @@ class FileOHLCVRepository:
         with self._filepath.open("a") as f:
             f.write(data.to_string() + "\n")
 
-    def add_intervals_batch(self, df: pd.DataFrame, columns_map: dict[str, str] | None = None) -> None:
+    def add_intervals_batch(self, 
+                            df: pd.DataFrame, 
+                            columns_map: dict[str, str] | None = None) -> None:
         if columns_map is not None:
             df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
         if not (set(df.columns) <= set(self._fieldnames)):
@@ -147,7 +160,10 @@ class FileOHLCVRepository:
 
         log.info("Added rows to trade repo", count=count)
 
-    def get_data(self, symbol: str, start: datetime | None = None, end: datetime | None = None) -> pd.DataFrame:
+    def get_data(self, 
+                 symbol: str, 
+                 start: datetime | None = None, 
+                 end: datetime | None = None) -> pd.DataFrame:
         data = []
         with self._filepath.open() as f:
             for i, row in enumerate(f):
@@ -180,7 +196,9 @@ class FileOHLCVRepository:
         return res
 
 
-def _reformat_dataframe_for_batch_input(df: pd.DataFrame, repo_field_names: list[str], columns_map: dict[str, str]) -> pd.DataFrame:
+def _reformat_dataframe_for_batch_input(df: pd.DataFrame, 
+                                        repo_field_names: list[str], 
+                                        columns_map: dict[str, str]) -> pd.DataFrame:
     """Rename columns of the input dataframe to match repo expectations"""
     # Validate column_map
     if not set(columns_map.keys()) <= set(df.columns):

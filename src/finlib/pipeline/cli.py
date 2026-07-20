@@ -18,7 +18,8 @@ def main() -> None:
     then prints a market summary and portfolio performance tables (market value,
     cost basis, cumulative PnL) to stdout.
     """
-    parser = argparse.ArgumentParser(description="Fetch and analyse trades and market data from Binance")
+    parser = argparse.ArgumentParser(description="Fetch and analyse trades and market data \
+        from Binance")
     parser.add_argument("trade_repo_path", help="Path of the JSONL trade repo")
     parser.add_argument("frequency", type=str, help="Market data quantisation frequency")
     args = parser.parse_args()
@@ -32,7 +33,9 @@ def main() -> None:
 
     # Fetch and store market data
     _, symbols, first_ts = data.fetch_trades(trade_repo)
-    mkt_df = asyncio.run(data.fetch_market_data(symbols, args.frequency, first_ts-timedelta(days=1)))
+    mkt_df = asyncio.run(data.fetch_market_data(symbols, 
+                                                args.frequency, 
+                                                first_ts-timedelta(days=1)))
     data.store_market_data(mkt_repo, mkt_df)
 
     # Compute market data analytics
@@ -48,7 +51,8 @@ def main() -> None:
     output.print_market_summary(market_summary, cols, formatters)
 
     # Compute cumulative PnL of the portfolio
-    cumpnl, market_value, cost_basis = analytics.compute_portfolio_performance_metrics(trade_repo, mkt_repo)
+    cumpnl, market_value, cost_basis = analytics.compute_portfolio_performance_metrics(trade_repo, 
+                                                                                       mkt_repo)
 
     print("\n")
     print("Market value")

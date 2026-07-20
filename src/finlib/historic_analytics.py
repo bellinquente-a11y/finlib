@@ -26,8 +26,15 @@ def add_rolling_stats(df: pd.DataFrame, intervals_per_year: int, window: int) ->
             returns=lambda d: d["close"].pct_change()
         )
         .assign(
-            rolling_vol= lambda d: (intervals_per_year**0.5)*d["returns"].rolling(window=window).std(),
-            rolling_sharpe= lambda d: (intervals_per_year**0.5)*d["returns"].rolling(window=window).mean()/d["returns"].rolling(window=window).std(),
+            rolling_vol= lambda d: (intervals_per_year**0.5)*(d["returns"]
+                                                              .rolling(window=window)
+                                                              .std()),
+            rolling_sharpe= lambda d: (intervals_per_year**0.5)*(d["returns"]
+                                                                 .rolling(window=window)
+                                                                 .mean()) / 
+                                                                 (d["returns"]
+                                                                 .rolling(window=window)
+                                                                 .std()),
         )
     )
 

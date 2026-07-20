@@ -10,7 +10,9 @@ class TradeRepository(Protocol):
     def add(self, trade: Trade) -> None: ...
     def get_all(self) -> list[Trade]: ...
     def get_by_symbol(self, symbol: str) -> list[Trade]: ...
-    def get_extreme_timestamps(self, symbol: str | None = None) -> tuple[datetime | None, datetime | None]: ...
+    def get_extreme_timestamps(self, 
+                               symbol: str | None = None) \
+                                -> tuple[datetime | None, datetime | None]: ...
     def get_all_symbols(self) -> set[str]: ...
 
 class InMemoryTradeRepository:
@@ -26,7 +28,9 @@ class InMemoryTradeRepository:
     def get_by_symbol(self, symbol: str) -> list[Trade]:
         return [*filter(lambda t: t.symbol==symbol, self._trades)]
 
-    def get_extreme_timestamps(self, symbol: str | None = None) -> tuple[datetime | None, datetime | None]:
+    def get_extreme_timestamps(self, 
+                               symbol: str | None = None) \
+                                -> tuple[datetime | None, datetime | None]:
         trades: Iterator[Trade] = (t for t in self._trades) 
         if symbol is not None:
             trades = filter(lambda t: t.symbol==symbol, trades)
@@ -61,9 +65,12 @@ class FileTradeRepository:
             all_trades = (Trade.model_validate_json(line) for line in f if line.strip())
             return [*filter(lambda t: t.symbol==symbol, all_trades)]    
 
-    def get_extreme_timestamps(self, symbol: str | None = None) -> tuple[datetime | None, datetime | None]:
+    def get_extreme_timestamps(self, 
+                               symbol: str | None = None) \
+                                -> tuple[datetime | None, datetime | None]:
         with self._filepath.open() as f:
-            trades: Iterator[Trade] = (Trade.model_validate_json(line) for line in f if line.strip())
+            trades: Iterator[Trade] = (Trade.model_validate_json(line) 
+                                       for line in f if line.strip())
             if symbol is not None:
                 trades = filter(lambda t: t.symbol==symbol, trades)
             return _get_extreme_timestamps(trades)

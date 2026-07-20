@@ -6,9 +6,12 @@ def test_trade_repo_get_symbols(tmp_trade_repo: TradeRepository):
     assert tmp_trade_repo.get_all_symbols() == {"AAA", "BBB"}    
 
 def test_trade_repo_get_timestamp(tmp_trade_repo: TradeRepository):
-    assert tmp_trade_repo.get_extreme_timestamps() == (datetime(2026,2,1,13,4,56), datetime(2026,4,1,13,4,56))
-    assert tmp_trade_repo.get_extreme_timestamps("AAA") == (datetime(2026,4,1,13,4,56), datetime(2026,4,1,13,4,56))
-    assert tmp_trade_repo.get_extreme_timestamps("BBB") == (datetime(2026,2,1,13,4,56), datetime(2026,3,1,13,4,56))
+    assert tmp_trade_repo.get_extreme_timestamps() == (datetime(2026,2,1,13,4,56), 
+                                                       datetime(2026,4,1,13,4,56))
+    assert tmp_trade_repo.get_extreme_timestamps("AAA") == (datetime(2026,4,1,13,4,56), 
+                                                            datetime(2026,4,1,13,4,56))
+    assert tmp_trade_repo.get_extreme_timestamps("BBB") == (datetime(2026,2,1,13,4,56), 
+                                                            datetime(2026,3,1,13,4,56))
 
 def test_portfolio_service_position_calculation(tmp_trade_repo: TradeRepository):
     ps = PortfolioService(tmp_trade_repo)

@@ -29,7 +29,11 @@ async def main(filepath: str) -> None:
     log.info("Extract market data from repo")
     mdata = pd.DataFrame()
     for s in symbols:
-        new_df = repo.get_data(s, start=datetime.now(tz=timezone.utc)-timedelta(days=10)).sort_values("timestamp")
+        new_df = (
+            repo
+            .get_data(s, start=datetime.now(tz=timezone.utc)-timedelta(days=10))
+            .sort_values("timestamp")
+        )
         new_df = add_rolling_stats(new_df, 24*252, 24*5)
         mdata = pd.concat((mdata, new_df), axis=0)
 

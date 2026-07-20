@@ -27,7 +27,9 @@ def fetch_trades(trade_repo: TradeRepository) -> tuple[list[Trade], list[str], d
     return trades, list(symbols), first_ts
 
 
-async def fetch_market_data(symbols: list[str], interval: binance_interval, start: datetime) -> pd.DataFrame:
+async def fetch_market_data(symbols: list[str], 
+                            interval: binance_interval, 
+                            start: datetime) -> pd.DataFrame:
     """Fetch OHLCV market data from Binance for the given symbols.
 
     Args:

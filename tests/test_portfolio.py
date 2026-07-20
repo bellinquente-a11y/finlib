@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from datetime import datetime
 from hypothesis import given
-from tests.strategies import trade_strategy, ordered_trades_list
+from tests.strategies import ordered_trades_list
 from itertools import groupby
 import random
 
@@ -28,7 +28,8 @@ def test_portfolio_hypothesis_len(trades):
     portfolio = Portfolio(name="MyPortfolio", trades=trades)
     assert len(portfolio)==len(trades)
 
-@pytest.mark.parametrize("symbol,expected", [("BBB", True), ("CBA", False)], ids=["present", "missing"])
+@pytest.mark.parametrize("symbol,expected", [("BBB", True), ("CBA", False)], 
+                         ids=["present", "missing"])
 def test_portfolio_contains(sample_portfolio, symbol, expected):
     assert (symbol in sample_portfolio) == expected
 
@@ -130,14 +131,17 @@ def test_historic_pnl_calculation(sample_historic_portfolio, sample_market_makin
             [Decimal(13.3)*Decimal(-100)-Decimal(12.)*Decimal(-100), 
              Decimal(52.4)*Decimal(60)-Decimal(45.)*Decimal(100)-Decimal(48)*Decimal(-40)],
             [Decimal(14.3)*Decimal(-200)-Decimal(12.)*Decimal(-100)-Decimal(19.)*Decimal(-100), 
-             Decimal(53.4)*Decimal(-30)-Decimal(45.)*Decimal(100)-Decimal(48)*Decimal(-40)-Decimal(52)*Decimal(-90)],
+             Decimal(53.4)*Decimal(-30)-Decimal(45.)*Decimal(100)-
+             Decimal(48)*Decimal(-40)-Decimal(52)*Decimal(-90)],
         ],
         columns = ["AAA", "BHP"],
         index = sample_market_making_prices.index
     )
     assert (pnl == exp_pnl).all().all()
 
-def test_historic_market_value_missing_symbol(sample_historic_portfolio, sample_market_making_prices):
-    sample_historic_portfolio.trades.append(Trade(symbol="ZZZ", quantity=10., price=10., side="BUY", timestamp=datetime(2026,2,1,13,4,56)))
+def test_historic_market_value_missing_symbol(sample_historic_portfolio, 
+                                              sample_market_making_prices):
+    sample_historic_portfolio.trades.append(Trade(symbol="ZZZ", quantity=10., price=10., 
+                                                  side="BUY", timestamp=datetime(2026,2,1,13,4,56)))
     with pytest.raises(ValueError, match="price missing for: ZZZ"):
         _ = sample_historic_portfolio.historic_market_value(sample_market_making_prices)

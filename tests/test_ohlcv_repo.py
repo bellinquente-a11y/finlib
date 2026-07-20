@@ -1,18 +1,23 @@
 from decimal import Decimal
-from finlib.ohlcv_repo import OHLCVInterval, OHLCVRepository, InMemoryOHLCVRepository, FileOHLCVRepository
+from finlib.ohlcv_repo import OHLCVInterval, OHLCVRepository, InMemoryOHLCVRepository, \
+    FileOHLCVRepository
 from datetime import datetime
 import pandas as pd
 import dataclasses
 import pytest
 
-_int1 = OHLCVInterval(symbol="SYM1", timestamp=datetime(2026,6,1,1,2,3), open=Decimal(101.2), high=Decimal(102.4), 
+_int1 = OHLCVInterval(symbol="SYM1", timestamp=datetime(2026,6,1,1,2,3), open=Decimal(101.2), 
+                      high=Decimal(102.4), low=Decimal(100.8), close=Decimal(100.9), 
+                      volume=Decimal(1_342))
+_int2 = OHLCVInterval(symbol="SYM1", timestamp=datetime(2026,6,2,1,2,3), open=Decimal(101.2), 
+                      high=Decimal(102.4), 
                       low=Decimal(100.8), close=Decimal(100.9), volume=Decimal(1_342))
-_int2 = OHLCVInterval(symbol="SYM1", timestamp=datetime(2026,6,2,1,2,3), open=Decimal(101.2), high=Decimal(102.4), 
-                      low=Decimal(100.8), close=Decimal(100.9), volume=Decimal(1_342))
-_int3 = OHLCVInterval(symbol="SYM1", timestamp=datetime(2026,6,3,1,2,3), open=Decimal(101.2), high=Decimal(102.4), 
-                      low=Decimal(100.8), close=Decimal(100.9), volume=Decimal(1_342))
-_int4 = OHLCVInterval(symbol="SYM2", timestamp=datetime(2026,6,4,1,2,3), open=Decimal(101.2), high=Decimal(102.4), 
-                      low=Decimal(100.8), close=Decimal(100.9), volume=Decimal(1_342))
+_int3 = OHLCVInterval(symbol="SYM1", timestamp=datetime(2026,6,3,1,2,3), open=Decimal(101.2), 
+                      high=Decimal(102.4), low=Decimal(100.8), close=Decimal(100.9), 
+                      volume=Decimal(1_342))
+_int4 = OHLCVInterval(symbol="SYM2", timestamp=datetime(2026,6,4,1,2,3), open=Decimal(101.2), 
+                      high=Decimal(102.4), low=Decimal(100.8), close=Decimal(100.9), 
+                      volume=Decimal(1_342))
 
 @pytest.fixture(params=["memory", "csv"])
 def repo(request, tmp_path) -> OHLCVRepository:
@@ -26,7 +31,8 @@ def test_in_memory_repo_output(repo: OHLCVRepository):
         repo.add_interval(i)
     df = repo.get_data("SYM1", datetime(2026,6,2,0,0,0), datetime(2026,6,2,23,59,59))
     fieldnames = [f.name for f in dataclasses.fields(OHLCVInterval)]
-    assert (df == pd.DataFrame([[getattr(_int2, f) for f in fieldnames]], columns=fieldnames)).all().all()
+    assert (df == pd.DataFrame([[getattr(_int2, f) for f in fieldnames]], 
+                               columns=fieldnames)).all().all()
 
 def test_in_memory_repo_add_batch(repo: OHLCVRepository):
     _intervals = [_int1, _int2, _int3, _int4]

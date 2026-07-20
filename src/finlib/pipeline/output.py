@@ -3,7 +3,9 @@
 import pandas as pd
 from typing import Callable
 
-def print_market_summary(market_summary: pd.DataFrame, columns: list[str], formatters: dict[str, Callable[..., str]]) -> None:
+def print_market_summary(market_summary: pd.DataFrame, 
+                         columns: list[str], 
+                         formatters: dict[str, Callable[..., str]]) -> None:
     """Print the last 10 rows of the market summary table to stdout.
 
     Args:

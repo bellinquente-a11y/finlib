@@ -56,7 +56,9 @@ def _close_df(closes):
     return pd.DataFrame({"close": closes})
 
 def test_rolling_stats_adds_columns():
-    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0, 109.0]), intervals_per_year=252, window=2)
+    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0, 109.0]), 
+                                          intervals_per_year=252, 
+                                          window=2)
     assert {"returns", "rolling_vol", "rolling_sharpe"}.issubset(result.columns)
 
 def test_rolling_stats_preserves_original_columns():
@@ -67,7 +69,9 @@ def test_rolling_stats_preserves_original_columns():
     assert "extra" in result.columns
 
 def test_rolling_stats_returns_values():
-    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0]), intervals_per_year=4, window=2)
+    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0]), 
+                                          intervals_per_year=4, 
+                                          window=2)
     assert pd.isna(result["returns"].iloc[0])
     assert result["returns"].iloc[1] == pytest.approx(0.1)
     assert result["returns"].iloc[2] == pytest.approx(-0.1)
@@ -84,7 +88,9 @@ def test_rolling_stats_sharpe_zero_when_mean_return_zero():
     assert result["rolling_sharpe"].iloc[2] == pytest.approx(0.0)
 
 def test_rolling_stats_first_rows_are_nan():
-    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0, 109.0]), intervals_per_year=252, window=3)
+    result = add_rolling_stats(_close_df([100.0, 110.0, 99.0, 109.0]), 
+                                          intervals_per_year=252, 
+                                          window=3)
     assert pd.isna(result["rolling_vol"].iloc[0])
     assert pd.isna(result["rolling_vol"].iloc[1])
 

@@ -1,4 +1,6 @@
-from finlib.async_fetch import BinanceDataRow, fetch_binance, _fetch_binance_raw_data, _convert_binance_data_to_DataFrame, _validated_fetch_binance_one_symbol, _fetch_binance_one_symbol_with_retry
+from finlib.async_fetch import BinanceDataRow, fetch_binance, _fetch_binance_raw_data, \
+    _convert_binance_data_to_DataFrame, _validated_fetch_binance_one_symbol, \
+        _fetch_binance_one_symbol_with_retry
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 import aiohttp
@@ -13,7 +15,8 @@ _EX_DEC = Decimal(103.5)
 _EX_INT = 1214
 _EX_STR = "0"
 
-_EX_ROW = [_EX_DT, _EX_DEC, _EX_DEC, _EX_DEC, _EX_DEC, _EX_DEC, _EX_DT, _EX_DEC, _EX_INT, _EX_DEC, _EX_DEC, _EX_STR]
+_EX_ROW = [_EX_DT, _EX_DEC, _EX_DEC, _EX_DEC, _EX_DEC, _EX_DEC, 
+           _EX_DT, _EX_DEC, _EX_INT, _EX_DEC, _EX_DEC, _EX_STR]
 
 async def test_stream_binance_data_interval():
     with pytest.raises(ValueError):
@@ -24,19 +27,23 @@ async def test_stream_binance_data_symbol_type():
         _ = await fetch_binance("BTCUSDT", "1m", _EX_DT)
 
 async def test_fetch_binance_data_happy_path():
-    with patch('finlib.async_fetch._fetch_binance_one_symbol', new_callable=AsyncMock) as mock:
+    with patch('finlib.async_fetch._fetch_binance_one_symbol', 
+                          new_callable=AsyncMock) as mock:
         mock.return_value = [_EX_ROW]
         result = await _fetch_binance_raw_data(['SYM'], "1m", 1)
-    assert (len(result["SYM"])==1) and (result["SYM"] is not None) and (result['SYM'][0].open_time == _EX_DT)
+    assert (len(result["SYM"])==1) and (result["SYM"] is not None) \
+        and (result['SYM'][0].open_time == _EX_DT)
 
 async def test_fetch_binance_data_malformed_data():
-    with patch('finlib.async_fetch._fetch_binance_one_symbol', new_callable=AsyncMock) as mock:
+    with patch('finlib.async_fetch._fetch_binance_one_symbol', 
+                          new_callable=AsyncMock) as mock:
         mock.return_value = [_EX_ROW, _EX_ROW[1:]]
         result = await _fetch_binance_raw_data(['SYM'], "1m", 2)
     assert (len(result["SYM"])==1) and (result['SYM'][0].open_time == _EX_DT)
 
 async def test_fetch_binance_data_client_response_error():
-    with patch('finlib.async_fetch._fetch_binance_one_symbol', new_callable=AsyncMock) as mock:
+    with patch('finlib.async_fetch._fetch_binance_one_symbol', 
+                          new_callable=AsyncMock) as mock:
         mock.side_effect = aiohttp.client_exceptions.ClientResponseError("x", "y")
         result = await _fetch_binance_raw_data(['SYM'], "1m",1)
     assert result["SYM"] is None
@@ -58,7 +65,8 @@ async def test_fetch_binance_semaphore():
             active_count-=1
         return [_EX_ROW]
 
-    with patch('finlib.async_fetch._fetch_binance_one_symbol', new_callable=AsyncMock) as mock:
+    with patch('finlib.async_fetch._fetch_binance_one_symbol', 
+                          new_callable=AsyncMock) as mock:
         mock.side_effect = slow_fetch
         ten_symbols = [f"SYM{n}" for n in range(10)]
         _ = await _fetch_binance_raw_data(ten_symbols, "1m", 1)
@@ -79,15 +87,18 @@ async def test_fetch_binance_retry():
         else:
             return [_EX_ROW]
 
-    with patch('finlib.async_fetch._fetch_binance_one_symbol', new_callable=AsyncMock) as mock:
+    with patch('finlib.async_fetch._fetch_binance_one_symbol', 
+                          new_callable=AsyncMock) as mock:
         mock.side_effect = retry_fetch
         _ = await _fetch_binance_raw_data(["SYM"], "1m", 1)
     assert count==max_retry
 
 
 def test_convert_binance_data_to_DataFrame_symbol_data_missing():
-    brow = BinanceDataRow(**{k:v for k,v in zip(BinanceDataRow.model_fields, _EX_ROW)})
-    assert (_convert_binance_data_to_DataFrame({"SYM1": [brow], "SYM2": None}) == _convert_binance_data_to_DataFrame({"SYM1": [brow]})).all().all()
+    brow = BinanceDataRow(**{k:v for k,v 
+                             in zip(BinanceDataRow.model_fields, _EX_ROW)})
+    assert (_convert_binance_data_to_DataFrame({"SYM1": [brow], "SYM2": None}) == 
+            _convert_binance_data_to_DataFrame({"SYM1": [brow]})).all().all()
 
 
 async def test_validated_fetch_binance_one_symbol_invalid_rows_count():
@@ -97,7 +108,8 @@ async def test_validated_fetch_binance_one_symbol_invalid_rows_count():
         result = [_EX_ROW, _EX_ROW[1:], _EX_ROW[1:], _EX_ROW, _EX_ROW]
         return result
 
-    with patch('finlib.async_fetch._fetch_binance_one_symbol_with_retry', new_callable=AsyncMock) as mock:
+    with patch('finlib.async_fetch._fetch_binance_one_symbol_with_retry', 
+                          new_callable=AsyncMock) as mock:
         mock.side_effect = malformed_rows
         with capture_logs() as logs:
             _ = await _validated_fetch_binance_one_symbol(None, "AAA", None, None, semaphore)
@@ -111,10 +123,13 @@ async def test_validated_fetch_binance_one_symbol_invalid_rows_remaining_output(
         result = [_EX_ROW, _EX_ROW[1:], _EX_ROW[1:], _EX_ROW, _EX_ROW]
         return result
 
-    with patch('finlib.async_fetch._fetch_binance_one_symbol_with_retry', new_callable=AsyncMock) as mock:
+    with patch('finlib.async_fetch._fetch_binance_one_symbol_with_retry', 
+                          new_callable=AsyncMock) as mock:
         mock.side_effect = malformed_rows
         result = await _validated_fetch_binance_one_symbol(None, "AAA", None, None, semaphore)
-        assert result == 3*[BinanceDataRow(**{k: v for k, v in zip(settings.binance.columns, _EX_ROW)})]
+        assert result == 3*[BinanceDataRow(**{k: v for k, v 
+                                              in zip(settings.binance.columns, 
+                                                                      _EX_ROW)})]
 
 @pytest.mark.parametrize("exception", [aiohttp.ClientError, asyncio.TimeoutError])
 async def test_fetch_binance_one_symbol_with_retry_timeout_retry(exception):
@@ -152,4 +167,6 @@ async def test_fetch_binance_raw_data_malformed_rows_skipped():
         mock.return_value.__aenter__ = AsyncMock(return_value=session)
         res = await _fetch_binance_raw_data(["AAA", "BBB"], "1m", 2)
         assert res["AAA"] == []
-        assert res["BBB"] == 2*[BinanceDataRow(**{k: v for k, v in zip(settings.binance.columns, _EX_ROW)})]
+        assert res["BBB"] == 2*[BinanceDataRow(**{k: v for k, v 
+                                                  in zip(settings.binance.columns, 
+                                                                          _EX_ROW)})]

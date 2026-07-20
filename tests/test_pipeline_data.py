@@ -13,7 +13,8 @@ def test_fetch_trades_output():
     repo.add(Trade(symbol="AAA", quantity=Decimal(10.), price=Decimal(105.), side="BUY"))
     repo.add(Trade(symbol="BBB", quantity=Decimal(10.), price=Decimal(105.), side="BUY"))
     repo.add(Trade(symbol="AAA", quantity=Decimal(10.), price=Decimal(105.), side="BUY"))
-    repo.add(Trade(symbol="AAA", quantity=Decimal(10.), price=Decimal(105.), side="BUY", timestamp=ts))
+    repo.add(Trade(symbol="AAA", quantity=Decimal(10.), price=Decimal(105.), side="BUY", 
+                   timestamp=ts))
     repo.add(Trade(symbol="CCC", quantity=Decimal(10.), price=Decimal(105.), side="BUY"))
     trades, symbols, first_dt = fetch_trades(repo)
     assert len(trades)==5 and len(symbols)==3 and first_dt==ts

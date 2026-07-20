@@ -37,7 +37,8 @@ class Trade(BaseModel):
         return self.quantity if self.side == 'BUY' else -1 * self.quantity
 
     def __str__(self) -> str:
-        return f"Trade(symbol={self.symbol!r}, quantity={self.quantity!r}, price={self.price!r}, side={self.side!r}, timestamp={self.timestamp!r})"
+        return (f"Trade(symbol={self.symbol!r}, quantity={self.quantity!r}, "
+                f"price={self.price!r}, side={self.side!r}, timestamp={self.timestamp!r})")
 
 @runtime_checkable
 class Tradeable(Protocol):

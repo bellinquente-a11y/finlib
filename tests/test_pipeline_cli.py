@@ -19,12 +19,18 @@ def test_main_wiring(tmp_path: Path):
     with trades_path.open("a") as f:
         f.write(trade.model_dump_json())
 
-    with (patch("finlib.ohlcv_repo.FileOHLCVRepository.__init__", return_value=None),
-          patch("finlib.pipeline.data.fetch_trades") as mock_fetch_trades,
-          patch("finlib.pipeline.data.fetch_market_data") as mock_fetch_market_data,
+    with (patch("finlib.ohlcv_repo.FileOHLCVRepository.__init__",
+        return_value=None),
+          patch("finlib.pipeline.data.fetch_trades")
+            as mock_fetch_trades,
+          patch("finlib.pipeline.data.fetch_market_data")
+            as mock_fetch_market_data,
           patch("finlib.pipeline.data.store_market_data"),
-          patch("finlib.pipeline.analytics.compute_market_summary", return_value = summary),
-          patch("finlib.pipeline.analytics.compute_portfolio_performance_metrics", return_value = (pnl, pnl, pnl)),
+          patch("finlib.pipeline.analytics.compute_market_summary",
+            return_value = summary),
+          patch(
+            "finlib.pipeline.analytics.compute_portfolio_performance_metrics",
+            return_value = (pnl, pnl, pnl)),
           patch("sys.argv", ["cli", str(trades_path), "1h"])
           ):
         mock_fetch_trades.return_value = (5*[trade], ["AAA"], ts)
