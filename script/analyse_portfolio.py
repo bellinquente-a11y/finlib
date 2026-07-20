@@ -1,10 +1,11 @@
 import logging
 import sys
-from pathlib import Path
 from decimal import Decimal
+from pathlib import Path
+
 from finlib import Equity, value_portfolio
-from finlib.data import stream_ohlcv, stream_trades
 from finlib.context_managers import timer
+from finlib.data import stream_ohlcv, stream_trades
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

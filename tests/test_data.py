@@ -1,6 +1,9 @@
-import pytest
-from finlib.data import stream_ohlcv, stream_trades
 from pathlib import Path
+
+import pytest
+
+from finlib.data import stream_ohlcv, stream_trades
+
 
 def test_stream_ohlcv_non_existing_path():
     bars = (bar for bar in stream_ohlcv(Path("aaxsad")))

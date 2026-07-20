@@ -1,14 +1,16 @@
 import asyncio
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
+from typing import Any, Literal, TypeAlias, get_args
+
 import aiohttp
-from pydantic import BaseModel, Field, ValidationError
+import pandas as pd
 import structlog
-from typing import Literal, TypeAlias, get_args, Any
+from dateutil.parser import parse
+from pydantic import BaseModel, Field, ValidationError
+
 from finlib.config import get_settings
 from finlib.decorators import async_retry
-from datetime import datetime, timedelta, timezone
-import pandas as pd
-from decimal import Decimal
-from dateutil.parser import parse
 
 log = structlog.get_logger(__name__)
 

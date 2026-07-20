@@ -1,14 +1,21 @@
-from finlib.async_fetch import BinanceDataRow, fetch_binance, _fetch_binance_raw_data, \
-    _convert_binance_data_to_DataFrame, _validated_fetch_binance_one_symbol, \
-        _fetch_binance_one_symbol_with_retry
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
-import aiohttp
 import asyncio
-from finlib.config import get_settings
 from datetime import datetime
 from decimal import Decimal
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
+import pytest
 from structlog.testing import capture_logs
+
+from finlib.async_fetch import (
+    BinanceDataRow,
+    _convert_binance_data_to_DataFrame,
+    _fetch_binance_one_symbol_with_retry,
+    _fetch_binance_raw_data,
+    _validated_fetch_binance_one_symbol,
+    fetch_binance,
+)
+from finlib.config import get_settings
 
 _EX_DT = datetime(2026,7,1,0,0,0)
 _EX_DEC = Decimal(103.5)

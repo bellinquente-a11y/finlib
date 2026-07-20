@@ -1,13 +1,16 @@
-from pydantic_core import ValidationError
-from finlib import value_portfolio, Equity, Portfolio, Trade
+import random
+from datetime import datetime
 from decimal import Decimal
+from itertools import groupby
+
 import pandas as pd
 import pytest
-from datetime import datetime
 from hypothesis import given
+from pydantic_core import ValidationError
+
+from finlib import Equity, Portfolio, Trade, value_portfolio
 from tests.strategies import ordered_trades_list
-from itertools import groupby
-import random
+
 
 def test_portfolio_empty_trade_list_validation_error():
     with pytest.raises(ValidationError):

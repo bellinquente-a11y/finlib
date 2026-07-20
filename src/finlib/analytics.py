@@ -1,12 +1,14 @@
-from pathlib import Path
 from decimal import Decimal
-from finlib.context_managers import timer
-from finlib.decorators import retry
-from finlib.data import stream_ohlcv, OHLCVBar
-from typing import Generator
-from finlib import Trade
-from operator import attrgetter
 from itertools import groupby
+from operator import attrgetter
+from pathlib import Path
+from typing import Generator
+
+from finlib import Trade
+from finlib.context_managers import timer
+from finlib.data import OHLCVBar, stream_ohlcv
+from finlib.decorators import retry
+
 
 @retry(max_attempts=3, delay=0.1, exceptions=(ValueError,))
 def calculate_daily_vwap(path: Path, symbol: str, min_volume: int = 0) -> Decimal:

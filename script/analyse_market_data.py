@@ -1,13 +1,15 @@
-from finlib.async_fetch import fetch_binance
-import logging
-from finlib.ohlcv_repo import FileOHLCVRepository
-from pathlib import Path
-from datetime import timedelta, datetime, timezone
-import pandas as pd
-from finlib.historic_analytics import add_rolling_stats
-import sys
-import subprocess
 import asyncio
+import logging
+import subprocess
+import sys
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import pandas as pd
+
+from finlib.async_fetch import fetch_binance
+from finlib.historic_analytics import add_rolling_stats
+from finlib.ohlcv_repo import FileOHLCVRepository
 
 log = logging.getLogger(__name__)
 

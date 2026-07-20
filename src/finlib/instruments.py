@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
-
 from typing import Protocol, runtime_checkable
+
 
 class Instrument(ABC):
     """Abstract base class for all instruments"""

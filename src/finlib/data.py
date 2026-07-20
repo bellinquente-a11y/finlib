@@ -1,10 +1,12 @@
 import csv
-from decimal import Decimal
 from dataclasses import dataclass
+from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 from typing import Generator, Literal, cast
+
 from finlib import Trade
-from datetime import datetime
+
 
 @dataclass(frozen=True)
 class OHLCVBar:

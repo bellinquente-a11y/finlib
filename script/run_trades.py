@@ -1,9 +1,10 @@
-from finlib.async_fetch import fetch_binance
-from finlib.trade_repo import InMemoryTradeRepository, PortfolioService
-from finlib.models import Trade
 import asyncio
 import logging
 from datetime import datetime, timedelta
+
+from finlib.async_fetch import fetch_binance
+from finlib.models import Trade
+from finlib.trade_repo import InMemoryTradeRepository, PortfolioService
 
 log = logging.getLogger(__name__)
 

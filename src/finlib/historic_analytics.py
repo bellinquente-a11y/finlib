@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def resample_dataframe(df: pd.DataFrame, freq: str = "D") -> pd.DataFrame:
     columns = list(df.columns)
     return (

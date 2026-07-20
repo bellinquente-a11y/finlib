@@ -1,7 +1,9 @@
 """Finlib output management module"""
 
-import pandas as pd
 from typing import Callable
+
+import pandas as pd
+
 
 def print_market_summary(market_summary: pd.DataFrame, 
                          columns: list[str], 

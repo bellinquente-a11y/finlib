@@ -1,6 +1,9 @@
-from hypothesis import strategies as st
-from finlib import Trade
 from datetime import datetime, timedelta
+
+from hypothesis import strategies as st
+
+from finlib import Trade
+
 
 def trade_strategy():
     return st.builds(

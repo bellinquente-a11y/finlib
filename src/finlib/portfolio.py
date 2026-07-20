@@ -1,9 +1,12 @@
-from pydantic import BaseModel, Field
 from decimal import Decimal
-from typing import Generator
-from finlib import Trade, Priceable
-import pandas as pd
 from itertools import groupby
+from typing import Generator
+
+import pandas as pd
+from pydantic import BaseModel, Field
+
+from finlib import Priceable, Trade
+
 
 class Portfolio(BaseModel):
     """Class representing a portfolio of trades"""

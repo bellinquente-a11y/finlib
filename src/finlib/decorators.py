@@ -1,8 +1,9 @@
-import time
-from typing import TypeVar, Callable, Any
-import functools
-import warnings
 import asyncio
+import functools
+import time
+import warnings
+from typing import Any, Callable, TypeVar
+
 import structlog
 
 log = structlog.get_logger(__name__)

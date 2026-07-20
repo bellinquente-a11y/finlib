@@ -1,10 +1,16 @@
-from decimal import Decimal
-from finlib.ohlcv_repo import OHLCVInterval, OHLCVRepository, InMemoryOHLCVRepository, \
-    FileOHLCVRepository
-from datetime import datetime
-import pandas as pd
 import dataclasses
+from datetime import datetime
+from decimal import Decimal
+
+import pandas as pd
 import pytest
+
+from finlib.ohlcv_repo import (
+    FileOHLCVRepository,
+    InMemoryOHLCVRepository,
+    OHLCVInterval,
+    OHLCVRepository,
+)
 
 _int1 = OHLCVInterval(symbol="SYM1", timestamp=datetime(2026,6,1,1,2,3), open=Decimal(101.2), 
                       high=Decimal(102.4), low=Decimal(100.8), close=Decimal(100.9), 

@@ -1,6 +1,6 @@
 import asyncio
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 SLEEP = 0.02
 

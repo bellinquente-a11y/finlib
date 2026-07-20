@@ -1,6 +1,8 @@
-from finlib.trade_repo import TradeRepository, PortfolioService
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
+from finlib.trade_repo import PortfolioService, TradeRepository
+
 
 def test_trade_repo_get_symbols(tmp_trade_repo: TradeRepository):
     assert tmp_trade_repo.get_all_symbols() == {"AAA", "BBB"}    

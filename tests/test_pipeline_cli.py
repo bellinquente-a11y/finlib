@@ -1,11 +1,14 @@
 
-from unittest.mock import patch
-from finlib.pipeline.cli import main
-from finlib import Trade
-from decimal import Decimal
 from datetime import datetime
-import pandas as pd
+from decimal import Decimal
 from pathlib import Path
+from unittest.mock import patch
+
+import pandas as pd
+
+from finlib import Trade
+from finlib.pipeline.cli import main
+
 
 def test_main_wiring(tmp_path: Path):
     summary = pd.DataFrame({"symbol": 5*["AAA"],

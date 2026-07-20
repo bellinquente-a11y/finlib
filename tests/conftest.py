@@ -1,9 +1,12 @@
-import pytest
-from finlib import Trade, Portfolio
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
 import pandas as pd
-from finlib.trade_repo import TradeRepository, FileTradeRepository, InMemoryTradeRepository
+import pytest
+
+from finlib import Portfolio, Trade
+from finlib.trade_repo import FileTradeRepository, InMemoryTradeRepository, TradeRepository
+
 
 @pytest.fixture
 def sample_trades() -> list[Trade]:

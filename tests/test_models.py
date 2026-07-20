@@ -1,7 +1,10 @@
-import pytest
 from decimal import Decimal
+
+import pytest
+
 from finlib.models import Trade
 from finlib.portfolio import Portfolio
+
 
 def test_symbol_is_uppercased():
     t = Trade(symbol='bhp', quantity=100, price=45.5, side='BUY')

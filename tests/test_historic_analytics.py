@@ -1,7 +1,9 @@
 import pandas as pd
 import pytest
-from finlib.historic_analytics import resample_dataframe, add_rolling_stats, maximum_drawdown
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
+
+from finlib.historic_analytics import add_rolling_stats, maximum_drawdown, resample_dataframe
 
 _COLUMNS = [
     "timestamp", "open", "high", "low", "close", "volume",

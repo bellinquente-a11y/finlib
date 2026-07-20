@@ -1,7 +1,10 @@
-from finlib import calculate_daily_vwap
 from pathlib import Path
+
 import pytest
+
+from finlib import calculate_daily_vwap
 from finlib.analytics import group_trades_by_symbol, trade_summary
+
 
 def test_calculate_daily_vwap_path_exists():
     with pytest.raises(Exception):

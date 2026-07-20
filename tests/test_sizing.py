@@ -1,7 +1,10 @@
-from finlib.sizing import kelly_fraction
-import pytest
-from hypothesis import given, strategies as st, settings
 import math
+
+import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
+
+from finlib.sizing import kelly_fraction
 
 MAX_HYPOTHESIS_SAMPLES = 100
 

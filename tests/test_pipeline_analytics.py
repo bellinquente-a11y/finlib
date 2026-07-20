@@ -1,14 +1,23 @@
-from finlib.pipeline.analytics import compute_market_summary, get_market_price, \
-    compute_portfolio_performance_metrics
-from finlib.ohlcv_repo import InMemoryOHLCVRepository, OHLCVInterval, OHLCVRepository, \
-    FileOHLCVRepository
-from finlib.trade_repo import TradeRepository, FileTradeRepository, InMemoryTradeRepository
-from finlib import Trade
-import pandas as pd
 from datetime import datetime, timedelta
 from decimal import Decimal
+
+import pandas as pd
 import pytest
 from numpy import nan
+
+from finlib import Trade
+from finlib.ohlcv_repo import (
+    FileOHLCVRepository,
+    InMemoryOHLCVRepository,
+    OHLCVInterval,
+    OHLCVRepository,
+)
+from finlib.pipeline.analytics import (
+    compute_market_summary,
+    compute_portfolio_performance_metrics,
+    get_market_price,
+)
+from finlib.trade_repo import FileTradeRepository, InMemoryTradeRepository, TradeRepository
 
 _TIMESTAMP1 = datetime(2026,6,1,1,2,3)
 _TIMESTAMP2 = datetime(2026,6,2,1,2,3)

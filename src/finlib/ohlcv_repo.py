@@ -1,10 +1,10 @@
-from typing import Protocol
-import pandas as pd
-from datetime import datetime
 from dataclasses import dataclass, fields
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
+
+import pandas as pd
 import structlog
 
 log = structlog.get_logger(__name__)

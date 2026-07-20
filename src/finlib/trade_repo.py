@@ -1,9 +1,11 @@
-from typing import Protocol, runtime_checkable
-from finlib.models import Trade
+from collections.abc import Iterator
+from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from datetime import datetime
-from collections.abc import Iterator
+from typing import Protocol, runtime_checkable
+
+from finlib.models import Trade
+
 
 @runtime_checkable
 class TradeRepository(Protocol):

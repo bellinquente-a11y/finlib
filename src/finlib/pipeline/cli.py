@@ -1,14 +1,16 @@
 """CLI to run the finlib pipeline"""
 
-from finlib.pipeline import data, analytics, output
+import argparse
 import asyncio
 import logging
-import argparse
+from datetime import timedelta
+from pathlib import Path
+
 from finlib.config import get_settings
 from finlib.ohlcv_repo import FileOHLCVRepository
+from finlib.pipeline import analytics, data, output
 from finlib.trade_repo import FileTradeRepository
-from pathlib import Path
-from datetime import timedelta
+
 
 def main() -> None:
     """Entry point for the finlib pipeline CLI.

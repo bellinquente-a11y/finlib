@@ -1,5 +1,7 @@
-from finlib.decorators import retry, validate_inputs, timer, deprecated
 import pytest
+
+from finlib.decorators import deprecated, retry, timer, validate_inputs
+
 
 def test_retry_does_not_affect_working_function():
     @retry(max_attempts=3, delay=0.1, exceptions=(ValueError,))

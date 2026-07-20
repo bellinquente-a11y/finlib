@@ -1,6 +1,9 @@
-import pytest
-from finlib import Equity, Future
 from decimal import Decimal
+
+import pytest
+
+from finlib import Equity, Future
+
 
 def test_price_Decimal():
     for instrument in [Equity, Future]:

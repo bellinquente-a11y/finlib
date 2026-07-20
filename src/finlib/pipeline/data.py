@@ -1,10 +1,12 @@
 """Trades and market data fetching and storing"""
 
-from finlib import OHLCVRepository, Trade, TradeRepository
-from finlib.async_fetch import fetch_binance, binance_interval
 import logging
-import pandas as pd
 from datetime import datetime
+
+import pandas as pd
+
+from finlib import OHLCVRepository, Trade, TradeRepository
+from finlib.async_fetch import binance_interval, fetch_binance
 
 log = logging.getLogger(__name__)
 

@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, timezone
-from typing import Literal, Protocol, runtime_checkable
 from decimal import Decimal
+from typing import Literal, Protocol, runtime_checkable
+
+from pydantic import BaseModel, Field, field_validator
+
 
 class Trade(BaseModel):
     """Class representing a trade"""

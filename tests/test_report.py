@@ -1,7 +1,9 @@
-from finlib.report import daily_trade_summary
-from finlib import Trade
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
+
+from finlib import Trade
+from finlib.report import daily_trade_summary
+
 
 def test_daily_trade_summary_calculation():
     t1 = Trade(symbol="BBB", quantity=10, price=100, side="BUY", 

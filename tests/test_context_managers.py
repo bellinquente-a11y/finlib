@@ -1,5 +1,7 @@
-from finlib.context_managers import timer
 import pytest
+
+from finlib.context_managers import timer
+
 
 def test_timer_prints_elapsed_without_label(capsys: pytest.CaptureFixture[str]) -> None:
     with timer():

@@ -1,11 +1,14 @@
-from finlib.trade_repo import InMemoryTradeRepository
-from finlib.ohlcv_repo import InMemoryOHLCVRepository
-from finlib import Trade
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from datetime import datetime, timezone, timedelta
-from finlib.pipeline.data import fetch_trades, store_market_data
-import pytest
+
 import pandas as pd
+import pytest
+
+from finlib import Trade
+from finlib.ohlcv_repo import InMemoryOHLCVRepository
+from finlib.pipeline.data import fetch_trades, store_market_data
+from finlib.trade_repo import InMemoryTradeRepository
+
 
 def test_fetch_trades_output():
     ts = datetime(2026,1,1,12,3,34, tzinfo=timezone.utc) 

@@ -1,12 +1,14 @@
 """"Trades and market data analysis module"""
 
-from finlib import historic_analytics
-import pandas as pd
-from finlib.ohlcv_repo import OHLCVRepository
-from finlib.trade_repo import TradeRepository
-from finlib.portfolio import Portfolio
 import logging
 from datetime import datetime
+
+import pandas as pd
+
+from finlib import historic_analytics
+from finlib.ohlcv_repo import OHLCVRepository
+from finlib.portfolio import Portfolio
+from finlib.trade_repo import TradeRepository
 
 log = logging.getLogger(__name__)
 

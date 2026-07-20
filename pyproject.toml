@@ -58,7 +58,7 @@ target-version = 'py312'
 [tool.ruff.lint]
 select = [
   'E', 'F',   # pycodestyle, pyflakes (defaults)
-#   'I',        # isort — import ordering
+  'I',        # isort — import ordering
 #   'B',        # bugbear — likely-bug patterns
 #   'UP',       # pyupgrade — modern syntax
 #   'SIM',      # simplify
