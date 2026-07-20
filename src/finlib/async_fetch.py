@@ -77,7 +77,7 @@ async def _validated_fetch_binance_one_symbol(session: aiohttp.ClientSession,
                                                                      strict=True)}
                             )
                         )
-                except ValidationError:
+                except (ValidationError, ValueError):
                     invalid_rows_count+=1
             if invalid_rows_count>0:
                 log.warning("Invalid Binance data", symbol=symbol, 

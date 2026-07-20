@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 import pytest
+from pydantic import ValidationError
 
 from finlib.models import Trade
 from finlib.portfolio import Portfolio
@@ -11,7 +12,7 @@ def test_symbol_is_uppercased():
     assert t.symbol == 'BHP'
 
 def test_rejects_negative_quantity():
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         Trade(symbol='BHP', quantity=-10, price=45.5, side='BUY')
 
 def test_notional_calculation():
