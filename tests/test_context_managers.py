@@ -16,6 +16,5 @@ def test_timer_prints_label(capsys: pytest.CaptureFixture[str]) -> None:
     assert "my operation" in out
 
 def test_timer_does_not_suppress_exceptions(capsys: pytest.CaptureFixture[str]) -> None:
-    with pytest.raises(ValueError):
-        with timer("failing"):
-            raise ValueError("boom")
+    with pytest.raises(ValueError), timer("failing"):
+        raise ValueError("boom")

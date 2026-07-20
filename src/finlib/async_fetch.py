@@ -96,7 +96,7 @@ async def _fetch_binance_raw_data(symbols: list[str],
     """Coroutine to fetch multiple symbols from Binance"""
     if not isinstance(symbols, list):
         raise TypeError
-    if interval not in get_args(binance_interval):
+    if interval not in get_args(binance_interval.__value__):
         raise ValueError(f"Binance quantisation interval {interval} not available")
     settings = get_settings()
     semaphore = asyncio.Semaphore(settings.binance.max_number_concurrent_calls)    
@@ -143,10 +143,7 @@ async def fetch_binance(symbols: list[str],
             raise NotImplementedError
 
     start = parse(start) if isinstance(start, str) else start
-    if start.tzinfo is None:
-        diffdt = datetime.now() - start
-    else:
-        diffdt = datetime.now(tz=UTC) - start
+    diffdt = datetime.now() - start if start.tzinfo is None else datetime.now(tz=UTC) - start
     limit = max(int(diffdt / deltat),1)
 
     data = await _fetch_binance_raw_data(symbols, interval, limit)

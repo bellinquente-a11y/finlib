@@ -91,7 +91,7 @@ class InMemoryOHLCVRepository:
         count=0
         for symbol in symbols:
             query = "symbol==@symbol"
-            if symbol in last_timestamp.keys():
+            if symbol in last_timestamp:
                 query = f"{query} and timestamp>@last_timestamp[symbol]"
             for row in df.query(query).itertuples():
                 self.add_interval(
@@ -115,7 +115,7 @@ class InMemoryOHLCVRepository:
     def _get_last_timestamps(self) -> dict[str, datetime]:
         res: dict[str, datetime] = {}
         for row in self._data:
-            if row.symbol not in res.keys():
+            if row.symbol not in res:
                 res[row.symbol] = row.timestamp
             else:
                 res[row.symbol] = max(res[row.symbol], row.timestamp)
@@ -153,7 +153,7 @@ class FileOHLCVRepository:
         for symbol in symbols:
 
             query = "symbol==@symbol"
-            if symbol in last_timestamp.keys():
+            if symbol in last_timestamp:
                 query = f"{query} and timestamp>@last_timestamp[symbol]"
                 log.info("adding intervals", symbol=symbol, first_timestamp=last_timestamp[symbol])
             else:
@@ -183,8 +183,7 @@ class FileOHLCVRepository:
                     elif (start is not None) and (end is None):
                         if row_data.timestamp<start:
                             continue
-                    elif (start is None) and (end is not None):
-                        if row_data.timestamp>end:
+                    elif (start is None) and (end is not None) and row_data.timestamp>end:
                             continue
                     data.append([getattr(row_data,f) for f in self._fieldnames])
         return pd.DataFrame(data, columns=self._fieldnames).sort_values(by="timestamp")
@@ -195,7 +194,7 @@ class FileOHLCVRepository:
             _ = f.readline()
             for row in f:
                 row_data = OHLCVInterval.from_string(row)
-                if row_data.symbol not in res.keys():
+                if row_data.symbol not in res:
                     res[row_data.symbol] = row_data.timestamp
                 else:
                     res[row_data.symbol] = max(row_data.timestamp, res[row_data.symbol])

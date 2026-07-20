@@ -29,7 +29,7 @@ def main(trades_csv: Path, prices_csv: Path) -> None:
 
     log.info('Generate portfolio...')
     positions = {}
-    for symbol in lot_size.keys():
+    for symbol in lot_size:
         if lot_size[symbol] == Decimal(0):
             continue
         if symbol not in eod_price:

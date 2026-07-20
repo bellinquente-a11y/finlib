@@ -61,6 +61,6 @@ select = [
   'I',        # isort — import ordering
   'B',        # bugbear — likely-bug patterns
   'UP',       # pyupgrade — modern syntax
-#   'SIM',      # simplify
+  'SIM',      # simplify
 #   'RET',      # return-statement hygiene
 ]

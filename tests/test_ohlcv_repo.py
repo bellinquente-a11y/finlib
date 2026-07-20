@@ -45,7 +45,7 @@ def test_in_memory_repo_add_batch(repo: OHLCVRepository):
     fieldnames = [f.name for f in dataclasses.fields(OHLCVInterval)]
     map = {"datetime": "timestamp", "open_price": "open"}
     inv_map = {v:k for k,v in map.items()}
-    columns = [inv_map[f] if f in inv_map.keys() else f for f in fieldnames]
+    columns = [inv_map.get(f, f) for f in fieldnames]
     df = pd.DataFrame([[getattr(i,f) for f in fieldnames] for i in _intervals], columns=columns)
     repo.add_intervals_batch(df, map)
     df_out = repo.get_data("SYM1") 
