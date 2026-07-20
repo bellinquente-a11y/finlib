@@ -5,7 +5,8 @@ from typing import Generator
 import pandas as pd
 from pydantic import BaseModel, Field
 
-from finlib import Priceable, Trade
+from finlib.instruments import Priceable
+from finlib.models import Trade
 
 
 class Portfolio(BaseModel):

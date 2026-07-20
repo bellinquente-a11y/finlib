@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from itertools import groupby
 
-from finlib import Trade
+from finlib.models import Trade
 
 
 def daily_trade_summary(trades: list[Trade]) -> dict[tuple[str, date], dict[str, int | Decimal]]:

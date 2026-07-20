@@ -4,7 +4,7 @@ from operator import attrgetter
 from pathlib import Path
 from typing import Generator
 
-from finlib import Trade
+from finlib.models import Trade
 from finlib.context_managers import timer
 from finlib.data import OHLCVBar, stream_ohlcv
 from finlib.decorators import retry
@@ -18,8 +18,8 @@ def calculate_daily_vwap(path: Path, symbol: str, min_volume: int = 0) -> Decima
         bars = (bar for bar in stream_ohlcv(path, min_volume) if bar.symbol==symbol)
         try:
             return calculate_vwap(bars)
-        except ValueError:
-            raise ValueError(f"Missing data for ticker {symbol}")
+        except ValueError as err:
+            raise ValueError(f"Missing data for ticker {symbol}") from err
 
 def calculate_vwap(bars: Generator[OHLCVBar, None, None]) -> Decimal:
     """VWAP calculation from bars generator"""

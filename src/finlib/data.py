@@ -5,7 +5,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Generator, Literal, cast
 
-from finlib import Trade
+from finlib.models import Trade
 
 
 @dataclass(frozen=True)

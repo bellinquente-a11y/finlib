@@ -5,7 +5,9 @@ from datetime import datetime
 
 import pandas as pd
 
-from finlib import OHLCVRepository, Trade, TradeRepository
+from finlib.ohlcv_repo import OHLCVRepository
+from finlib.models import Trade
+from finlib.trade_repo import TradeRepository
 from finlib.async_fetch import binance_interval, fetch_binance
 
 log = logging.getLogger(__name__)
