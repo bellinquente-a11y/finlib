@@ -4,10 +4,10 @@ from operator import attrgetter
 from pathlib import Path
 from typing import Generator
 
-from finlib.models import Trade
 from finlib.context_managers import timer
 from finlib.data import OHLCVBar, stream_ohlcv
 from finlib.decorators import retry
+from finlib.models import Trade
 
 
 @retry(max_attempts=3, delay=0.1, exceptions=(ValueError,))
