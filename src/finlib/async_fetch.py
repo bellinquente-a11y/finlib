@@ -72,7 +72,9 @@ async def _validated_fetch_binance_one_symbol(session: aiohttp.ClientSession,
                 try:
                     result.append(
                         BinanceDataRow(
-                            **{k: v for k, v in zip(settings.binance.columns, row)}
+                            **{k: v for k, v in zip(settings.binance.columns, 
+                                                                     row, 
+                                                                     strict=True)}
                             )
                         )
                 except ValidationError:
@@ -105,7 +107,9 @@ async def _fetch_binance_raw_data(symbols: list[str],
                 for symbol in symbols
                 ]
             )
-    return {s:r for s,r in zip(symbols, result)}
+    return {s:r for s,r in zip(symbols, 
+                                                                        result, 
+                                                                        strict=True)}
 
 def _convert_binance_data_to_DataFrame(data: dict[str, list[BinanceDataRow] | None]) \
     -> pd.DataFrame:

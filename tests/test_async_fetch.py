@@ -103,7 +103,9 @@ async def test_fetch_binance_retry():
 
 def test_convert_binance_data_to_DataFrame_symbol_data_missing():
     brow = BinanceDataRow(**{k:v for k,v 
-                             in zip(BinanceDataRow.model_fields, _EX_ROW)})
+                             in zip(BinanceDataRow.model_fields, 
+                                                     _EX_ROW, 
+                                                     strict=True)})
     assert (_convert_binance_data_to_DataFrame({"SYM1": [brow], "SYM2": None}) == 
             _convert_binance_data_to_DataFrame({"SYM1": [brow]})).all().all()
 
@@ -136,7 +138,8 @@ async def test_validated_fetch_binance_one_symbol_invalid_rows_remaining_output(
         result = await _validated_fetch_binance_one_symbol(None, "AAA", None, None, semaphore)
         assert result == 3*[BinanceDataRow(**{k: v for k, v 
                                               in zip(settings.binance.columns, 
-                                                                      _EX_ROW)})]
+                                                                      _EX_ROW,
+                                                                      strict=True)})]
 
 @pytest.mark.parametrize("exception", [aiohttp.ClientError, asyncio.TimeoutError])
 async def test_fetch_binance_one_symbol_with_retry_timeout_retry(exception):
@@ -176,4 +179,5 @@ async def test_fetch_binance_raw_data_malformed_rows_skipped():
         assert res["AAA"] == []
         assert res["BBB"] == 2*[BinanceDataRow(**{k: v for k, v 
                                                   in zip(settings.binance.columns, 
-                                                                          _EX_ROW)})]
+                                                                          _EX_ROW, 
+                                                                          strict=True)})]

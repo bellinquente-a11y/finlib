@@ -24,7 +24,9 @@ class OHLCVInterval:
         fields_names = [f.name for f in fields(self)]
         fields_types = [f.type for f in fields(self)]
         output = []
-        for fname, ftype in zip(fields_names, fields_types):
+        for fname, ftype in zip(fields_names, 
+                                                                   fields_types, 
+                                                                   strict=True):
             field = getattr(self, fname)
             if ftype is str:
                 output.append(field)
@@ -41,8 +43,12 @@ class OHLCVInterval:
         fields_names = [f.name for f in fields(cls)]
         fields_types = [f.type for f in fields(cls)]
         data_list = string.strip().split(",")
-        data: dict[str, Any] = {k:v for k,v in zip(fields_names, data_list)}
-        for fname, ftype in zip(fields_names, fields_types):
+        data: dict[str, Any] = {k:v for k,v in zip(fields_names, 
+                                                                    data_list, 
+                                                                    strict=True)}
+        for fname, ftype in zip(fields_names, 
+                                                                   fields_types, 
+                                                                   strict=True):
             if ftype is str:
                 continue
             elif ftype is datetime:

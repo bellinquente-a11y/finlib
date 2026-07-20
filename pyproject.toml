@@ -59,7 +59,7 @@ target-version = 'py312'
 select = [
   'E', 'F',   # pycodestyle, pyflakes (defaults)
   'I',        # isort — import ordering
-#   'B',        # bugbear — likely-bug patterns
+  'B',        # bugbear — likely-bug patterns
 #   'UP',       # pyupgrade — modern syntax
 #   'SIM',      # simplify
 #   'RET',      # return-statement hygiene
