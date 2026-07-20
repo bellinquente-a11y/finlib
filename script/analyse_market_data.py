@@ -2,7 +2,7 @@ import asyncio
 import logging
 import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -33,7 +33,7 @@ async def main(filepath: str) -> None:
     for s in symbols:
         new_df = (
             repo
-            .get_data(s, start=datetime.now(tz=timezone.utc)-timedelta(days=10))
+            .get_data(s, start=datetime.now(tz=UTC)-timedelta(days=10))
             .sort_values("timestamp")
         )
         new_df = add_rolling_stats(new_df, 24*252, 24*5)

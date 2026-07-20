@@ -1,7 +1,7 @@
 import asyncio
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from typing import Any, Literal, TypeAlias, get_args
+from typing import Any, Literal, get_args
 
 import aiohttp
 import pandas as pd
@@ -14,7 +14,7 @@ from finlib.decorators import async_retry
 
 log = structlog.get_logger(__name__)
 
-binance_interval: TypeAlias = Literal["1m", "3m", "5m", "15m", "30m", "1h", "2h", 
+type binance_interval = Literal["1m", "3m", "5m", "15m", "30m", "1h", "2h",
                                       "4h", "6h", "8h", "12h", "1d", "3d", "1w", "1M"]
 
 class BinanceDataRow(BaseModel):
@@ -146,7 +146,7 @@ async def fetch_binance(symbols: list[str],
     if start.tzinfo is None:
         diffdt = datetime.now() - start
     else:
-        diffdt = datetime.now(tz=timezone.utc) - start
+        diffdt = datetime.now(tz=UTC) - start
     limit = max(int(diffdt / deltat),1)
 
     data = await _fetch_binance_raw_data(symbols, interval, limit)

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 import pandas as pd
@@ -11,7 +11,7 @@ from finlib.trade_repo import InMemoryTradeRepository
 
 
 def test_fetch_trades_output():
-    ts = datetime(2026,1,1,12,3,34, tzinfo=timezone.utc) 
+    ts = datetime(2026,1,1,12,3,34, tzinfo=UTC) 
     repo = InMemoryTradeRepository()
     repo.add(Trade(symbol="AAA", quantity=Decimal(10.), price=Decimal(105.), side="BUY"))
     repo.add(Trade(symbol="BBB", quantity=Decimal(10.), price=Decimal(105.), side="BUY"))

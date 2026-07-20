@@ -96,7 +96,7 @@ def _get_extreme_timestamps(trades: Iterator[Trade]) -> tuple[datetime | None, d
     return min_ts, max_ts
 
 
-class PortfolioService():
+class PortfolioService:
     def __init__(self, trade_repo: TradeRepository):
         self._trade_repo = trade_repo
 

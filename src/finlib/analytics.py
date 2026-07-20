@@ -1,8 +1,8 @@
+from collections.abc import Generator
 from decimal import Decimal
 from itertools import groupby
 from operator import attrgetter
 from pathlib import Path
-from typing import Generator
 
 from finlib.context_managers import timer
 from finlib.data import OHLCVBar, stream_ohlcv
@@ -52,6 +52,6 @@ def trade_summary(trades: list[Trade]) -> None:
         symbol_trades = trades_by_group[symbol]
         quantity = sum([trade.quantity for trade in symbol_trades])
         notional = sum([trade.notional for trade in symbol_trades])
-        print((f"{symbol}: {len(symbol_trades)} trades; quantity = {quantity:,.2f}; "
-               f"notional = {notional:,.2f}"))
+        print(f"{symbol}: {len(symbol_trades)} trades; quantity = {quantity:,.2f}; "
+               f"notional = {notional:,.2f}")
     return

@@ -1,9 +1,10 @@
 import csv
+from collections.abc import Generator
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Generator, Literal, cast
+from typing import Literal, cast
 
 from finlib.models import Trade
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Literal, Protocol, runtime_checkable
 
@@ -15,7 +15,7 @@ class Trade(BaseModel):
     price: Decimal = Field(..., gt=0)
     side: Literal['BUY', 'SELL']
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
 
     @field_validator('symbol')

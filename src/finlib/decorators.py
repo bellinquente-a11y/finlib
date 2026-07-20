@@ -2,16 +2,15 @@ import asyncio
 import functools
 import time
 import warnings
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any
 
 import structlog
 
 log = structlog.get_logger(__name__)
 
-F = TypeVar('F', bound=Callable[..., Any])
-
-
-def retry(max_attempts: int = 3, 
+def retry[F: Callable[..., Any]](
+          max_attempts: int = 3, 
           delay: float = 1., 
           exceptions: tuple[type[Exception], ...] = (Exception, )
           ) -> Callable[[F], F]:
@@ -37,7 +36,7 @@ def retry(max_attempts: int = 3,
     return decorator
 
 
-def validate_inputs(min_quantity: int) -> Callable[[F], F]:
+def validate_inputs[F: Callable[..., Any]](min_quantity: int) -> Callable[[F], F]:
     """Decorator to validate the minimum quantity input of a function"""
     def decorator(func: F) -> F:
         @functools.wraps(func)
@@ -50,7 +49,7 @@ def validate_inputs(min_quantity: int) -> Callable[[F], F]:
     return decorator
 
 
-def timer(func: F) -> F:
+def timer[F: Callable[..., Any]](func: F) -> F:
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         start = time.perf_counter()
@@ -61,7 +60,7 @@ def timer(func: F) -> F:
     return wrapper # type: ignore[return-value]
 
 
-def deprecated(func: F) -> F:
+def deprecated[F: Callable[..., Any]](func: F) -> F:
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         warnings.warn(f"Function {func.__name__} will not be supported in a future release", 
@@ -71,7 +70,8 @@ def deprecated(func: F) -> F:
     return wrapper # type: ignore[return-value]
 
 
-def async_retry(max_retry: int, 
+def async_retry[F: Callable[..., Any]](
+                max_retry: int, 
                 delay: float = 1., 
                 exceptions: tuple[type[Exception], ...] = (Exception, )) -> Callable[[F],F]:
     def decorator(func: F) -> F:

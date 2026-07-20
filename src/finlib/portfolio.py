@@ -1,6 +1,6 @@
+from collections.abc import Generator
 from decimal import Decimal
 from itertools import groupby
-from typing import Generator
 
 import pandas as pd
 from pydantic import BaseModel, Field
@@ -35,8 +35,7 @@ class Portfolio(BaseModel):
 
     def __iter__(self) -> Generator[Trade, None, None]:  # type: ignore[override]
         """Iterate over the trades in the portfolio"""
-        for trade in self.trades:
-            yield trade
+        yield from self.trades
 
     def __getitem__(self, index: int) -> Trade:
         return self.trades[index]
