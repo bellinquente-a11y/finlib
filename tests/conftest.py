@@ -7,6 +7,12 @@ import pandas as pd
 import pytest
 
 from finlib import Portfolio, Trade
+from finlib.ohlcv_repo import (
+    FileOHLCVRepository,
+    InMemoryOHLCVRepository,
+    OHLCVInterval,
+    OHLCVRepository,
+)
 from finlib.trade_repo import FileTradeRepository, InMemoryTradeRepository, TradeRepository
 
 
@@ -118,4 +124,54 @@ def tmp_trade_repo(request: pytest.FixtureRequest, tmp_path: Path) -> TradeRepos
     ]
     for trade in trades:
         repo.add(trade)
+    return repo
+
+
+@pytest.fixture(params=("memory", "csv"))
+def tmp_ohlcv_repo(request: pytest.FixtureRequest, tmp_path: Path) -> OHLCVRepository:
+    if request.param == "memory":
+        repo: FileOHLCVRepository | InMemoryOHLCVRepository = InMemoryOHLCVRepository()
+    elif request.param == "csv":
+        repo = FileOHLCVRepository(tmp_path / "ohlcv_repo.csv")
+
+    _int1 = OHLCVInterval(
+        symbol="SYM1",
+        timestamp=datetime(2026, 6, 1, 1, 2, 3),
+        open=Decimal(101.2),
+        high=Decimal(102.4),
+        low=Decimal(100.8),
+        close=Decimal(100.9),
+        volume=Decimal(1_342),
+    )
+    _int2 = OHLCVInterval(
+        symbol="SYM1",
+        timestamp=datetime(2026, 6, 2, 1, 2, 3),
+        open=Decimal(101.2),
+        high=Decimal(102.4),
+        low=Decimal(100.8),
+        close=Decimal(100.9),
+        volume=Decimal(1_342),
+    )
+    _int3 = OHLCVInterval(
+        symbol="SYM1",
+        timestamp=datetime(2026, 6, 3, 1, 2, 3),
+        open=Decimal(101.2),
+        high=Decimal(102.4),
+        low=Decimal(100.8),
+        close=Decimal(100.9),
+        volume=Decimal(1_342),
+    )
+    _int4 = OHLCVInterval(
+        symbol="SYM2",
+        timestamp=datetime(2026, 6, 4, 1, 2, 3),
+        open=Decimal(101.2),
+        high=Decimal(102.4),
+        low=Decimal(100.8),
+        close=Decimal(100.9),
+        volume=Decimal(1_342),
+    )
+
+    for i in [_int1, _int2, _int3, _int4]:
+        repo.add_interval(i)
+
     return repo

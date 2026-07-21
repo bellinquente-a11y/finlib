@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import pandas as pd
 import pytest
+from structlog.testing import capture_logs
 
 from finlib import Trade
 from finlib.ohlcv_repo import InMemoryOHLCVRepository
@@ -50,3 +51,17 @@ def test_store_market_data_ordered_output() -> None:
         .all()
         .all()
     )
+
+
+def test_fstore_market_data_empty_df_error() -> None:
+    repo = InMemoryTradeRepository()
+    with pytest.raises(RuntimeError, match="No trades in trade repository"), capture_logs() as logs:
+        _ = fetch_trades(repo)
+        assert logs[0]["event"] == "Empty trade repository"
+
+
+def test_fetch_trades_empty_repo_error() -> None:
+    ohlcv_repo = InMemoryOHLCVRepository()
+    with pytest.raises(ValueError, match="Empty market data DataFrame"), capture_logs() as logs:
+        store_market_data(ohlcv_repo, pd.DataFrame())
+        assert logs[0]["event"] == "Empty market price dataframe"

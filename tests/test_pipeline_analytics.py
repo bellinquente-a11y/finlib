@@ -5,6 +5,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 from numpy import nan
+from structlog.testing import capture_logs
 
 from finlib import Trade
 from finlib.ohlcv_repo import (
@@ -148,3 +149,33 @@ def test_compute_portfolio_performance_metrics(
         trade_repo.add(t)
     with pytest.raises(RuntimeError):
         _ = compute_portfolio_performance_metrics(trade_repo, ohlcv_repo)
+
+
+def test_compute_market_summary_missing_symbol_warning() -> None:
+    ohlcv_repo = InMemoryOHLCVRepository()
+    with capture_logs() as logs:
+        _ = compute_market_summary(ohlcv_repo, ["AAA"])
+        assert logs[0]["log_level"] == "warning"
+        assert logs[0]["event"] == "Missing data from OHLCV repo"
+        assert logs[0]["symbol"] == "AAA"
+
+
+def test_get_market_price_missing_symbol_warning() -> None:
+    ohlcv_repo = InMemoryOHLCVRepository()
+    with capture_logs() as logs:
+        _ = get_market_price(ohlcv_repo, ["ABC"], datetime(2022, 1, 1))
+        assert logs[0]["log_level"] == "warning"
+        assert logs[0]["event"] == "Missing data from OHLCV repo"
+        assert logs[0]["symbol"] == "ABC"
+
+
+def test_compute_portfolio_performance_metrics_missing_symbols_error(
+    tmp_trade_repo: TradeRepository, tmp_ohlcv_repo: OHLCVRepository
+) -> None:
+    with (
+        pytest.raises(RuntimeError, match="Missing symbols in price dataframe"),
+        capture_logs() as logs,
+    ):
+        _ = compute_portfolio_performance_metrics(tmp_trade_repo, tmp_ohlcv_repo)
+        assert logs[0]["log_level"] == "error"
+        assert logs[0]["event"] == "Missing symbols in the market price dataframe"
