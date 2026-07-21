@@ -797,3 +797,49 @@ Notes on `fastapi.dependencies.utils`.
 *Look for invariants to test with the `hypothesis` library*
 
 That helps finding the bug I didn't think about.
+
+---
+
+## Week 5, day 4: 21/07
+
+### structlog audit
+
+- The main `finlib` library uses logging (with `structlog`) rather inconsistently. In:
+  - data fetching (`async_fetch`)
+  - exception managemenht (`decorators`)
+  - data management (`ohlcv_repo`)
+
+- The `finlib.pipeline` uses the stdlib loggin instead. Notice this is almost the opposite of what we would want (see below).
+
+- The program suggests to address this by making `structlog` the standard throughout the library.
+
+### What I built
+
+- Extended `ruff` checks beyond the default values (`pycodestyle`, `pyflakes`) to include:
+  - import ordering
+  - `bug-bear` to fix likely bug patterns
+  - `pyupgrade`
+  - simplify
+  - return statement hygiene
+
+- Extended `mypy` checks to `tests` and `script` dirs
+
+- Installed `pre-commit` and added several pre-commit hooks in `.pre-commity-config.yaml`
+
+- Introduced `config.settings.environment` setting to control `structlog` renderer in pipeline (console vs json).
+
+### TO REMEMBER
+
+- Shared libraries should use stdlib logging as a Python convention.
+
+- My own applications could use `structlog`.
+
+- Log at boundaries and decisions.
+
+### Surprises
+
+- How many issues can be prevented with testing and linting discipline and infrastructure.
+
+### Still unclear
+
+- When and where to log
