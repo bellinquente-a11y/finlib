@@ -7,18 +7,16 @@ from pydantic import BaseModel, Field, field_validator
 
 class Trade(BaseModel):
     """Class representing a trade"""
-    
-    model_config = {'frozen': True, 'str_strip_whitespace': True}
+
+    model_config = {"frozen": True, "str_strip_whitespace": True}
 
     symbol: str = Field(..., min_length=1, max_length=10)
     quantity: Decimal = Field(..., gt=0)
     price: Decimal = Field(..., gt=0)
-    side: Literal['BUY', 'SELL']
-    timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(UTC)
-    )
+    side: Literal["BUY", "SELL"]
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
-    @field_validator('symbol')
+    @field_validator("symbol")
     @classmethod
     def symbol_uppercase(cls, v: str) -> str:
         return v.upper()
@@ -27,19 +25,22 @@ class Trade(BaseModel):
     def notional(self) -> Decimal:
         """Calculate the SIGNED notional value of the trade"""
 
-        if self.side == 'BUY':
+        if self.side == "BUY":
             return self.quantity * self.price
-        if self.side == 'SELL':
-            return -1 * (self.quantity * self.price)    
+        if self.side == "SELL":
+            return -1 * (self.quantity * self.price)
         raise ValueError(f"Invalid side: {self.side}")
 
     def lot_size(self) -> Decimal:
         """Get the lot size of the trade"""
-        return self.quantity if self.side == 'BUY' else -1 * self.quantity
+        return self.quantity if self.side == "BUY" else -1 * self.quantity
 
     def __str__(self) -> str:
-        return (f"Trade(symbol={self.symbol!r}, quantity={self.quantity!r}, "
-                f"price={self.price!r}, side={self.side!r}, timestamp={self.timestamp!r})")
+        return (
+            f"Trade(symbol={self.symbol!r}, quantity={self.quantity!r}, "
+            f"price={self.price!r}, side={self.side!r}, timestamp={self.timestamp!r})"
+        )
+
 
 @runtime_checkable
 class Tradeable(Protocol):
@@ -51,7 +52,8 @@ class Tradeable(Protocol):
     def price(self) -> Decimal: ...
     def lot_size(self) -> Decimal: ...
 
+
 def is_valid_trade_size(instrument: Tradeable, notional: Decimal) -> bool:
     """Check if a trade is a valid size"""
 
-    return bool(instrument.lot_size()*instrument.price == notional)
+    return bool(instrument.lot_size() * instrument.price == notional)

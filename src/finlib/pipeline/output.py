@@ -5,9 +5,9 @@ from collections.abc import Callable
 import pandas as pd
 
 
-def print_market_summary(market_summary: pd.DataFrame, 
-                         columns: list[str], 
-                         formatters: dict[str, Callable[..., str]]) -> None:
+def print_market_summary(
+    market_summary: pd.DataFrame, columns: list[str], formatters: dict[str, Callable[..., str]]
+) -> None:
     """Print the last 10 rows of the market summary table to stdout.
 
     Args:
@@ -15,15 +15,9 @@ def print_market_summary(market_summary: pd.DataFrame,
         columns: Subset of columns to display.
         formatters: Per-column format callables passed to DataFrame.to_string.
     """
-    print(
-        market_summary[columns]
-        .dropna()
-        .tail(10)
-        .to_string(
-            formatters=formatters
-        )
-    )
+    print(market_summary[columns].dropna().tail(10).to_string(formatters=formatters))
     return
+
 
 def print_trading_summary(df: pd.DataFrame, format: str, axis_format: str) -> None:
     """Print the most recent row of a per-symbol trading summary to stdout.
@@ -35,11 +29,8 @@ def print_trading_summary(df: pd.DataFrame, format: str, axis_format: str) -> No
     """
     formatters = {k: format.format for k in df.columns.to_list()}
     print(
-        df
-        .set_axis(pd.DatetimeIndex(df.index).strftime(axis_format))
+        df.set_axis(pd.DatetimeIndex(df.index).strftime(axis_format))
         .tail(1)
-        .to_string(
-            formatters=formatters
-        )
+        .to_string(formatters=formatters)
     )
     return

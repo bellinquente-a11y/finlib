@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/bellinquente-a11y/finlib/actions/workflows/ci.yml/badge.svg)](https://github.com/bellinquente-a11y/finlib/actions/workflows/ci.yml)
 
-Production-grade Python for financial data modelling. 
+Production-grade Python for financial data modelling.
 - Strict type annotations (mypy --strict)
 - Protocol-based dependency injection
 - structured logging (structlog)
@@ -91,7 +91,7 @@ INFO:finlib.pipeline.data:Storing market data in OHLCV repository
 
 Market value
                  BNBUSDT    BTCUSDT   ETHUSDT
-timestamp                                    
+timestamp
 2026-07-06 23:59  90,412  1,089,938  -880,069
 
 Cost basis
@@ -100,7 +100,7 @@ Cost basis
 
 PnL
                   BNBUSDT  BTCUSDT  ETHUSDT
-timestamp                                  
+timestamp
 2026-07-06 23:59   33,961   83,444   52,307
 
 Total PnL =  169,711

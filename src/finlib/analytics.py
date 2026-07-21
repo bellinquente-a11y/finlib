@@ -15,21 +15,22 @@ def calculate_daily_vwap(path: Path, symbol: str, min_volume: int = 0) -> Decima
     """Calculate VWAP from CSV file. It assumes the file reports data for one day only."""
 
     with timer(f"VWAP for ticker {symbol}"):
-        bars = (bar for bar in stream_ohlcv(path, min_volume) if bar.symbol==symbol)
+        bars = (bar for bar in stream_ohlcv(path, min_volume) if bar.symbol == symbol)
         try:
             return calculate_vwap(bars)
         except ValueError as err:
             raise ValueError(f"Missing data for ticker {symbol}") from err
 
+
 def calculate_vwap(bars: Generator[OHLCVBar, None, None]) -> Decimal:
     """VWAP calculation from bars generator"""
-    numerator, total_volume = Decimal(0.), Decimal(0.)
+    numerator, total_volume = Decimal(0.0), Decimal(0.0)
     for bar in bars:
-        numerator += bar.close*Decimal(bar.volume)
+        numerator += bar.close * Decimal(bar.volume)
         total_volume += bar.volume
-    if total_volume==Decimal(0):
+    if total_volume == Decimal(0):
         raise ValueError("Missing trading volume")
-    return Decimal(numerator/total_volume)
+    return Decimal(numerator / total_volume)
 
 
 def group_trades_by_symbol(trades: list[Trade]) -> dict[str, list[Trade]]:
@@ -40,17 +41,21 @@ def group_trades_by_symbol(trades: list[Trade]) -> dict[str, list[Trade]]:
         if not isinstance(trade, Trade):
             raise TypeError
     sorted_trades = sorted(trades, key=attrgetter("symbol"))
-    return {symbol: list(group) 
-            for symbol, group in groupby(sorted_trades, key=attrgetter("symbol"))}
+    return {
+        symbol: list(group) for symbol, group in groupby(sorted_trades, key=attrgetter("symbol"))
+    }
+
 
 def trade_summary(trades: list[Trade]) -> None:
-    """"Prints a summary of a list of trades, aggregated by symbol"""
+    """ "Prints a summary of a list of trades, aggregated by symbol"""
     trades_by_group = group_trades_by_symbol(trades)
     sorted_symbol = sorted(trades_by_group.keys())
     for symbol in sorted_symbol:
         symbol_trades = trades_by_group[symbol]
         quantity = sum([trade.quantity for trade in symbol_trades])
         notional = sum([trade.notional for trade in symbol_trades])
-        print(f"{symbol}: {len(symbol_trades)} trades; quantity = {quantity:,.2f}; "
-               f"notional = {notional:,.2f}")
+        print(
+            f"{symbol}: {len(symbol_trades)} trades; quantity = {quantity:,.2f}; "
+            f"notional = {notional:,.2f}"
+        )
     return

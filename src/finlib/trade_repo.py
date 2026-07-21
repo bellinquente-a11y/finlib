@@ -12,10 +12,11 @@ class TradeRepository(Protocol):
     def add(self, trade: Trade) -> None: ...
     def get_all(self) -> list[Trade]: ...
     def get_by_symbol(self, symbol: str) -> list[Trade]: ...
-    def get_extreme_timestamps(self, 
-                               symbol: str | None = None) \
-                                -> tuple[datetime | None, datetime | None]: ...
+    def get_extreme_timestamps(
+        self, symbol: str | None = None
+    ) -> tuple[datetime | None, datetime | None]: ...
     def get_all_symbols(self) -> set[str]: ...
+
 
 class InMemoryTradeRepository:
     def __init__(self) -> None:
@@ -28,14 +29,14 @@ class InMemoryTradeRepository:
         return list(self._trades)
 
     def get_by_symbol(self, symbol: str) -> list[Trade]:
-        return [*filter(lambda t: t.symbol==symbol, self._trades)]
+        return [*filter(lambda t: t.symbol == symbol, self._trades)]
 
-    def get_extreme_timestamps(self, 
-                               symbol: str | None = None) \
-                                -> tuple[datetime | None, datetime | None]:
-        trades: Iterator[Trade] = (t for t in self._trades) 
+    def get_extreme_timestamps(
+        self, symbol: str | None = None
+    ) -> tuple[datetime | None, datetime | None]:
+        trades: Iterator[Trade] = (t for t in self._trades)
         if symbol is not None:
-            trades = filter(lambda t: t.symbol==symbol, trades)
+            trades = filter(lambda t: t.symbol == symbol, trades)
         return _get_extreme_timestamps(trades)
 
     def get_all_symbols(self) -> set[str]:
@@ -54,26 +55,27 @@ class FileTradeRepository:
         with self._filepath.open("a") as f:
             f.write(trade.model_dump_json() + "\n")
         self._symbols |= {trade.symbol}
-    
+
     def get_all(self) -> list[Trade]:
         if not self._filepath.exists():
             return []
         with self._filepath.open() as f:
             return [Trade.model_validate_json(line) for line in f if line.strip()]
-    
+
     def get_by_symbol(self, symbol: str) -> list[Trade]:
         with self._filepath.open() as f:
             all_trades = (Trade.model_validate_json(line) for line in f if line.strip())
-            return [*filter(lambda t: t.symbol==symbol, all_trades)]    
+            return [*filter(lambda t: t.symbol == symbol, all_trades)]
 
-    def get_extreme_timestamps(self, 
-                               symbol: str | None = None) \
-                                -> tuple[datetime | None, datetime | None]:
+    def get_extreme_timestamps(
+        self, symbol: str | None = None
+    ) -> tuple[datetime | None, datetime | None]:
         with self._filepath.open() as f:
-            trades: Iterator[Trade] = (Trade.model_validate_json(line) 
-                                       for line in f if line.strip())
+            trades: Iterator[Trade] = (
+                Trade.model_validate_json(line) for line in f if line.strip()
+            )
             if symbol is not None:
-                trades = filter(lambda t: t.symbol==symbol, trades)
+                trades = filter(lambda t: t.symbol == symbol, trades)
             return _get_extreme_timestamps(trades)
 
     def get_all_symbols(self) -> set[str]:
@@ -83,6 +85,7 @@ class FileTradeRepository:
                 if line.strip():
                     symbols |= {Trade.model_validate_json(line).symbol}
         return symbols
+
 
 def _get_extreme_timestamps(trades: Iterator[Trade]) -> tuple[datetime | None, datetime | None]:
     min_ts, max_ts = None, None
@@ -113,8 +116,6 @@ class PortfolioService:
     def get_summary(self) -> dict[str, dict[str, Decimal]]:
         symbols = sorted(list(set(t.symbol for t in self._trade_repo.get_all())))
         return {
-            symbol: {"position": self.get_position(symbol),
-                     "notional": self.get_notional(symbol)
-                    } 
-                for symbol in symbols
-            }
+            symbol: {"position": self.get_position(symbol), "notional": self.get_notional(symbol)}
+            for symbol in symbols
+        }

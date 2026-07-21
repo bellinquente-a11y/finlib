@@ -48,7 +48,7 @@
 ### What I built
 
 - A `pydantic.BaseModel` `Portfolio` class of `Trades` with custom dunder methods
-- An `Instrument` ABC and two concrete subclasses 
+- An `Instrument` ABC and two concrete subclasses
 - A Protocol for `Priceable` instruments
 
 ### Surprises
@@ -238,7 +238,7 @@ Nothing.
 - A `PortfolioService` class interfacing with the `TradeRepository` protocol at object creation.
 - A `config.py` file returning a `Setting` object from `pydantic_settings.BaseSettings`.
 - A `.env` file from which default settings are read.
-- Subsettings for Binance API via `pydantic.BaseModel`. 
+- Subsettings for Binance API via `pydantic.BaseModel`.
 - Refactor the code to avoid global instantiated dependencies.
 
 
@@ -706,7 +706,7 @@ Notes on `fastapi.dependencies.utils`.
 - `pytest` fixtures
 - their scope: function (def); class; module; system
 - parametrizing tests via `pytest.mark.parametrize`
-- using `match` in `pytest.raises` to make sure that an error message is useful (important!) 
+- using `match` in `pytest.raises` to make sure that an error message is useful (important!)
 
 ### Built
 

@@ -9,11 +9,13 @@ import structlog
 
 log = structlog.get_logger(__name__)
 
+
 @dataclass(frozen=True)
 class OHLCVInterval:
     """Dataclass representing an OHLCV bar"""
+
     symbol: str
-    timestamp: datetime 
+    timestamp: datetime
     open: Decimal
     high: Decimal
     low: Decimal
@@ -24,9 +26,7 @@ class OHLCVInterval:
         fields_names = [f.name for f in fields(self)]
         fields_types = [f.type for f in fields(self)]
         output = []
-        for fname, ftype in zip(fields_names, 
-                                                                   fields_types, 
-                                                                   strict=True):
+        for fname, ftype in zip(fields_names, fields_types, strict=True):
             field = getattr(self, fname)
             if ftype is str:
                 output.append(field)
@@ -37,18 +37,14 @@ class OHLCVInterval:
             else:
                 raise NotImplementedError
         return ",".join(output)
-    
+
     @classmethod
     def from_string(cls, string: str) -> "OHLCVInterval":
         fields_names = [f.name for f in fields(cls)]
         fields_types = [f.type for f in fields(cls)]
         data_list = string.strip().split(",")
-        data: dict[str, Any] = {k:v for k,v in zip(fields_names, 
-                                                                    data_list, 
-                                                                    strict=True)}
-        for fname, ftype in zip(fields_names, 
-                                                                   fields_types, 
-                                                                   strict=True):
+        data: dict[str, Any] = {k: v for k, v in zip(fields_names, data_list, strict=True)}
+        for fname, ftype in zip(fields_names, fields_types, strict=True):
             if ftype is str:
                 continue
             if ftype is datetime:
@@ -62,13 +58,13 @@ class OHLCVInterval:
 
 class OHLCVRepository(Protocol):
     def add_interval(self, data: OHLCVInterval) -> None: ...
-    def add_intervals_batch(self, 
-                            data: pd.DataFrame, 
-                            columns_map: dict[str, str] | None=None) -> None: ...
-    def get_data(self, 
-                 symbol: str, 
-                 start: datetime | None = None, 
-                 end: datetime | None = None) -> pd.DataFrame: ...
+    def add_intervals_batch(
+        self, data: pd.DataFrame, columns_map: dict[str, str] | None = None
+    ) -> None: ...
+    def get_data(
+        self, symbol: str, start: datetime | None = None, end: datetime | None = None
+    ) -> pd.DataFrame: ...
+
 
 class InMemoryOHLCVRepository:
     def __init__(self) -> None:
@@ -78,9 +74,9 @@ class InMemoryOHLCVRepository:
     def add_interval(self, data: OHLCVInterval) -> None:
         self._data.append(data)
 
-    def add_intervals_batch(self, 
-                            df: pd.DataFrame, 
-                            columns_map: dict[str, str] | None = None) -> None:
+    def add_intervals_batch(
+        self, df: pd.DataFrame, columns_map: dict[str, str] | None = None
+    ) -> None:
         if columns_map is not None:
             df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
         if not (set(df.columns) <= set(self._fieldnames)):
@@ -88,29 +84,28 @@ class InMemoryOHLCVRepository:
 
         last_timestamp = self._get_last_timestamps()
         symbols = set(df["symbol"].to_list())
-        count=0
+        count = 0
         for symbol in symbols:
             query = "symbol==@symbol"
             if symbol in last_timestamp:
                 query = f"{query} and timestamp>@last_timestamp[symbol]"
             for row in df.query(query).itertuples():
-                self.add_interval(
-                    OHLCVInterval(**{k:getattr(row,k) for k in  self._fieldnames})
-                )
-                count+=1
+                self.add_interval(OHLCVInterval(**{k: getattr(row, k) for k in self._fieldnames}))
+                count += 1
         log.info("Added rows to trade repo", count=count)
 
-    def get_data(self, 
-                 symbol: str, 
-                 start: datetime | None = None, 
-                 end: datetime | None = None) -> pd.DataFrame:
-        filtered_data = filter(lambda b: b.symbol==symbol, self._data)
+    def get_data(
+        self, symbol: str, start: datetime | None = None, end: datetime | None = None
+    ) -> pd.DataFrame:
+        filtered_data = filter(lambda b: b.symbol == symbol, self._data)
         if start is not None:
-            filtered_data = filter(lambda b: b.timestamp>=start, filtered_data)
+            filtered_data = filter(lambda b: b.timestamp >= start, filtered_data)
         if end is not None:
-            filtered_data = filter(lambda b: b.timestamp<=end, filtered_data)
-        return pd.DataFrame([[getattr(i, f) for f in self._fieldnames] for i in filtered_data], 
-                            columns=self._fieldnames).sort_values(["timestamp", "symbol"])
+            filtered_data = filter(lambda b: b.timestamp <= end, filtered_data)
+        return pd.DataFrame(
+            [[getattr(i, f) for f in self._fieldnames] for i in filtered_data],
+            columns=self._fieldnames,
+        ).sort_values(["timestamp", "symbol"])
 
     def _get_last_timestamps(self) -> dict[str, datetime]:
         res: dict[str, datetime] = {}
@@ -120,6 +115,7 @@ class InMemoryOHLCVRepository:
             else:
                 res[row.symbol] = max(res[row.symbol], row.timestamp)
         return res
+
 
 class FileOHLCVRepository:
     def __init__(self, filepath: Path) -> None:
@@ -139,9 +135,9 @@ class FileOHLCVRepository:
         with self._filepath.open("a") as f:
             f.write(data.to_string() + "\n")
 
-    def add_intervals_batch(self, 
-                            df: pd.DataFrame, 
-                            columns_map: dict[str, str] | None = None) -> None:
+    def add_intervals_batch(
+        self, df: pd.DataFrame, columns_map: dict[str, str] | None = None
+    ) -> None:
         if columns_map is not None:
             df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
         if not (set(df.columns) <= set(self._fieldnames)):
@@ -149,9 +145,8 @@ class FileOHLCVRepository:
 
         symbols = set(df["symbol"].to_list())
         last_timestamp = self._get_last_timestamps()
-        count=0
+        count = 0
         for symbol in symbols:
-
             query = "symbol==@symbol"
             if symbol in last_timestamp:
                 query = f"{query} and timestamp>@last_timestamp[symbol]"
@@ -160,36 +155,35 @@ class FileOHLCVRepository:
                 log.info("adding intervals", symbol=symbol)
 
             for row in df.query(query).itertuples():
-                ohlcv_int = OHLCVInterval(**{k:getattr(row,k) for k in self._fieldnames})
+                ohlcv_int = OHLCVInterval(**{k: getattr(row, k) for k in self._fieldnames})
                 self.add_interval(ohlcv_int)
-                count+=1
+                count += 1
 
         log.info("Added rows to trade repo", count=count)
 
-    def get_data(self, 
-                 symbol: str, 
-                 start: datetime | None = None, 
-                 end: datetime | None = None) -> pd.DataFrame:
+    def get_data(
+        self, symbol: str, start: datetime | None = None, end: datetime | None = None
+    ) -> pd.DataFrame:
         data = []
         with self._filepath.open() as f:
             for i, row in enumerate(f):
-                if i==0:
+                if i == 0:
                     continue
                 row_data = OHLCVInterval.from_string(row)
-                if row_data.symbol==symbol:
+                if row_data.symbol == symbol:
                     if (start is not None) and (end is not None):
-                        if row_data.timestamp<start or row_data.timestamp>end:
+                        if row_data.timestamp < start or row_data.timestamp > end:
                             continue
                     elif (start is not None) and (end is None):
-                        if row_data.timestamp<start:
+                        if row_data.timestamp < start:
                             continue
-                    elif (start is None) and (end is not None) and row_data.timestamp>end:
-                            continue
-                    data.append([getattr(row_data,f) for f in self._fieldnames])
+                    elif (start is None) and (end is not None) and row_data.timestamp > end:
+                        continue
+                    data.append([getattr(row_data, f) for f in self._fieldnames])
         return pd.DataFrame(data, columns=self._fieldnames).sort_values(by="timestamp")
 
     def _get_last_timestamps(self) -> dict[str, datetime]:
-        res : dict[str, datetime] = {}
+        res: dict[str, datetime] = {}
         with self._filepath.open() as f:
             _ = f.readline()
             for row in f:
@@ -201,9 +195,9 @@ class FileOHLCVRepository:
         return res
 
 
-def _reformat_dataframe_for_batch_input(df: pd.DataFrame, 
-                                        repo_field_names: list[str], 
-                                        columns_map: dict[str, str]) -> pd.DataFrame:
+def _reformat_dataframe_for_batch_input(
+    df: pd.DataFrame, repo_field_names: list[str], columns_map: dict[str, str]
+) -> pd.DataFrame:
     """Rename columns of the input dataframe to match repo expectations"""
     # Validate column_map
     if not set(columns_map.keys()) <= set(df.columns):

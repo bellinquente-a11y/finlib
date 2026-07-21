@@ -13,8 +13,9 @@ from finlib.ohlcv_repo import FileOHLCVRepository
 
 log = logging.getLogger(__name__)
 
+
 async def main(filepath: str) -> None:
-    
+
     repo_path = Path(filepath)
 
     # delete existing repo file
@@ -31,20 +32,18 @@ async def main(filepath: str) -> None:
     log.info("Extract market data from repo")
     mdata = pd.DataFrame()
     for s in symbols:
-        new_df = (
-            repo
-            .get_data(s, start=datetime.now(tz=UTC)-timedelta(days=10))
-            .sort_values("timestamp")
+        new_df = repo.get_data(s, start=datetime.now(tz=UTC) - timedelta(days=10)).sort_values(
+            "timestamp"
         )
-        new_df = add_rolling_stats(new_df, 24*252, 24*5)
+        new_df = add_rolling_stats(new_df, 24 * 252, 24 * 5)
         mdata = pd.concat((mdata, new_df), axis=0)
 
     mdata = mdata.sort_values(["timestamp", "symbol"])
 
     log.info("Print rolling summary stats")
-    
+
     print(mdata.tail(10))
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     asyncio.run(main(sys.argv[1]))

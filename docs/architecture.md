@@ -15,13 +15,10 @@ sequenceDiagram
     CLI->>TradeRepo: trades.jsonl
     config->>OHLCVRepository: repo_dir, freq
     TradeRepo->>OHLCVRepository: symbols
-    OHLCVRepository-->>MarketDataAnalytics: calculate 
+    OHLCVRepository-->>MarketDataAnalytics: calculate
     TradeRepo->>PortfolioService: positions
     OHLCVRepository->>PortfolioService" mark to market
     PortfolioService->PortfolioPnlAnaltics: calculate
     MarketDataAnalytics-->Output: print
     PortfolioPnlAnaltics->Output: print
 ```
-
-
-

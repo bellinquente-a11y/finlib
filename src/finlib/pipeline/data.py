@@ -12,6 +12,7 @@ from finlib.trade_repo import TradeRepository
 
 log = logging.getLogger(__name__)
 
+
 def fetch_trades(trade_repo: TradeRepository) -> tuple[list[Trade], list[str], datetime]:
     """Load trades from in file repository and return list of symbols and first trade timestamp."""
     log.info("Loading trades from the trade repository")
@@ -23,17 +24,17 @@ def fetch_trades(trade_repo: TradeRepository) -> tuple[list[Trade], list[str], d
     first_ts, _ = trade_repo.get_extreme_timestamps()
     if first_ts is None:
         raise ValueError
-        
+
     log.info(f"Trades loaded    = {len(trades)}")
-    log.info(f"Symbols          = {", ".join([s for s in symbols])}")
+    log.info(f"Symbols          = {', '.join([s for s in symbols])}")
     log.info(f"First time stamp = {first_ts!r}")
 
     return trades, list(symbols), first_ts
 
 
-async def fetch_market_data(symbols: list[str], 
-                            interval: binance_interval, 
-                            start: datetime) -> pd.DataFrame:
+async def fetch_market_data(
+    symbols: list[str], interval: binance_interval, start: datetime
+) -> pd.DataFrame:
     """Fetch OHLCV market data from Binance for the given symbols.
 
     Args:
@@ -44,14 +45,14 @@ async def fetch_market_data(symbols: list[str],
     Returns:
         DataFrame with one row per symbol/interval combination.
     """
-    log.info(f"Fetching {interval} market data for symbols: {", ".join(symbols)} from {start!s}")
+    log.info(f"Fetching {interval} market data for symbols: {', '.join(symbols)} from {start!s}")
     return await fetch_binance(symbols, interval, start)
 
 
 def store_market_data(ohlcv_repo: OHLCVRepository, df: pd.DataFrame) -> None:
-    """"Store market data in the OHLCV repository."""
+    """ "Store market data in the OHLCV repository."""
     log.info("Storing market data in OHLCV repository")
-    if df.shape[0]==0:
+    if df.shape[0] == 0:
         raise ValueError("Empty market data DataFrame")
     columns_map = {"close_time": "timestamp"}
     ohlcv_repo.add_intervals_batch(df, columns_map=columns_map)

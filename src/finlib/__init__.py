@@ -10,12 +10,18 @@ from finlib.trade_repo import FileTradeRepository, PortfolioService, TradeReposi
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-__all__ = ['Trade', 
-           'Instrument', 'Equity', 'Future', 'Priceable', 
-           'value_portfolio', 'Portfolio',
-           'calculate_daily_vwap',
-           'PortfolioService', 'TradeRepository',
-           'FileTradeRepository',
-           'OHLCVRepository',
-           'pipeline'
-           ]
+__all__ = [
+    "Trade",
+    "Instrument",
+    "Equity",
+    "Future",
+    "Priceable",
+    "value_portfolio",
+    "Portfolio",
+    "calculate_daily_vwap",
+    "PortfolioService",
+    "TradeRepository",
+    "FileTradeRepository",
+    "OHLCVRepository",
+    "pipeline",
+]

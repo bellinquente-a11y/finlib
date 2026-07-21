@@ -12,36 +12,38 @@ def trade_strategy() -> st.SearchStrategy[Trade]:
         symbol=st.text(alphabet=st.characters(categories=["Lu"]), min_size=1, max_size=10),
         quantity=st.floats(min_value=0, max_value=1e9, exclude_min=True),
         price=st.floats(min_value=0, max_value=1e9, exclude_min=True),
-        side=st.sampled_from(['BUY', 'SELL']),
+        side=st.sampled_from(["BUY", "SELL"]),
     )
+
 
 @st.composite
 def ordered_trades_list(draw: st.DrawFn, min_trades: int = 1, max_trades: int = 20) -> list[Trade]:
-    symbols = draw(st.lists(
-        st.text(alphabet=st.characters(categories=["Lu"]), min_size=1, max_size=10),
-        min_size=1, max_size=5, unique=True
-    ))
+    symbols = draw(
+        st.lists(
+            st.text(alphabet=st.characters(categories=["Lu"]), min_size=1, max_size=10),
+            min_size=1,
+            max_size=5,
+            unique=True,
+        )
+    )
 
     n_trades = draw(st.integers(min_value=min_trades, max_value=max_trades))
 
-    timestamp = draw(st.datetimes(min_value=datetime(2020,1,1), max_value=datetime(2030,1,1)))
-    res : list[Trade] = []
+    timestamp = draw(st.datetimes(min_value=datetime(2020, 1, 1), max_value=datetime(2030, 1, 1)))
+    res: list[Trade] = []
     for _ in range(n_trades):
         offset = draw(st.integers(min_value=1, max_value=3600))
         timestamp += timedelta(offset)
         res.append(
             Trade(
                 symbol=draw(st.sampled_from(symbols)),
-                quantity=Decimal(str(draw(st.floats(min_value=0, 
-                                                    max_value=1e9, 
-                                                    exclude_min=True)))),
-                price=Decimal(str(draw(st.floats(min_value=0, 
-                                                 max_value=1e9, 
-                                                 exclude_min=True)))),
-                side=draw(st.sampled_from(['BUY', 'SELL'])),
-                timestamp=timestamp
+                quantity=Decimal(
+                    str(draw(st.floats(min_value=0, max_value=1e9, exclude_min=True)))
+                ),
+                price=Decimal(str(draw(st.floats(min_value=0, max_value=1e9, exclude_min=True)))),
+                side=draw(st.sampled_from(["BUY", "SELL"])),
+                timestamp=timestamp,
             )
         )
 
     return res
-
