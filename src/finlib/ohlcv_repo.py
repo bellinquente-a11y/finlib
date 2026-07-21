@@ -152,7 +152,11 @@ class FileOHLCVRepository:
             if symbol in last_timestamp:
                 last_timestamp_symbol = last_timestamp[symbol]
                 query = f"{query} and timestamp>@last_timestamp_symbol"
-                log.info("adding intervals", symbol=symbol, first_timestamp=last_timestamp_symbol)
+                log.info(
+                    "adding intervals",
+                    symbol=symbol,
+                    last_timestamp=last_timestamp_symbol.astimezone().strftime("%d-%m-%Y %H:%M:%S"),
+                )
             else:
                 log.info("adding intervals", symbol=symbol)
 
@@ -161,7 +165,7 @@ class FileOHLCVRepository:
                 self.add_interval(ohlcv_int)
                 count += 1
 
-        log.info("Added rows to trade repo", count=count)
+        log.info("New rows added to trade repo", count=count)
 
     def get_data(
         self, symbol: str, start: datetime | None = None, end: datetime | None = None

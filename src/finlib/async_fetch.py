@@ -1,4 +1,5 @@
 import asyncio
+import time
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any, Literal, get_args
@@ -154,5 +155,8 @@ async def fetch_binance(
     diffdt = datetime.now() - start if start.tzinfo is None else datetime.now(tz=UTC) - start
     limit = max(int(diffdt / deltat), 1)
 
+    start_time = time.perf_counter()
     data = await _fetch_binance_raw_data(symbols, interval, limit)
+    elapsed = time.perf_counter() - start_time
+    log.info("Fetched Binance data", symbols=symbols, interval=interval, elapsed=f"{elapsed:.1f}s")
     return _convert_binance_data_to_DataFrame(data)

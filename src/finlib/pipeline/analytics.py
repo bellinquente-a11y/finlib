@@ -99,10 +99,12 @@ def compute_portfolio_performance_metrics(
     symbols = trade_repo.get_all_symbols()
     first_ts, _ = trade_repo.get_extreme_timestamps()
     if first_ts is None:
+        log.error("Empty trade repo")
         raise ValueError
     portfolio = Portfolio(name="My portfolio", trades=trades)
     prices = get_market_price(ohlcv_repo, list(symbols), first_ts)
     if set(symbols) != set(prices.columns.to_list()):
+        log.error("Missing symbols in the market price dataframe")
         raise RuntimeError("Missing sumbols in price dataframe")
     return (
         portfolio.historic_pnl(prices),
