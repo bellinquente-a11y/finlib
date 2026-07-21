@@ -24,7 +24,7 @@ def fetch_trades(trade_repo: TradeRepository) -> tuple[list[Trade], list[str], d
     first_ts, last_ts = trade_repo.get_extreme_timestamps()
     if first_ts is None or last_ts is None:
         log.error("Empty trade repository")
-        raise ValueError
+        raise RuntimeError("No trades in trade repository")
 
     log.info(
         "Trades loaded from repo",

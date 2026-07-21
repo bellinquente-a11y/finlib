@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -50,9 +51,10 @@ class Settings(BaseSettings):
         env_nested_delimiter="__",
     )
 
+    environment: Literal["local", "production"] = Field(default="local")
+    log_level: str = Field(default="INFO")
     data_dir: Path = Field(default=Path("./data"))
     fetch_timeout_seconds: float = Field(default=10.0)
-    log_level: str = Field(default="INFO")
 
     binance: BinanceSettings = BinanceSettings()
 

@@ -1,16 +1,16 @@
 """ "Trades and market data analysis module"""
 
-import logging
 from datetime import datetime
 
 import pandas as pd
+import structlog
 
 from finlib import historic_analytics
 from finlib.ohlcv_repo import OHLCVRepository
 from finlib.portfolio import Portfolio
 from finlib.trade_repo import TradeRepository
 
-log = logging.getLogger(__name__)
+log = structlog.getLogger(__name__)
 
 INTERVALS_PER_YEAR_DAILY = 252
 
@@ -29,15 +29,13 @@ def compute_market_summary(
     result = pd.DataFrame()
     for symbol in symbols:
         df = ohlcv_repo.get_data(symbol)
-        log.debug("df from market repo shape %s: [%i, %i]", symbol, df.shape[0], df.shape[1])
         if df.shape[0] == 0:
-            log.warning(f"Missing market data for {symbol}")
+            log.warning("Missing data from OHLCV repo", symbol=symbol)
 
         else:
             df = historic_analytics.resample_dataframe(
                 df.drop(columns="symbol").sort_values(by="timestamp"), freq="D"
             )
-            log.debug("df daily resampling shape %s: [%i, %i]", symbol, df.shape[0], df.shape[1])
             df = historic_analytics.add_rolling_stats(df, INTERVALS_PER_YEAR_DAILY, window)
             result = pd.concat(
                 (
@@ -67,9 +65,8 @@ def get_market_price(
     result = pd.DataFrame()
     for symbol in symbols:
         df = ohlcv_repo.get_data(symbol, first_ts)
-        log.debug("df from market repo shape %s: [%i, %i]", symbol, df.shape[0], df.shape[1])
         if df.shape[0] == 0:
-            log.warning(f"Missing market data for {symbol}")
+            log.warning("Missing data from OHLCV repo", symbol=symbol)
 
         else:
             df = (
@@ -105,7 +102,7 @@ def compute_portfolio_performance_metrics(
     prices = get_market_price(ohlcv_repo, list(symbols), first_ts)
     if set(symbols) != set(prices.columns.to_list()):
         log.error("Missing symbols in the market price dataframe")
-        raise RuntimeError("Missing sumbols in price dataframe")
+        raise RuntimeError("Missing symbols in price dataframe")
     return (
         portfolio.historic_pnl(prices),
         portfolio.historic_market_value(prices),

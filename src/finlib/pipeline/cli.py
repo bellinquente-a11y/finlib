@@ -6,6 +6,8 @@ import logging
 from datetime import timedelta
 from pathlib import Path
 
+import structlog
+
 from finlib.config import get_settings
 from finlib.ohlcv_repo import FileOHLCVRepository
 from finlib.pipeline import analytics, data, output
@@ -29,7 +31,28 @@ def main() -> None:
     args = parser.parse_args()
 
     settings = get_settings()
-    logging.basicConfig(level=settings.log_level)
+
+    # structlog config
+    shared_processors: list[structlog.typing.Processor] = [
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+    ]
+
+    if settings.environment == "production":
+        renderer: structlog.processors.JSONRenderer | structlog.dev.ConsoleRenderer = (
+            structlog.processors.JSONRenderer()
+        )
+    else:
+        renderer = structlog.dev.ConsoleRenderer()
+
+    structlog.configure(
+        processors=[*shared_processors, renderer],
+        wrapper_class=structlog.make_filtering_bound_logger(
+            logging.getLevelNamesMapping()[settings.log_level]
+        ),
+        logger_factory=structlog.PrintLoggerFactory(),
+    )
 
     # Create repo objects
     trade_repo = FileTradeRepository(Path(args.trade_repo_path))
