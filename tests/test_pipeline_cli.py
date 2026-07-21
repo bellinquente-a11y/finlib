@@ -10,14 +10,14 @@ from finlib import Trade
 from finlib.pipeline.cli import main
 
 
-def test_main_wiring(tmp_path: Path):
+def test_main_wiring(tmp_path: Path) -> None:
     summary = pd.DataFrame({"symbol": 5*["AAA"],
                        "close": 5*[Decimal(100)],
                        "rolling_vol": 5*[0.1],
                        "rolling_sharpe": 5*[1.0]})
     pnl = pd.DataFrame([[Decimal(1)]], columns=["AAA"], index=[datetime(2026,1,1)])
     ts = datetime(2026,2,2,2,2,2)
-    trade = Trade(symbol="AAA", quantity=10, price=100., side="BUY", timestamp=ts)
+    trade = Trade(symbol="AAA", quantity=Decimal(10), price=Decimal(100.), side="BUY", timestamp=ts)
     trades_path = tmp_path / "trades.jsonl"
     with trades_path.open("a") as f:
         f.write(trade.model_dump_json())

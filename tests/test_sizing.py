@@ -8,27 +8,27 @@ from finlib.sizing import kelly_fraction
 
 MAX_HYPOTHESIS_SAMPLES = 100
 
-def test_kelly_criterion_calculation_without_cap():
+def test_kelly_criterion_calculation_without_cap() -> None:
     assert kelly_fraction(0.5, 2.0, 0.5) == pytest.approx(0.25)
 
-def test_kelly_criterion_calculation_with_cap():
+def test_kelly_criterion_calculation_with_cap() -> None:
     assert kelly_fraction(0.9, 1.0, 0.5) == pytest.approx(0.5)
 
-def test_kelly_criterion_probability_out_of_bounds_raises():
+def test_kelly_criterion_probability_out_of_bounds_raises() -> None:
     with pytest.raises(ValueError, match="Input p of kelly_criterion needs to satisfy 0<=p<=1"):
         _ = kelly_fraction(1.1, 1.0, 0.5)
     with pytest.raises(ValueError, match="Input p of kelly_criterion needs to satisfy 0<=p<=1"):
         _ = kelly_fraction(-0.1, 1.0, 0.5)
 
-def test_kelly_criterion_b_not_strictly_positive_raises():
+def test_kelly_criterion_b_not_strictly_positive_raises() -> None:
     with pytest.raises(ValueError, match="Input b of kelly_criterion needs to satisfy b>0"):
         _ = kelly_fraction(0.5, 0, 0.5)
 
-def test_kelly_criterion_non_positive_cap_raises():
+def test_kelly_criterion_non_positive_cap_raises() -> None:
     with pytest.raises(ValueError, match="Input cap of kelly_criterion needs to satisfy cap>0"):
         _ = kelly_fraction(0.5, 2, 0)
 
-def test_kelly_criterion_no_hedge_output_zero():
+def test_kelly_criterion_no_hedge_output_zero() -> None:
     assert kelly_fraction(0.5, 1, 0.5) == pytest.approx(0)
 
 @settings(max_examples=MAX_HYPOTHESIS_SAMPLES)
@@ -37,7 +37,7 @@ def test_kelly_criterion_no_hedge_output_zero():
     b=st.floats(min_value=0, exclude_min=True),
     cap=st.floats(min_value=0, exclude_min=True)
 )
-def test_kelly_criterion_output_between_0_and_1(p, b, cap):
+def test_kelly_criterion_output_between_0_and_1(p: float, b: float, cap: float) -> None:
     k = kelly_fraction(p,b,cap)
     assert k>=0 and k<=cap
 
@@ -46,7 +46,7 @@ def test_kelly_criterion_output_between_0_and_1(p, b, cap):
     b=st.floats(min_value=0, exclude_min=True),
     cap=st.floats(min_value=0, exclude_min=True)
 )
-def test_kelly_criterion_p_eq_1_ouputs_cap(b, cap):
+def test_kelly_criterion_p_eq_1_ouputs_cap(b: float, cap: float) -> None:
     assert kelly_fraction(1,b,cap) == min(cap, 1)
 
 @settings(max_examples=MAX_HYPOTHESIS_SAMPLES)
@@ -56,7 +56,10 @@ def test_kelly_criterion_p_eq_1_ouputs_cap(b, cap):
     b=st.floats(min_value=0, exclude_min=True),
     cap=st.floats(min_value=0, exclude_min=True)
 )
-def test_kelly_criterion_monotone_non_decreasing_in_p_at_fixed_b(p1, p2, b, cap):
+def test_kelly_criterion_monotone_non_decreasing_in_p_at_fixed_b(p1: float, 
+                                                                 p2: float, 
+                                                                 b: float, 
+                                                                 cap: float) -> None:
     p_min, p_max = min(p1, p2), max(p1, p2)
     k_p_min = kelly_fraction(p_min, b, cap)
     k_p_max = kelly_fraction(p_max, b, cap)
@@ -64,7 +67,7 @@ def test_kelly_criterion_monotone_non_decreasing_in_p_at_fixed_b(p1, p2, b, cap)
 
 @settings(max_examples=MAX_HYPOTHESIS_SAMPLES)
 @st.composite
-def p_b_resulting_in_negative_edge(draw):
+def p_b_resulting_in_negative_edge(draw: st.DrawFn) -> dict[str, float]:
     p = draw(st.floats(min_value=0, max_value=1, exclude_min=True, exclude_max=True))
     b_max = (1-p)/p
     b = draw(st.floats(min_value=0, max_value=b_max, exclude_min=True))
@@ -75,7 +78,7 @@ def p_b_resulting_in_negative_edge(draw):
     inputs = p_b_resulting_in_negative_edge(),
     cap=st.floats(min_value=0, exclude_min=True)
 )
-def test_kelly_fraction_non_positive_edge_result_zero(inputs, cap):
+def test_kelly_fraction_non_positive_edge_result_zero(inputs: dict[str, float], cap: float) -> None:
     assert kelly_fraction(inputs["p"], inputs["b"], cap) == pytest.approx(0)
 
 @settings(max_examples=MAX_HYPOTHESIS_SAMPLES)
@@ -84,5 +87,5 @@ def test_kelly_fraction_non_positive_edge_result_zero(inputs, cap):
     b=st.floats(min_value=0, exclude_min=True),
     cap=st.floats(min_value=0, exclude_min=True)
 )
-def test_kelly_fraction_result_finite(p, b, cap):
+def test_kelly_fraction_result_finite(p: float, b: float, cap: float) -> None:
     assert math.isfinite(kelly_fraction(p, b, cap))

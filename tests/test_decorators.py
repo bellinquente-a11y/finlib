@@ -3,14 +3,14 @@ import pytest
 from finlib.decorators import deprecated, retry, timer, validate_inputs
 
 
-def test_retry_does_not_affect_working_function():
+def test_retry_does_not_affect_working_function() -> None:
     @retry(max_attempts=3, delay=0.1, exceptions=(ValueError,))
     def test_retry() -> int: 
         return 1
     assert isinstance(test_retry(), int)
     assert test_retry()==1
 
-def test_retry_number_retries():
+def test_retry_number_retries() -> None:
     count = 0
     @retry(max_attempts=3, delay=0.1, exceptions=(ValueError,))
     def test_retry() -> int:
@@ -21,7 +21,7 @@ def test_retry_number_retries():
         _ = test_retry()
     assert count==3
 
-def test_validate_inputs():
+def test_validate_inputs() -> None:
     @validate_inputs(min_quantity=1)
     def price_order(quantity: float, price: float) -> float:
         return quantity * price

@@ -3,7 +3,7 @@ import sys
 from decimal import Decimal
 from pathlib import Path
 
-from finlib import Equity, value_portfolio
+from finlib import Equity, Priceable, value_portfolio
 from finlib.context_managers import timer
 from finlib.data import stream_ohlcv, stream_trades
 
@@ -28,13 +28,13 @@ def main(trades_csv: Path, prices_csv: Path) -> None:
         eod_price[bar.symbol] = bar.close
 
     log.info('Generate portfolio...')
-    positions = {}
+    positions : dict[str, tuple[Priceable, float]] = {}
     for symbol in lot_size:
         if lot_size[symbol] == Decimal(0):
             continue
         if symbol not in eod_price:
             raise RuntimeError(f"Missing symbol {symbol} in market data file")
-        positions[symbol] = (Equity(symbol, eod_price[symbol]), lot_size[symbol])
+        positions[symbol] = (Equity(symbol, eod_price[symbol]), float(lot_size[symbol]))
 
     log.info('Valuing portfolio...')
     with timer('Portfolio valuation'):

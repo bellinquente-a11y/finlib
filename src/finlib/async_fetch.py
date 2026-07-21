@@ -32,6 +32,13 @@ class BinanceDataRow(BaseModel):
     taker_buy_quote_asset_volume: Decimal = Field(..., gt=0)
     ignore: str
 
+    @classmethod
+    def from_list(cls, data: list[Any]) -> "BinanceDataRow":
+        return cls(**{k:v for k,v 
+                     in zip(cls.model_fields, 
+                                     data, 
+                                     strict=True)})
+
 async def _fetch_binance_one_symbol(session: aiohttp.ClientSession, 
                                     symbol: str, 
                                     interval: binance_interval, 

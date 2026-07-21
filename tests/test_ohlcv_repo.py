@@ -1,6 +1,7 @@
 import dataclasses
 from datetime import datetime
 from decimal import Decimal
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -26,12 +27,12 @@ _int4 = OHLCVInterval(symbol="SYM2", timestamp=datetime(2026,6,4,1,2,3), open=De
                       volume=Decimal(1_342))
 
 @pytest.fixture(params=["memory", "csv"])
-def repo(request, tmp_path) -> OHLCVRepository:
+def repo(request: pytest.FixtureRequest, tmp_path: Path) -> OHLCVRepository:
     if request.param == "memory":
         return InMemoryOHLCVRepository()
     return FileOHLCVRepository(tmp_path / "ohlcv_repo.csv")
 
-def test_in_memory_repo_output(repo: OHLCVRepository):
+def test_in_memory_repo_output(repo: OHLCVRepository) -> None:
     for i in [_int1, _int2, _int3, _int4]:
         repo.add_interval(i)
     df = repo.get_data("SYM1", datetime(2026,6,2,0,0,0), datetime(2026,6,2,23,59,59))
@@ -39,7 +40,7 @@ def test_in_memory_repo_output(repo: OHLCVRepository):
     assert (df == pd.DataFrame([[getattr(_int2, f) for f in fieldnames]], 
                                columns=fieldnames)).all().all()
 
-def test_in_memory_repo_add_batch(repo: OHLCVRepository):
+def test_in_memory_repo_add_batch(repo: OHLCVRepository) -> None:
     _intervals = [_int1, _int2, _int3, _int4]
     fieldnames = [f.name for f in dataclasses.fields(OHLCVInterval)]
     map = {"datetime": "timestamp", "open_price": "open"}

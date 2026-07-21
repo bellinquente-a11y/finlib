@@ -1,5 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
+from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 import pytest
@@ -10,27 +12,31 @@ from finlib.trade_repo import FileTradeRepository, InMemoryTradeRepository, Trad
 
 @pytest.fixture
 def sample_trades() -> list[Trade]:
-    def create_trade(symbol, price, quantity, side, timestamp):
+    def create_trade(symbol: str, 
+                     price: float, 
+                     quantity: float, 
+                     side: Literal["BUY", "SELL"], 
+                     timestamp: tuple[int, int, int, int, int, int]) -> Trade:
         return Trade(symbol=symbol, 
                      price=Decimal(price), 
                      quantity=Decimal(quantity), 
                      side=side, 
                      timestamp=datetime(*timestamp))
     return [
-        create_trade("BBB", 10,  100, "BUY", [2026,2,3,12,3,45]),
-        create_trade("AAA", 10, 50, "BUY", [2026,1,3,12,3,45]),
-        create_trade("AAA", 10, 10, "SELL", [2025,2,3,12,3,45]),
-        create_trade("CCC", 10.2, 70.45,  "SELL", [2026,2,17,12,3,45]),
-        create_trade("BBB", 10, 80, "BUY", [2026,6,3,12,3,45]),
-        create_trade("AAA", 10, 20, "SELL", [2026,7,3,12,3,45]),
+        create_trade("BBB", 10,  100, "BUY", (2026,2,3,12,3,45)),
+        create_trade("AAA", 10, 50, "BUY", (2026,1,3,12,3,45)),
+        create_trade("AAA", 10, 10, "SELL", (2025,2,3,12,3,45)),
+        create_trade("CCC", 10.2, 70.45,  "SELL", (2026,2,17,12,3,45)),
+        create_trade("BBB", 10, 80, "BUY", (2026,6,3,12,3,45)),
+        create_trade("AAA", 10, 20, "SELL", (2026,7,3,12,3,45)),
     ]
 
 @pytest.fixture
-def sample_portfolio(sample_trades):
+def sample_portfolio(sample_trades: list[Trade]) -> Portfolio:
     return Portfolio(name="My portfolio", trades=sample_trades)
 
 @pytest.fixture
-def sample_historic_portfolio(sample_trades):
+def sample_historic_portfolio(sample_trades: list[Trade]) -> Portfolio:
     _TIMESTAMP1 = datetime(2026,2,1,3,0,0)
     _TIMESTAMP2 = datetime(2026,2,4,2,9,0)
     _TIMESTAMP3 = datetime(2026,2,6,3,5,0)
@@ -49,7 +55,7 @@ def sample_historic_portfolio(sample_trades):
     return Portfolio(name="My portfolio", trades=[_TRADE3, _TRADE4, _TRADE1, _TRADE5, _TRADE2])
 
 @pytest.fixture
-def sample_market_making_prices():
+def sample_market_making_prices() -> pd.DataFrame:
     _MM_TIMESTAMPS = [
         datetime(2026,2,1,2,0,0),
         datetime(2026,2,2,2,0,0),
@@ -68,9 +74,9 @@ def sample_market_making_prices():
     )    
 
 @pytest.fixture(params = ("memory", "jsonl"))
-def tmp_trade_repo(request, tmp_path) -> TradeRepository:
+def tmp_trade_repo(request: pytest.FixtureRequest, tmp_path: Path) -> TradeRepository:
     if request.param=="memory":
-        repo = InMemoryTradeRepository()
+        repo : FileTradeRepository | InMemoryTradeRepository = InMemoryTradeRepository()
     elif request.param=="jsonl":
         repo = FileTradeRepository(tmp_path / "trade_repo.jsonl")
     trades =[

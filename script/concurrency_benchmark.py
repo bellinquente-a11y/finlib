@@ -4,11 +4,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 SLEEP = 0.02
 
-def fetch_price(symbol: str):
+def fetch_price(symbol: str) -> float:
     time.sleep(SLEEP)
     return hash(symbol) % 100 + 0.5
 
-async def fetch_price_async(symbol: str):
+async def fetch_price_async(symbol: str) -> float:
     await asyncio.sleep(SLEEP)
     return hash(symbol) % 100 + 0.5
 
