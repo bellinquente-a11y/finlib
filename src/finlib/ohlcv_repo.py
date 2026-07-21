@@ -88,7 +88,8 @@ class InMemoryOHLCVRepository:
         for symbol in symbols:
             query = "symbol==@symbol"
             if symbol in last_timestamp:
-                query = f"{query} and timestamp>@last_timestamp[symbol]"
+                last_timestamp_symbol = last_timestamp[symbol]  # noqa: F841 # this is a pandas-query false positive
+                query = f"{query} and timestamp>@last_timestamp_symbol"
             for row in df.query(query).itertuples():
                 self.add_interval(OHLCVInterval(**{k: getattr(row, k) for k in self._fieldnames}))
                 count += 1
@@ -149,8 +150,9 @@ class FileOHLCVRepository:
         for symbol in symbols:
             query = "symbol==@symbol"
             if symbol in last_timestamp:
-                query = f"{query} and timestamp>@last_timestamp[symbol]"
-                log.info("adding intervals", symbol=symbol, first_timestamp=last_timestamp[symbol])
+                last_timestamp_symbol = last_timestamp[symbol]
+                query = f"{query} and timestamp>@last_timestamp_symbol"
+                log.info("adding intervals", symbol=symbol, first_timestamp=last_timestamp_symbol)
             else:
                 log.info("adding intervals", symbol=symbol)
 
