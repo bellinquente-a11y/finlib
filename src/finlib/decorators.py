@@ -94,7 +94,9 @@ def async_retry[F: Callable[..., Any]](
                     return await func(*args, **kwargs)
                 except exceptions as e:
                     last_exc = e
-                    log.info("Retry function call", func=func, count=count, wait=wait_time, exc=e)
+                    log.warning(
+                        "Retry function call", func=func, count=count, wait=wait_time, exc=e
+                    )
                     count += 1
                     await asyncio.sleep(wait_time)
             raise RuntimeError(
