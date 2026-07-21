@@ -80,3 +80,43 @@ def test_in_memory_repo_add_batch(repo: OHLCVRepository) -> None:
     repo.add_intervals_batch(df, map)
     df_out = repo.get_data("SYM1")
     assert (df_out == df.query('symbol == "SYM1"').rename(columns=map)).all().all()
+
+
+def test_in_memory_repo_add_multiple_batches(repo: OHLCVRepository) -> None:
+    _intervals1 = [_int1, _int2]
+    _intervals2 = [_int3, _int4]
+    fieldnames = [f.name for f in dataclasses.fields(OHLCVInterval)]
+    map = {"datetime": "timestamp", "open_price": "open"}
+    inv_map = {v: k for k, v in map.items()}
+    columns = [inv_map.get(f, f) for f in fieldnames]
+    df1 = pd.DataFrame([[getattr(i, f) for f in fieldnames] for i in _intervals1], columns=columns)
+    df2 = pd.DataFrame([[getattr(i, f) for f in fieldnames] for i in _intervals2], columns=columns)
+    repo.add_intervals_batch(df1, map)
+    repo.add_intervals_batch(df2, map)
+    df_out = repo.get_data("SYM1")
+    exp_df = (
+        pd.concat((df1, df2), axis=0)
+        .query('symbol == "SYM1"')
+        .rename(columns=map)
+        .reset_index(drop=True)
+    )
+    assert set(df_out.columns) == set(exp_df.columns)
+    assert all(df_out.index == exp_df.index)
+    assert (df_out == exp_df).all().all()
+
+
+def test_in_memory_repo_add_same_batches(repo: OHLCVRepository) -> None:
+    _intervals1 = [_int1, _int2, _int3, _int4]
+    fieldnames = [f.name for f in dataclasses.fields(OHLCVInterval)]
+    map = {"datetime": "timestamp", "open_price": "open"}
+    inv_map = {v: k for k, v in map.items()}
+    columns = [inv_map.get(f, f) for f in fieldnames]
+    df1 = pd.DataFrame([[getattr(i, f) for f in fieldnames] for i in _intervals1], columns=columns)
+    df2 = pd.DataFrame([[getattr(i, f) for f in fieldnames] for i in _intervals1], columns=columns)
+    repo.add_intervals_batch(df1, map)
+    repo.add_intervals_batch(df2, map)
+    df_out = repo.get_data("SYM1")
+    exp_df = df1.query('symbol == "SYM1"').rename(columns=map).reset_index(drop=True)
+    assert set(df_out.columns) == set(exp_df.columns)
+    assert all(df_out.index == exp_df.index)
+    assert (df_out == exp_df).all().all()
