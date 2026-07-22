@@ -1,6 +1,6 @@
 # finlib
 
-[![CI](https://github.com/bellinquente-a11y/finlib/actions/workflows/ci.yml/badge.svg)](https://github.com/bellinquente-a11y/finlib/actions/workflows/ci.yml)
+[![CI](https://github.com/simone-belli/finlib/actions/workflows/ci.yml/badge.svg)](https://github.com/simone-belli/finlib/actions/workflows/ci.yml)
 
 Production-grade Python for financial data modelling.
 - Strict type annotations (mypy --strict)
