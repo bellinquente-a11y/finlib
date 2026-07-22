@@ -106,26 +106,40 @@ timestamp
 Total PnL =  169,711
 ```
 
-## Testing
+## Testing & Quality
 
-### Full suite with coverage
+### Principles
+
+- unit tests to test behaviour
+- hypothesis tests to test invariants
+- fake what we own; mock what we don't
+
+### Full suite with coverage (pytest)
+
+pytest + pytest-asyncio; property-based tests (Hypothesis) for portfolio invariants and position sizing
 
 ```bash
 poetry run pytest --cov=finlib -v
 ```
 
-### Type-checking
+### Type-checking (mypy)
 
 ```bash
 poetry run mypy src/ --strict
 ```
 
-### Linting
+### Linting (ruff)
+
+Extended checks: E,F,I,B,UP,SIM,RET.
 
 ```bash
 poetry run ruff check src/ tests/ script/
 ```
 
+### pre-commit
+
+Enforcement of linting, format, mypy --strict.
+
 ### CI
 
-CI enforces ≥80% pytest coverage, mypy --strict, and ruff on every push.
+CI enforces ≥85% pytest coverage, mypy --strict, and ruff on every push.

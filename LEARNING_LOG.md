@@ -25,11 +25,15 @@
 
 ## Week 1, day 2, 18/05
 
+
+
 ### What I built
 
 - A Trade class using `@dataclass`: reduces boilerplate.
 - A Trade class using `Pydantic`: ideal for validation and serialisation
 - A test file to be run with `pytest`
+
+
 
 ### Surprises
 
@@ -37,13 +41,19 @@
 - Usefulness of `poetry` to fix bugs and clean up the code
 - Pydantic's high structure
 
+
+
 ### Still unclear
 
 - Whether dataclass and Pydantic are used in practice as opposed to numpy arrays
 
 ---
 
+
+
 ## Week 1, day 3, 09/06
+
+
 
 ### What I built
 
@@ -51,9 +61,13 @@
 - An `Instrument` ABC and two concrete subclasses
 - A Protocol for `Priceable` instruments
 
+
+
 ### Surprises
 
 - That there is a movement against inheritance and in favour of Protocols (more pythonic)
+
+
 
 ### Still unclear
 
@@ -63,7 +77,11 @@
 
 ---
 
+
+
 ## Week 1, day 4 19/06
+
+
 
 ### What I built
 
@@ -257,7 +275,11 @@ Nothing.
 
 ---
 
+
+
 ## Week 2, day 5 26/06 - week retrospective
+
+
 
 ### Deliverables
 
@@ -414,7 +436,11 @@ Nothing.
 
 ---
 
+
+
 ## Week 3, day 5 1/07 - week retrospective
+
+
 
 ### Deliverables
 
@@ -671,7 +697,11 @@ Notes on `fastapi.dependencies.utils`.
 
 ---
 
+
+
 ## Week 5, day 5 16/07 - retrospective so far
+
+
 
 ### Things that seem obvious but that felt hard early
 
@@ -683,11 +713,15 @@ Notes on `fastapi.dependencies.utils`.
 - how to use mocking for testing
 - the usefulness of trees and graph theory
 
+
+
 ### Questions from the log that have been answered
 
 - how to build test functions
 - why protocols are useful
 - how to define project settings via dependency injection
+
+
 
 ### Still open questions
 
@@ -699,7 +733,11 @@ Notes on `fastapi.dependencies.utils`.
 
 ---
 
+
+
 ## Week 6, day 1: 17/07
+
+
 
 ### Studied
 
@@ -708,14 +746,20 @@ Notes on `fastapi.dependencies.utils`.
 - parametrizing tests via `pytest.mark.parametrize`
 - using `match` in `pytest.raises` to make sure that an error message is useful (important!)
 
+
+
 ### Built
 
 - Simplified the test suite by introducing a `conftest.py` file
 - Added new tests.
 
+
+
 ### Surprises
 
 - Exception message need to be inpur as f-strings: it is a BUG to input them in logging style
+
+
 
 ### Current pytest coverrage
 
@@ -726,37 +770,42 @@ Notes on `fastapi.dependencies.utils`.
 
 ---
 
+
+
 ## Week 6, day 2: 18/07
+
+
 
 ### Mocking review in finlilb
 
 - `finlib.async_fetch`: notice that I mock my own function `finlib.async_fetch._fetch_binance_one_symbol`, where I should probably mock the interface of the library I don't own, namely `finlib.async_fetch.aiohttp.ClientSession.get`.
-
 - `finlib.pipeline.cli` mocks my own functions, but it does so for wiring.
-
 - Otehrwise, I use the repository framework to test my own code.
-
 - `autospec` is never used!!!
+
+
 
 ### Test driven development (TDD)
 
 - used the TDD framework to dev `finlib.sizing.kelly_criterion`
-
 - clunky, but useful to include edge cases that I would have not considered (negative b; positivity of the result)
-
 - leads to more confidence in the result
-
 - TDD is is useful when we already know the output and edge cases; it would be wasteful in research and exploratory context
+
+
 
 ### Lessons
 
 1. Mock at the interface what you do *not* own; if you own it, fake it instead.
-
 2. TDD when the interface is the hard part; test after if the exploration is the hard part.
+
+
 
 ### Suprises
 
 - That TDD feels almost natural as an approach.
+
+
 
 ### Still unclear
 
@@ -764,43 +813,55 @@ Notes on `fastapi.dependencies.utils`.
 
 ---
 
+
+
 ## Week 6, day 3: 20/07
+
+
 
 ### Focus
 
 - Deep dive into `hypothesis.strategy`
-
 - `st.builds`: build a new strategy from an existing class
-
 - `st.composite`: build a new strategy by composing exisiting strategies in a function
-
 - `settings` control the parameters of `hypothesis` tests
+
+
 
 ### What I built
 
 - several `hypothesis` based tests for `portfolio` and `sizing` modules
 
+
+
 ### Bugs found with the new test suite
 
 - nothing new
-
 - I noticed that the tests feeling most reliable are those that:
   1. require less specification regarding the form the inputs
   2. are most restrictive in terms of the requirements of the outputs
+
+
 
 ### Surprises
 
 - the level of customizability of the hypothesis library
 
+
+
 ### TO REMEMBER
 
-*Look for invariants to test with the `hypothesis` library*
+*Look for invariants to test with the* `hypothesis` *library*
 
 That helps finding the bug I didn't think about.
 
 ---
 
-## Week 5, day 4: 21/07
+
+
+## Week 6, day 4: 21/07
+
+
 
 ### structlog audit
 
@@ -808,10 +869,10 @@ That helps finding the bug I didn't think about.
   - data fetching (`async_fetch`)
   - exception managemenht (`decorators`)
   - data management (`ohlcv_repo`)
-
 - The `finlib.pipeline` uses the stdlib loggin instead. Notice this is almost the opposite of what we would want (see below).
-
 - The program suggests to address this by making `structlog` the standard throughout the library.
+
+
 
 ### What I built
 
@@ -821,25 +882,65 @@ That helps finding the bug I didn't think about.
   - `pyupgrade`
   - simplify
   - return statement hygiene
-
 - Extended `mypy` checks to `tests` and `script` dirs
-
 - Installed `pre-commit` and added several pre-commit hooks in `.pre-commity-config.yaml`
-
 - Introduced `config.settings.environment` setting to control `structlog` renderer in pipeline (console vs json).
+
+
 
 ### TO REMEMBER
 
 - Shared libraries should use stdlib logging as a Python convention.
-
 - My own applications could use `structlog`.
-
 - Log at boundaries and decisions.
+
+
 
 ### Surprises
 
 - How many issues can be prevented with testing and linting discipline and infrastructure.
 
+
+
 ### Still unclear
 
 - When and where to log
+
+---
+
+
+
+## Week 6 - day 5: 22/07 - retrospective
+
+
+### Deliverables
+
+- [x] tests/conftest.py + shared fixtures
+- [x] historic_market_value ValueError bug found via match=
+- [x] mock audit + 2 side_effect retry tests
+- [x] sizing.py built test-first, mypy-strict clean
+- [x] 4+ portfolio invariants, 3+ sizer properties
+- [x] pre-commit installed, every hook seen blocking
+- [x] structured logging narrative through pipeline
+- [x] coverage >= 85%, gate raised in CI, badge in README
+- [x] v0.6.0 tagged, CI green
+
+
+### Among what I learnt this week, what shall I still use in week 20?
+
+1. `conftest` and generic `fixtures`
+2. `hypothesis`
+3. `pytest.raises` with `match`
+4. testing exceptions
+5. mocking what I do *not* own
+6. TDD
+
+
+### Most useful thing this week
+
+- pytest fixtures
+
+
+### The thing that most resisted me
+
+- testing *everything*
