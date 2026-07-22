@@ -1,3 +1,4 @@
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,17 @@ def test_calculate_daily_vwap_missing_symbol(tmp_path: Path) -> None:
     csv_file.write_text(f"{columns}{line}")
     with pytest.raises(RuntimeError):
         _ = calculate_daily_vwap(csv_file, "XYZ")
+
+
+def test_calculate_daily_vwap_calculation(tmp_path: Path) -> None:
+    csv_file = tmp_path / "prices.csv"
+    columns = "symbol,timestamp,open,high,low,close,volume\n"
+    line1 = "AAPL,2026-01-02T09:30:00,195,195.3,194.75,195.28,1551595\n"
+    line2 = "AAPL,2026-01-02T10:30:00,195,195.3,194.75,200.00,1400000\n"
+    csv_file.write_text(f"{columns}{line1}{line2}")
+    assert calculate_daily_vwap(csv_file, "AAPL") == pytest.approx(
+        Decimal((195.28 * 1551595 + 200.00 * 1400000) / (1551595 + 1400000))
+    )
 
 
 def test_group_trades_by_symbol_result(sample_trades: list[Trade]) -> None:

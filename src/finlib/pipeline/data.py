@@ -22,19 +22,16 @@ def fetch_trades(trade_repo: TradeRepository) -> tuple[list[Trade], list[str], d
 
     symbols = trade_repo.get_all_symbols()
     first_ts, last_ts = trade_repo.get_extreme_timestamps()
-    if first_ts is None or last_ts is None:
-        log.error("Empty trade repository")
-        raise RuntimeError("No trades in trade repository")
 
     log.info(
         "Trades loaded from repo",
         num_trades=len(trades),
         num_symbols=len(symbols),
-        first_date=first_ts.strftime("%d-%m-%Y"),
-        last_date=last_ts.strftime("%d-%m-%Y"),
+        first_date="n/a" if first_ts is None else first_ts.strftime("%d-%m-%Y"),
+        last_date="n/a" if last_ts is None else last_ts.strftime("%d-%m-%Y"),
     )
 
-    return trades, list(symbols), first_ts
+    return trades, list(symbols), (first_ts if first_ts else datetime.now())
 
 
 async def fetch_market_data(

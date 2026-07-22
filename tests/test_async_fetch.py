@@ -210,3 +210,13 @@ async def test_fetch_binance_raw_data_malformed_rows_skipped() -> None:
         res = await _fetch_binance_raw_data(["AAA", "BBB"], "1m", 2)
         assert res["AAA"] == []
         assert res["BBB"] == 2 * [_EX_ROW_BROW]
+
+
+async def test_fetch_binance_malformed_interval_error() -> None:
+
+    def expected_message(interval: str) -> str:
+        return f"Misspecified interval value in fetch_binance: {interval}"
+
+    for interval in ("3M", "1y", "10ss"):
+        with pytest.raises(RuntimeError, match=expected_message(interval)):
+            _ = await fetch_binance(["AAA", "BBB"], interval, "2022-01-01")  # type: ignore # this is a test

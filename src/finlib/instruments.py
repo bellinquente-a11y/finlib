@@ -69,17 +69,6 @@ class Priceable(Protocol):
     def price(self) -> Decimal: ...
 
 
-class ThirdPartyInstrument(Priceable):
-    """Third party instrument"""
-
-    @property
-    def symbol(self) -> str:
-        return "XYZ"
-
-    def price(self) -> Decimal:
-        return Decimal("100.00")
-
-
 def get_value(instrument: Priceable, qty: float) -> Decimal:
     """Get the value of an instrument"""
 

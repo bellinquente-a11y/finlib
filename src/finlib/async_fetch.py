@@ -139,17 +139,20 @@ def _convert_binance_data_to_DataFrame(
 async def fetch_binance(
     symbols: list[str], interval: binance_interval, start: datetime | str
 ) -> pd.DataFrame:
-    match interval[-1]:
-        case "s":
-            deltat = timedelta(seconds=float(interval[:-1]))
-        case "m":
-            deltat = timedelta(minutes=float(interval[:-1]))
-        case "h":
-            deltat = timedelta(hours=float(interval[:-1]))
-        case "d":
-            deltat = timedelta(days=float(interval[:-1]))
-        case _:
-            raise NotImplementedError
+    try:
+        match interval[-1]:
+            case "s":
+                deltat = timedelta(seconds=float(interval[:-1]))
+            case "m":
+                deltat = timedelta(minutes=float(interval[:-1]))
+            case "h":
+                deltat = timedelta(hours=float(interval[:-1]))
+            case "d":
+                deltat = timedelta(days=float(interval[:-1]))
+            case _:
+                raise NotImplementedError
+    except (ValueError, NotImplementedError) as err:
+        raise RuntimeError(f"Misspecified interval value in fetch_binance: {interval}") from err
 
     start = parse(start) if isinstance(start, str) else start
     diffdt = datetime.now() - start if start.tzinfo is None else datetime.now(tz=UTC) - start
