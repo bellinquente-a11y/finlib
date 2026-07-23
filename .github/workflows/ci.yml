@@ -17,4 +17,4 @@ jobs:
       - run: poetry install --with dev
       - run: poetry run ruff check src/ tests/ script/
       - run: poetry run mypy src/ tests/ script/ --strict
-      - run: poetry run pytest --cov=finlib --cov-fail-under=85 -v
+      - run: poetry run pytest --cov=finlib --cov-fail-under=90 -v
