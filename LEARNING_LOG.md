@@ -972,3 +972,25 @@ That helps finding the bug I didn't think about.
 - Hashes are functions of the content (incl. earlier parent's hashes).
 
 - Difference between merge and rebase.
+
+---
+
+## Week 7, day 2: 23/7
+
+### Focus: advanced Git
+
+- interactive rebase `git rebase -i HEAD~5` allows you to manually arrange the last 5 commits
+
+- `git cherry-pick`: to apply the diff from a commit on top of another commit
+
+- `git stash`: to manage dirty work that you don't want to lose nor commit into an existing branch
+
+- `git reflog`: independent chronological log of all commits (even those not reachable from HEAD): critical to recover any change
+
+- `git bisect`: bisect (O(log(n))) search for a bug; it allows answering the question "why does this commit does not pass the test, while a previous one did?"
+
+### Surprises
+
+- how git makes sense, once you understand the object model
+
+- how insanely useful `git bisect` can be
