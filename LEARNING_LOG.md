@@ -944,3 +944,31 @@ That helps finding the bug I didn't think about.
 ### The thing that most resisted me
 
 - testing *everything*
+
+---
+
+## Week 7, day 1: 23/7
+
+### Focus: Git
+
+- It works using the object model.
+
+- 4 types of objects, each identified by a *SHA hash*:
+  1. Blobs: raw bit data content, no file names, no dirs
+  2. Trees: filenames & dir structure
+  3. Commits: parent(s) hashes + commit details
+  4. Tags: name -> object pointer
+
+- Branches are simply pointers (text file) to a commit's SHA hash.
+
+- The structure above gives rise to a Directed Acyclical Graph (DAG).
+
+- HEAD is the current bracnh's pointer.
+
+- A commit is a snapshot of the entire project (not diffs).
+
+- Diffs are managhed separately for memory economy.
+
+- Hashes are functions of the content (incl. earlier parent's hashes).
+
+- Difference between merge and rebase.
