@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
+  quality-matrix:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -26,3 +26,14 @@ jobs:
       - run: poetry run ruff check src/ tests/ script/
       - run: poetry run mypy src/ tests/ script/ --strict
       - run: poetry run pytest --cov=finlib --cov-fail-under=90 -v
+
+  quality:
+    needs: quality-matrix
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - run: |
+          if [ "${{ contains(needs.quality-matrix.result, 'failure') || contains(needs.quality-matrix.result, 'cancelled') }}" = "true" ]; then
+            echo "One or more matrix jobs failed"
+            exit 1
+          fi
