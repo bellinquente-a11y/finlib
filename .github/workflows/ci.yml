@@ -5,16 +5,35 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  quality:
+  quality-matrix:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
       - run: pip install "poetry>=2.0"
       - run: poetry install --with dev
       - run: poetry run ruff check src/ tests/ script/
       - run: poetry run mypy src/ tests/ script/ --strict
       - run: poetry run pytest --cov=finlib --cov-fail-under=90 -v
+
+  quality:
+    needs: quality-matrix
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - run: |
+          if [ "${{ contains(needs.quality-matrix.result, 'failure') || contains(needs.quality-matrix.result, 'cancelled') }}" = "true" ]; then
+            echo "One or more matrix jobs failed"
+            exit 1
+          fi

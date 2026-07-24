@@ -994,3 +994,31 @@ That helps finding the bug I didn't think about.
 - how git makes sense, once you understand the object model
 
 - how insanely useful `git bisect` can be
+
+---
+
+## Week 7, day 3: 24/7
+
+### Focus: GitHub flow
+
+- Instead of pushing main, it is safer to merge via a PR: it allows to explicitly visualise diffs
+
+- Repo governance. Edit the settings of a repo to:
+
+    - prevent from pushing changes into main
+
+    - require reviewers for a PR
+
+    - require CI to pass as part of the PR process (status check required)
+
+- `.github/workflows/ci.yml`
+
+    - add matrix builds to test CI on multitple parameters (e.g. python versions)
+
+    - introduce a concurrency group to cancel superseded runs
+
+- `.github/pull_request_template.md` added
+
+### Surprises
+
+How strict once can be (and probably should be) with the merging process.
