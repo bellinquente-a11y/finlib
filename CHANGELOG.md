@@ -1,4 +1,19 @@
-# CHANGELOG.md  (Keep a Changelog format)
+# CHANGELOG.md
+
+## [0.6.1] - 2026-07-24
+
+### Added
+
+- add: CODEOWNERS file; pull request template
+
+### Changed
+
+- increase pytest coverage threshold from 85 to 90 in CI configuration
+- enhance CI configuration with concurrency and Python version matrix
+
+### Fixed
+
+- update CI badge in README to reflect new repository owner
 
 ## [0.6.0] - 2026-07-22
 
