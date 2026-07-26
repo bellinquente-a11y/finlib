@@ -41,11 +41,11 @@
 
 - validated fetch functionality for Binance data
 - add hypothesis library as a dependency in pyproject.toml; update poetry.lock with new package details
-- dd maximum drawdown calculation function to historic analytics; enhance tests for maximum drawdown scenarios
+- add maximum drawdown calculation function to historic analytics; enhance tests for maximum drawdown scenarios
 
 ### Changed
 
-- optimize timestamp retrieval in OHLCV repositories by avoid O(n^2) search
+- optimize timestamp retrieval in OHLCV repositories by avoiding O(n^2) search
 
 ## [0.4.2] - 2026-07-07
 

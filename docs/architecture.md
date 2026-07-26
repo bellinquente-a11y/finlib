@@ -10,7 +10,7 @@ sequenceDiagram
     participant OHLCVRepository
     participant MarketDataAnalytics
     participant PortfolioService
-    participant PortfolioPnlAnaltics
+    participant PortfolioPnlAnalytics
     participant Output
     CLI->>TradeRepo: trades.jsonl
     config->>OHLCVRepository: repo_dir, freq
@@ -18,7 +18,7 @@ sequenceDiagram
     OHLCVRepository-->>MarketDataAnalytics: calculate
     TradeRepo->>PortfolioService: positions
     OHLCVRepository->>PortfolioService" mark to market
-    PortfolioService->PortfolioPnlAnaltics: calculate
+    PortfolioService->PortfolioPnlAnalytics: calculate
     MarketDataAnalytics-->Output: print
-    PortfolioPnlAnaltics->Output: print
+    PortfolioPnlAnalytics->Output: print
 ```

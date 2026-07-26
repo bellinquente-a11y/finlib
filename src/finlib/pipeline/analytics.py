@@ -1,4 +1,4 @@
-""" "Trades and market data analysis module"""
+"""Trades and market data analysis module"""
 
 from datetime import datetime
 

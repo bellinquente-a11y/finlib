@@ -388,14 +388,14 @@ Nothing.
 ### What I built
 
 - Built a `retry` decorator and `timeout` handling to the async fetcher. As usual, asynchronous code requires particular care.
-- Introduced a `semaphore` to the asyc fetcher to avoid reaching the network API limit.
+- Introduced a `semaphore` to the async fetcher to avoid reaching the network API limit.
 - Introduced mock test to the async fetcher via `AsyncMock`.
 
 
 
 ### Surprises
 
-- How easy and effective it is to simulate third party output via mocking. Extremely usueful for testing.
+- How easy and effective it is to simulate third party output via mocking. Extremely useful for testing.
 
 
 
@@ -418,7 +418,7 @@ Nothing.
 - Looked for candidates to refactor hidden dependencies:
   - decorators inputs in `analytics.py`, `async_fetch.py`
   - `settings` module definition in `async_fetch.py`
-- Implemented refactorisation of settings via the new function `config.get_settings`. The latter caches the result to fix the values in a given environment. To test alternantive settings, ise `cache_clear`.
+- Implemented refactorisation of settings via the new function `config.get_settings`. The latter caches the result to fix the values in a given environment. To test alternative settings, use `cache_clear`.
 
 
 
@@ -520,7 +520,7 @@ Nothing.
 | Missing data                                  | `finlib.async_fetch._validated_fetch_binance_one_symbol`  | log warning and output empty                  |
 | Runtime error in loading from Binance network | `finlib.async_fetch._validated_fetch_binance_one_symbol`  | log warning and output empty                  |
 | Empty market data DataFrame                   | `finlib.pipeline.store_market_data`                       | `ValueError`                                  |
-| OHLCV repo file exists with wrong header      | `finlib.ohlcv_repo.__init__`                              | `FileEsistsError`                             |
+| OHLCV repo file exists with wrong header      | `finlib.ohlcv_repo.__init__`                              | `FileExistsError`                             |
 
 
 
@@ -545,7 +545,7 @@ Production data pipelines die from silent failures. Every failure mode in the fe
 
 ### What I built
 
-- `analytics` module in the `pipeline` to calculate rolling stats of marlet data
+- `analytics` module in the `pipeline` to calculate rolling stats of market data
 - `cli` module to run the pipeline from CLI
 
 
@@ -629,7 +629,7 @@ Production data pipelines die from silent failures. Every failure mode in the fe
 ### Focus
 
 - Binary search trees (BST): inorder, preorder and postorder search
-- Graphs: Breadth First Seacrh (BFS) and Depth First Search (DFS)
+- Graphs: Breadth First Search (BFS) and Depth First Search (DFS)
 
 
 
@@ -726,9 +726,9 @@ Notes on `fastapi.dependencies.utils`.
 ### Still open questions
 
 - how to use the `__slots__` dunder
-- hot to properly use the doc folder
+- how to properly use the doc folder
 - When to use the `operator` methods `attrgetter`, `itemgetter` and `methodcaller` in practice and whether I will forget about them
-- hot to properly log
+- how to properly log
 - general use of *fixtures*
 
 ---
@@ -757,11 +757,11 @@ Notes on `fastapi.dependencies.utils`.
 
 ### Surprises
 
-- Exception message need to be inpur as f-strings: it is a BUG to input them in logging style
+- Exception messages need to be input as f-strings: it is a BUG to input them in logging style
 
 
 
-### Current pytest coverrage
+### Current pytest coverage
 
 - TOTAL = 92%
 - src/finlib/async_fetch.py = 83%
@@ -776,11 +776,11 @@ Notes on `fastapi.dependencies.utils`.
 
 
 
-### Mocking review in finlilb
+### Mocking review in finlib
 
 - `finlib.async_fetch`: notice that I mock my own function `finlib.async_fetch._fetch_binance_one_symbol`, where I should probably mock the interface of the library I don't own, namely `finlib.async_fetch.aiohttp.ClientSession.get`.
 - `finlib.pipeline.cli` mocks my own functions, but it does so for wiring.
-- Otehrwise, I use the repository framework to test my own code.
+- Otherwise, I use the repository framework to test my own code.
 - `autospec` is never used!!!
 
 
@@ -790,7 +790,7 @@ Notes on `fastapi.dependencies.utils`.
 - used the TDD framework to dev `finlib.sizing.kelly_criterion`
 - clunky, but useful to include edge cases that I would have not considered (negative b; positivity of the result)
 - leads to more confidence in the result
-- TDD is is useful when we already know the output and edge cases; it would be wasteful in research and exploratory context
+- TDD is useful when we already know the output and edge cases; it would be wasteful in research and exploratory context
 
 
 
@@ -801,7 +801,7 @@ Notes on `fastapi.dependencies.utils`.
 
 
 
-### Suprises
+### Surprises
 
 - That TDD feels almost natural as an approach.
 
@@ -823,7 +823,7 @@ Notes on `fastapi.dependencies.utils`.
 
 - Deep dive into `hypothesis.strategy`
 - `st.builds`: build a new strategy from an existing class
-- `st.composite`: build a new strategy by composing exisiting strategies in a function
+- `st.composite`: build a new strategy by composing existing strategies in a function
 - `settings` control the parameters of `hypothesis` tests
 
 
@@ -867,9 +867,9 @@ That helps finding the bug I didn't think about.
 
 - The main `finlib` library uses logging (with `structlog`) rather inconsistently. In:
   - data fetching (`async_fetch`)
-  - exception managemenht (`decorators`)
+  - exception management (`decorators`)
   - data management (`ohlcv_repo`)
-- The `finlib.pipeline` uses the stdlib loggin instead. Notice this is almost the opposite of what we would want (see below).
+- The `finlib.pipeline` uses the stdlib logging instead. Notice this is almost the opposite of what we would want (see below).
 - The program suggests to address this by making `structlog` the standard throughout the library.
 
 
@@ -883,7 +883,7 @@ That helps finding the bug I didn't think about.
   - simplify
   - return statement hygiene
 - Extended `mypy` checks to `tests` and `script` dirs
-- Installed `pre-commit` and added several pre-commit hooks in `.pre-commity-config.yaml`
+- Installed `pre-commit` and added several pre-commit hooks in `.pre-commit-config.yaml`
 - Introduced `config.settings.environment` setting to control `structlog` renderer in pipeline (console vs json).
 
 
@@ -963,11 +963,11 @@ That helps finding the bug I didn't think about.
 
 - The structure above gives rise to a Directed Acyclical Graph (DAG).
 
-- HEAD is the current bracnh's pointer.
+- HEAD is the current branch's pointer.
 
 - A commit is a snapshot of the entire project (not diffs).
 
-- Diffs are managhed separately for memory economy.
+- Diffs are managed separately for memory economy.
 
 - Hashes are functions of the content (incl. earlier parent's hashes).
 
@@ -987,7 +987,7 @@ That helps finding the bug I didn't think about.
 
 - `git reflog`: independent chronological log of all commits (even those not reachable from HEAD): critical to recover any change
 
-- `git bisect`: bisect (O(log(n))) search for a bug; it allows answering the question "why does this commit does not pass the test, while a previous one did?"
+- `git bisect`: bisect (O(log(n))) search for a bug; it allows answering the question "why does this commit not pass the test, while a previous one did?"
 
 ### Surprises
 
@@ -1013,7 +1013,7 @@ That helps finding the bug I didn't think about.
 
 - `.github/workflows/ci.yml`
 
-    - add matrix builds to test CI on multitple parameters (e.g. python versions)
+    - add matrix builds to test CI on multiple parameters (e.g. python versions)
 
     - introduce a concurrency group to cancel superseded runs
 
@@ -1021,7 +1021,7 @@ That helps finding the bug I didn't think about.
 
 ### Surprises
 
-How strict once can be (and probably should be) with the merging process.
+How strict one can be (and probably should be) with the merging process.
 
 ---
 
@@ -1069,7 +1069,7 @@ How strict once can be (and probably should be) with the merging process.
 
     1. Transforming: the decorator returns a different callable
 
-    2. Regsitering: the output callable is essentially the same, but the input callable is registered at decoration time so that something else can find it later.
+    2. Registering: the output callable is essentially the same, but the input callable is registered at decoration time so that something else can find it later.
 
 ### Still unclear
 
