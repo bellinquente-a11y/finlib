@@ -1022,3 +1022,55 @@ That helps finding the bug I didn't think about.
 ### Surprises
 
 How strict once can be (and probably should be) with the merging process.
+
+---
+
+## Week 7, day 4: 27/7
+
+### What I learnt
+
+- Semantic versioning: MAJOR.MINOR.PATCH
+
+    - PATCH: no API change
+
+    - MINOR: backward compatible API change
+
+    - MAJOR: the change might break things
+
+- It is important to keep the conventional commit syntax: fix, feat, doc, ...
+
+- How `@field_validator` is registered in Pydantic.
+
+    - The decorator does not return the input function. Instead, it returns a new object with the same functionality (via `__get__`) and annotated information.
+
+    - That information is used in the `__new__` metaclass method to generate a list of all the fields to be validated and under which rule.
+
+    - This happens at the metaclass definition level, so that the validation process (in rust, faster) can be compiled before the class is created.
+
+- There are 2 useful patterns to learn from the above.
+
+    1. Instead of subclassing a method, I can use a decorator to stamp metadata to the method and customise the behaviour at class definition (not at runtime).
+
+    2. Split the "what should happen" (data structure) and "make it fast" (via compiled code). Schema-compile-execute.
+
+- In `finlib` this could be applied to the `historic_analytics` module to generalise the rolling window calculation.
+
+- Classes vs Metaclasses
+
+- `__new__` vs `__init__`
+
+### What I built
+
+- `STRUCTLOG.md` as the true history of evolving versions.
+
+### Surprises
+
+- There are 2 ways to use a decorator:
+
+    1. Transforming: the decorator returns a different callable
+
+    2. Regsitering: the output callable is essentially the same, but the input callable is registered at decoration time so that something else can find it later.
+
+### Still unclear
+
+- The practical implementation of the 2 Pydantic patterns discussed above.
