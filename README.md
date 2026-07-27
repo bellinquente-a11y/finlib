@@ -38,7 +38,7 @@ Production-grade Python for financial data modelling.
 ## Installation
 
 ```bash
-git clone https://github.com/bellinquente-a11y/finlib
+git clone https://github.com/simone-belli/finlib
 cd finlib && poetry install
 ```
 
