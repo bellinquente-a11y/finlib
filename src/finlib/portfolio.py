@@ -75,7 +75,7 @@ class Portfolio(BaseModel):
                 index=[t.timestamp for t in group_trades],
             )
             dhld = pd.concat((dhld, dhld_symbol), axis=1, sort=True)
-        return -dhld.fillna(value=0).cumsum(axis=0)
+        return -dhld.fillna(value=0).cumsum(axis=0).rename_axis("timestamp", axis=0)
 
     def historic_market_value(self, price: pd.DataFrame) -> pd.DataFrame:
         """
