@@ -80,7 +80,7 @@ def _update_and_push(ver: str) -> None:
     log.info("Commit changes")
     output = _subprocess_run(["git", "add", CHANGELOG_PATH, PYPROJECT_PATH])
     print(output)
-    output = _subprocess_run(["git", "commit", "-m", f"New release {ver}"])
+    output = _subprocess_run(["git", "commit", "-m", f"docs: updated files for new release {ver}"])
     print(output)
     log.info("Push changes remotely")
     output = _subprocess_run(["git", "push", "origin", branch])
