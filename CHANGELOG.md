@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## [0.6.4] - 2026-07-28
+
+### Added
+
+    - fix: add commit message for git tag in release script
+
 ## [0.6.3] - 2026-07-28
 
 ### Added
