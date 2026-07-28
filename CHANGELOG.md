@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## [0.6.3] - 2026-07-28
+
+### Added
+
+    - feat: enhance release script to support tagging and improved version handling
+
 ## [0.6.2] - 2026-07-28
 
 ### Added
