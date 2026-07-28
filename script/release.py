@@ -33,9 +33,9 @@ def _read_changelog(path: Path, ver: str) -> list[str]:
     return desc
 
 
-def _subprocess_run(input: str) -> str:
+def _subprocess_run(input: list[str]) -> str:
     result = subprocess.run(
-        input.split(" "),
+        input,
         capture_output=True,
         text=True,
         check=True,
@@ -74,7 +74,7 @@ def main() -> None:
         f.writelines(lines)
 
     # Verify that we are not on the main branch
-    branch = _subprocess_run("git branch --show-current").strip()
+    branch = _subprocess_run(["git", "branch", "--show-current"]).strip()
     if branch == "main":
         log.error("Update release not allowed on the main branch")
         raise ValueError("Update release not allowed on the main branch")
@@ -82,12 +82,12 @@ def main() -> None:
 
     # Commit & push the changes
     log.info("Commit changes")
-    output = _subprocess_run(f"git add {CHANGELOG_PATH} {PYPROJECT_PATH}")
+    output = _subprocess_run(["git", "add", CHANGELOG_PATH, PYPROJECT_PATH])
     print(output)
-    output = _subprocess_run(f'git commit -m "New release {args.ver}"')
+    output = _subprocess_run(["git", "commit", "-m", f"New release {args.ver}"])
     print(output)
     log.info("Push changes remotely")
-    output = _subprocess_run(f"git push origin {branch}")
+    output = _subprocess_run(["git", "push", "origin", branch])
     print(output)
 
 
