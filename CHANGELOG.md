@@ -1,5 +1,22 @@
 # CHANGELOG.md
 
+## [0.6.2] - 2026-07-28
+
+### Added
+
+    - Sample trades data in JSONL
+    - CONTRIBUTING.md guide
+    - Release update script to automate versioning and changelog verification
+
+### Changed
+
+    - Enhanced output formatting and improve market summary display in pipeline CLI
+    - Simplied README.md for non dev user
+
+### Fixed
+
+    - Updated repository URL in installation instructions
+
 ## [0.6.1] - 2026-07-24
 
 ### Added
