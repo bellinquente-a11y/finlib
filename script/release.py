@@ -4,6 +4,9 @@ import re
 import subprocess
 from pathlib import Path
 
+CHANGELOG_PATH = "./CHANGELOG.md"
+PYPROJECT_PATH = "./pyproject.toml"
+
 log = logging.getLogger(__name__)
 
 logging.basicConfig(
@@ -43,16 +46,9 @@ def _subprocess_run(input: list[str]) -> str:
     return result.stdout
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Finlib release update script")
-    parser.add_argument("ver", type=str, help="New version MAJOR.MINOR.PATCH")
-    args = parser.parse_args()
-
-    CHANGELOG_PATH = "./CHANGELOG.md"
-    PYPROJECT_PATH = "./pyproject.toml"
-
+def _update_and_push(ver: str) -> None:
     # Read the CHANGELOG.md file
-    _ = _read_changelog(Path(CHANGELOG_PATH), args.ver)
+    _ = _read_changelog(Path(CHANGELOG_PATH), ver)
 
     # Update project.toml file
     log.info("Reading pyproject.toml")
@@ -61,7 +57,7 @@ def main() -> None:
 
     m = re.search(r"version = \"(?P<ver>[\w.-]+)\"", lines[2])
     if m:
-        if m.group("ver") == args.ver:
+        if m.group("ver") == ver:
             log.error("pyproject.toml version alrady up to date")
             raise ValueError("pyproject.toml version alrady up to date")
     else:
@@ -69,7 +65,7 @@ def main() -> None:
         raise ValueError("Version not found in pyproject.toml")
 
     log.info("Editing pyproject.toml")
-    lines[2] = f'version = "{args.ver}"\n'
+    lines[2] = f'version = "{ver}"\n'
     with open(PYPROJECT_PATH, "w", encoding="utf-8") as f:
         f.writelines(lines)
 
@@ -84,11 +80,55 @@ def main() -> None:
     log.info("Commit changes")
     output = _subprocess_run(["git", "add", CHANGELOG_PATH, PYPROJECT_PATH])
     print(output)
-    output = _subprocess_run(["git", "commit", "-m", f"New release {args.ver}"])
+    output = _subprocess_run(["git", "commit", "-m", f"New release {ver}"])
     print(output)
     log.info("Push changes remotely")
     output = _subprocess_run(["git", "push", "origin", branch])
     print(output)
+
+
+def _tag_and_release(ver: str) -> None:
+    description = _read_changelog(Path(CHANGELOG_PATH), ver)
+
+    log.info("Tagging the commit")
+    output = _subprocess_run(["git", "tag", "-a", f"v{ver}"])
+    print(output)
+    output = _subprocess_run(["git", "push", "origin", f"v{ver}"])
+    print(output)
+
+    log.info("New release")
+    output = _subprocess_run(
+        [
+            "gh",
+            "release",
+            "create",
+            f"v{ver}",
+            "--title",
+            f"v{ver}",
+            "--notes",
+            " ".join(description),
+        ]
+    )
+    print(output)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Finlib release update script")
+    parser.add_argument("ver", type=str, help="New version MAJOR.MINOR.PATCH")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--pr", action="store_true")
+    group.add_argument("--tag", action="store_true")
+    args = parser.parse_args()
+
+    if not args.pr and not args.tag:
+        log.error("Either --pr or --tag need to be selected")
+        raise ValueError("Either --pr or --tag need to be selected")
+
+    if args.pr:
+        _update_and_push(args.ver)
+
+    if args.tag:
+        _tag_and_release(args.ver)
 
 
 if __name__ == "__main__":
