@@ -91,7 +91,7 @@ def _tag_and_release(ver: str) -> None:
     description = _read_changelog(Path(CHANGELOG_PATH), ver)
 
     log.info("Tagging the commit")
-    output = _subprocess_run(["git", "tag", "-a", f"v{ver}"])
+    output = _subprocess_run(["git", "tag", "-a", f"v{ver}", "-m", f"Release {ver}"])
     print(output)
     output = _subprocess_run(["git", "push", "origin", f"v{ver}"])
     print(output)
