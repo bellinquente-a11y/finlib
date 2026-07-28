@@ -1074,3 +1074,28 @@ How strict one can be (and probably should be) with the merging process.
 ### Still unclear
 
 - The practical implementation of the 2 Pydantic patterns discussed above.
+
+## Week 7, day 5: 29/7 - retrospective
+
+### Focus
+
+- Git: the object model
+- Git workflow knowing git internals
+- rebase vs merge
+- reflog
+- Git bisect
+- repo governance
+- versions and releases
+- decorators: transforming vs registering
+- the schema-compile-execute pattern
+- auditing of the code with cloning
+- release automation
+- DSA problems
+
+### The most useful thing learnt
+
+- The git object model to understand git
+
+### What resisted me the most
+
+- Reading the pydantic code internals
