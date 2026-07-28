@@ -35,111 +35,79 @@ Production-grade Python for financial data modelling.
 | `config.py` | pydantic-settings config with `.env` support |
 | `pipeline/` | CLI entry point, data orchestration, analytics, formatted output |
 
+
 ## Installation
 
 ```bash
-git clone https://github.com/bellinquente-a11y/finlib
+git clone https://github.com/simone-belli/finlib
 cd finlib && poetry install
 ```
 
-## Portfolio analysis pipeline
+## Portfolio analysis: quick start
 
 Reads historic trades from a JSONL file, fetches OHLCV market data from Binance, caches it locally as CSV, and computes portfolio analytics.
 
+CLI inputs:
+
+1. Trades JSONL file path
+
+2. Quantisation frequency
+
 ```bash
-poetry run finlib-pipeline ~/data/trades.jsonl 1h
+poetry run finlib-pipeline ./examples/trades.jsonl 1h
 ```
 
 ### trades.jsonl format
 
-```text
-{"symbol": "BTCUSDT", "quantity": "3", "price": "75539.5", "side": "BUY", "timestamp": "2026-05-22T07:08:47.107473Z"}
-{"symbol": "BNBUSDT", "quantity": "117", "price": "653.22", "side": "BUY", "timestamp": "2026-05-22T14:37:17.848747Z"}
-```
+See `examples/trades.jsonl`.
 
 ### Example output
 
 ```text
-
-INFO:finlib.pipeline.data:Loading trades from the trade repository
-INFO:finlib.pipeline.data:Trades loaded    = 221
-INFO:finlib.pipeline.data:Symbols          = BTCUSDT, BNBUSDT, ETHUSDT
-INFO:finlib.pipeline.data:First time stamp = datetime.datetime(2026, 5, 22, 7, 8, 47, 107473, tzinfo=TzInfo(0))
-INFO:finlib.pipeline.data:Fetching 1h market data for symbols: BTCUSDT, BNBUSDT, ETHUSDT from 2026-05-21 07:08:47.107473+00:00
-2026-07-07 09:24:19 [info     ] Async fetching Binance data    interval=1h limit=1120 symbol=BTCUSDT
-2026-07-07 09:24:19 [info     ] Async fetching Binance data    interval=1h limit=1120 symbol=BNBUSDT
-2026-07-07 09:24:19 [info     ] Async fetching Binance data    interval=1h limit=1120 symbol=ETHUSDT
-INFO:finlib.pipeline.data:Storing market data in OHLCV repository
-2026-07-07 09:24:20 [info     ] adding intervals               symbol=BTCUSDT
-2026-07-07 09:24:20 [info     ] adding intervals               symbol=BNBUSDT
-2026-07-07 09:24:20 [info     ] adding intervals               symbol=ETHUSDT
-2026-07-07 09:24:20 [info     ] Added rows to trade repo       count=3000
+2026-07-27T07:28:54.333459Z [info     ] Trades loaded from repo        first_date=22-05-2026 last_date=03-07-2026 num_symbols=3 num_trades=221
+2026-07-27T07:28:54.333717Z [info     ] Fetching market data           symbols=['ETHUSDT', 'BNBUSDT', 'BTCUSDT']
+2026-07-27T07:28:54.333933Z [info     ] Async fetching Binance data    interval=1h limit=1608 symbol=ETHUSDT
+2026-07-27T07:28:54.334235Z [info     ] Async fetching Binance data    interval=1h limit=1608 symbol=BNBUSDT
+2026-07-27T07:28:54.334334Z [info     ] Async fetching Binance data    interval=1h limit=1608 symbol=BTCUSDT
+2026-07-27T07:28:54.679417Z [info     ] Fetched Binance data           elapsed=0.3s interval=1h symbols=['ETHUSDT', 'BNBUSDT', 'BTCUSDT']
+2026-07-27T07:28:54.729248Z [info     ] Storing market data            dataframe_shape=(3000, 12) size=36,000
+2026-07-27T07:28:54.758581Z [info     ] adding intervals               last_timestamp='27-07-2026 17:59:59' symbol=ETHUSDT
+2026-07-27T07:28:54.761593Z [info     ] adding intervals               last_timestamp='27-07-2026 17:59:59' symbol=BNBUSDT
+2026-07-27T07:28:54.762791Z [info     ] adding intervals               last_timestamp='27-07-2026 17:59:59' symbol=BTCUSDT
+2026-07-27T07:28:54.763832Z [info     ] New rows added to trade repo   count=0
 
 
-     symbol   close rolling_vol rolling_sharpe
-38  BTCUSDT  62,583       0.285           0.64
-39  BTCUSDT  63,144       0.286           1.10
-39  ETHUSDT   1,781       0.399           2.66
-39  BNBUSDT     575       0.276          -0.60
-40  ETHUSDT   1,786       0.388           1.94
-40  BTCUSDT  63,650       0.265           0.14
-40  BNBUSDT     590       0.267          -0.92
-41  BNBUSDT     587       0.267          -0.98
-41  BTCUSDT  64,114       0.266           0.46
-41  ETHUSDT   1,803       0.388           2.33
+Market summary
+----------------------------------------------------------------------------------------------------
+
+     symbol         timestamp   close rolling_vol rolling_sharpe
+62  BNBUSDT  2026-07-28 00:00     575       0.170           0.23
+62  BTCUSDT  2026-07-28 00:00  65,385       0.236           2.07
+62  ETHUSDT  2026-07-28 00:00   1,969       0.336           3.70
 
 
-Market value
-                 BNBUSDT    BTCUSDT   ETHUSDT
-timestamp
-2026-07-06 23:59  90,412  1,089,938  -880,069
+Portfolio market value
+----------------------------------------------------------------------------------------------------
 
-Cost basis
-                   BNBUSDT     BTCUSDT  ETHUSDT
-2026-07-03 23:21   24,373   1,173,382  -827,762
+                  BNBUSDT     BTCUSDT  ETHUSDT
+2026-07-27 07:59  -88,575  -1,111,551  960,896
 
-PnL
-                  BNBUSDT  BTCUSDT  ETHUSDT
-timestamp
-2026-07-06 23:59   33,961   83,444   52,307
 
-Total PnL =  169,711
+Portfolio cost basis
+----------------------------------------------------------------------------------------------------
+
+                  BNBUSDT    BTCUSDT   ETHUSDT
+2026-07-03 23:21  124,373  1,173,382  -827,762
+
+
+Portfolio PnL
+----------------------------------------------------------------------------------------------------
+
+                 BNBUSDT BTCUSDT  ETHUSDT
+2026-07-27 07:59  35,798  61,831  133,134
+
 ```
 
-## Testing & Quality
+## Contributing
 
-### Principles
-
-- unit tests to test behaviour
-- hypothesis tests to test invariants
-- fake what we own; mock what we don't
-
-### Full suite with coverage (pytest)
-
-pytest + pytest-asyncio; property-based tests (Hypothesis) for portfolio invariants and position sizing
-
-```bash
-poetry run pytest --cov=finlib -v
-```
-
-### Type-checking (mypy)
-
-```bash
-poetry run mypy src/ --strict
-```
-
-### Linting (ruff)
-
-Extended checks: E,F,I,B,UP,SIM,RET.
-
-```bash
-poetry run ruff check src/ tests/ script/
-```
-
-### pre-commit
-
-Enforcement of linting, format, mypy --strict.
-
-### CI
-
-CI enforces ≥85% pytest coverage, mypy --strict, and ruff on every push.
+See `.github/CONTRIBUTING.md`.

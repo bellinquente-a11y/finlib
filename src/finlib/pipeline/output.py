@@ -8,14 +8,35 @@ import pandas as pd
 def print_market_summary(
     market_summary: pd.DataFrame, columns: list[str], formatters: dict[str, Callable[..., str]]
 ) -> None:
-    """Print the last 10 rows of the market summary table to stdout.
+    """Print the most recent row per symbol from the market summary table to stdout.
 
     Args:
         market_summary: DataFrame produced by compute_market_summary.
         columns: Subset of columns to display.
         formatters: Per-column format callables passed to DataFrame.to_string.
     """
-    print(market_summary[columns].dropna().tail(10).to_string(formatters=formatters))
+    timestamp_format = "%Y-%m-%d %H:%M"
+    columns = ["symbol", "timestamp"] + columns
+    symbols = sorted(list(set(market_summary["symbol"].to_numpy())))
+    df = pd.DataFrame()
+    for _symbol in symbols:
+        df = pd.concat(
+            (
+                df,
+                (
+                    market_summary.query("symbol == @_symbol")
+                    .dropna()
+                    .sort_values(by="timestamp")
+                    .iloc[[-1]]
+                ),
+            ),
+            axis=0,
+        )
+    print(
+        df[columns]
+        .assign(timestamp=lambda y: pd.DatetimeIndex(y["timestamp"]).strftime(timestamp_format))
+        .to_string(formatters=formatters)
+    )
     return
 
 
@@ -30,6 +51,7 @@ def print_trading_summary(df: pd.DataFrame, format: str, axis_format: str) -> No
     formatters = {k: format.format for k in df.columns.to_list()}
     print(
         df.set_axis(pd.DatetimeIndex(df.index).strftime(axis_format))
+        .rename_axis(None, axis=0)
         .tail(1)
         .to_string(formatters=formatters)
     )

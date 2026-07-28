@@ -52,7 +52,7 @@ async def fetch_market_data(
 
 
 def store_market_data(ohlcv_repo: OHLCVRepository, df: pd.DataFrame) -> None:
-    """ "Store market data in the OHLCV repository."""
+    """Store market data in the OHLCV repository."""
     if df.shape[0] == 0:
         log.error("Empty market price dataframe")
         raise ValueError("Empty market data DataFrame")

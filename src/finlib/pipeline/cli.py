@@ -68,31 +68,33 @@ def main() -> None:
     # Compute market data analytics
     market_summary = analytics.compute_market_summary(mkt_repo, symbols, window=24)
 
-    cols = ["symbol", "close", "rolling_vol", "rolling_sharpe"]
+    cols = ["close", "rolling_vol", "rolling_sharpe"]
     formatters = {
         "close": "{:,.0f}".format,
         "rolling_vol": "{:.3f}".format,
         "rolling_sharpe": "{:.2f}".format,
     }
-    print("\n")
+    _headline_title("Market summary")
     output.print_market_summary(market_summary, cols, formatters)
 
     # Compute cumulative PnL of the portfolio
     cumpnl, market_value, cost_basis = analytics.compute_portfolio_performance_metrics(
         trade_repo, mkt_repo
     )
-
-    print("\n")
-    print("Market value")
+    _headline_title("Portfolio market value")
     output.print_trading_summary(market_value, "{:,.0f}", "%Y-%m-%d %H:%M")
 
-    print("\nCost basis")
+    _headline_title("Portfolio cost basis")
     output.print_trading_summary(cost_basis, "{:,.0f}", "%Y-%m-%d %H:%M")
 
-    print("\nPnL")
+    _headline_title("Portfolio PnL")
     output.print_trading_summary(cumpnl, "{:,.0f}", "%Y-%m-%d %H:%M")
+    print("\n")
 
-    print(f"\nTotal PnL = {cumpnl.sum(axis=1).iloc[-1]:,.0f}")
+
+def _headline_title(title: str) -> None:
+    full_str = f"\n\n{title}\n{100 * '-'}\n"
+    print(full_str)
 
 
 if __name__ == "__main__":

@@ -37,6 +37,7 @@ def test_main_wiring(tmp_path: Path) -> None:
             "finlib.pipeline.analytics.compute_portfolio_performance_metrics",
             return_value=(pnl, pnl, pnl),
         ),
+        patch("finlib.pipeline.output.print_market_summary"),
         patch("sys.argv", ["cli", str(trades_path), "1h"]),
     ):
         mock_fetch_trades.return_value = (5 * [trade], ["AAA"], ts)

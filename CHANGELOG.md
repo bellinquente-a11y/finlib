@@ -1,5 +1,22 @@
 # CHANGELOG.md
 
+## [0.6.2] - 2026-07-28
+
+### Added
+
+    - Sample trades data in JSONL
+    - CONTRIBUTING.md guide
+    - Release update script to automate versioning and changelog verification
+
+### Changed
+
+    - Enhanced output formatting and improve market summary display in pipeline CLI
+    - Simplied README.md for non dev user
+
+### Fixed
+
+    - Updated repository URL in installation instructions
+
 ## [0.6.1] - 2026-07-24
 
 ### Added
@@ -41,11 +58,11 @@
 
 - validated fetch functionality for Binance data
 - add hypothesis library as a dependency in pyproject.toml; update poetry.lock with new package details
-- dd maximum drawdown calculation function to historic analytics; enhance tests for maximum drawdown scenarios
+- add maximum drawdown calculation function to historic analytics; enhance tests for maximum drawdown scenarios
 
 ### Changed
 
-- optimize timestamp retrieval in OHLCV repositories by avoid O(n^2) search
+- optimize timestamp retrieval in OHLCV repositories by avoiding O(n^2) search
 
 ## [0.4.2] - 2026-07-07
 

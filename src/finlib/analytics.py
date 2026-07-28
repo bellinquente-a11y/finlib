@@ -47,7 +47,7 @@ def group_trades_by_symbol(trades: list[Trade]) -> dict[str, list[Trade]]:
 
 
 def trade_summary(trades: list[Trade]) -> None:
-    """ "Prints a summary of a list of trades, aggregated by symbol"""
+    """Prints a summary of a list of trades, aggregated by symbol"""
     trades_by_group = group_trades_by_symbol(trades)
     sorted_symbol = sorted(trades_by_group.keys())
     for symbol in sorted_symbol:
