@@ -49,12 +49,10 @@ class InMemoryTradeRepository:
 class FileTradeRepository:
     def __init__(self, filepath: Path) -> None:
         self._filepath = filepath
-        self._symbols: set[str] = set()
 
     def add(self, trade: Trade) -> None:
         with self._filepath.open("a") as f:
             f.write(trade.model_dump_json() + "\n")
-        self._symbols |= {trade.symbol}
 
     def get_all(self) -> list[Trade]:
         if not self._filepath.exists():
