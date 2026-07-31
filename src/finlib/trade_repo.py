@@ -1,8 +1,9 @@
+import sqlite3
 from collections.abc import Iterator
 from datetime import datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Protocol, runtime_checkable
+from typing import Literal, Protocol, cast, runtime_checkable
 
 from finlib.models import Trade
 
@@ -83,6 +84,85 @@ class FileTradeRepository:
                 if line.strip():
                     symbols |= {Trade.model_validate_json(line).symbol}
         return symbols
+
+
+class SQLiteTradeRepository:
+    def __init__(self, dbpath: Path) -> None:
+        self._dbpath = str(dbpath)
+        if not dbpath.exists():
+            query = """
+                CREATE TABLE trades (
+                    symbol      TEXT NOT NULL,
+                    quantity    TEXT NOT NULL,
+                    price       TEXT NOT NULL,
+                    side        TEXT NOT NULL,
+                    timestamp   TEXT NOT NULL
+                );
+            """
+            with sqlite3.connect(self._dbpath) as conn:
+                cur = conn.cursor()
+                cur.execute(query)
+
+    @classmethod
+    def _Trade_to_row(cls, trade: Trade) -> tuple[str, ...]:
+        return (
+            trade.symbol,
+            str(trade.quantity),
+            str(trade.price),
+            trade.side,
+            trade.timestamp.isoformat(),
+        )
+
+    @classmethod
+    def _row_to_Trade(cls, row: tuple[str, ...]) -> Trade:
+        return Trade(
+            symbol=row[0],
+            quantity=Decimal(row[1]),
+            price=Decimal(row[2]),
+            side=cast(Literal["BUY", "SELL"], row[3]),
+            timestamp=datetime.fromisoformat(row[4]),
+        )
+
+    def add(self, trade: Trade) -> None:
+        query = "INSERT INTO trades (symbol, quantity, price, side, timestamp) VALUES (?,?,?,?,?)"
+        with sqlite3.connect(self._dbpath) as conn:
+            cur = conn.cursor()
+            cur.execute(query, SQLiteTradeRepository._Trade_to_row(trade))
+
+    def get_all(self) -> list[Trade]:
+        with sqlite3.connect(self._dbpath) as conn:
+            cur = conn.cursor()
+            rows = cur.execute("SELECT * FROM trades")
+            return [SQLiteTradeRepository._row_to_Trade(row) for row in rows]
+
+    def get_by_symbol(self, symbol: str) -> list[Trade]:
+        with sqlite3.connect(self._dbpath) as conn:
+            cur = conn.cursor()
+            rows = cur.execute("SELECT * FROM trades WHERE symbol = ?", (symbol,))
+            return [SQLiteTradeRepository._row_to_Trade(row) for row in rows]
+
+    def get_extreme_timestamps(
+        self, symbol: str | None = None
+    ) -> tuple[datetime | None, datetime | None]:
+        with sqlite3.connect(self._dbpath) as conn:
+            cur = conn.cursor()
+            query_min = "SELECT MIN(timestamp) FROM trades"
+            query_max = "SELECT MAX(timestamp) FROM trades"
+            if symbol is None:
+                row_min = cur.execute(query_min).fetchone()
+                row_max = cur.execute(query_max).fetchone()
+            else:
+                query_min = f"{query_min} WHERE symbol = ?"
+                query_max = f"{query_max} WHERE symbol = ?"
+                row_min = cur.execute(query_min, (symbol,)).fetchone()
+                row_max = cur.execute(query_max, (symbol,)).fetchone()
+        return datetime.fromisoformat(row_min[0]), datetime.fromisoformat(row_max[0])
+
+    def get_all_symbols(self) -> set[str]:
+        with sqlite3.connect(self._dbpath) as conn:
+            cur = conn.cursor()
+            res = cur.execute("SELECT symbol FROM trades GROUP BY symbol").fetchall()
+        return set([x[0] for x in res])
 
 
 def _get_extreme_timestamps(trades: Iterator[Trade]) -> tuple[datetime | None, datetime | None]:

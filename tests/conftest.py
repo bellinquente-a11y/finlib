@@ -13,7 +13,12 @@ from finlib.ohlcv_repo import (
     OHLCVInterval,
     OHLCVRepository,
 )
-from finlib.trade_repo import FileTradeRepository, InMemoryTradeRepository, TradeRepository
+from finlib.trade_repo import (
+    FileTradeRepository,
+    InMemoryTradeRepository,
+    SQLiteTradeRepository,
+    TradeRepository,
+)
 
 
 @pytest.fixture
@@ -93,12 +98,16 @@ def sample_market_making_prices() -> pd.DataFrame:
     )
 
 
-@pytest.fixture(params=("memory", "jsonl"))
+@pytest.fixture(params=("memory", "jsonl", "sql"))
 def tmp_trade_repo(request: pytest.FixtureRequest, tmp_path: Path) -> TradeRepository:
+    repo: FileTradeRepository | InMemoryTradeRepository | SQLiteTradeRepository
     if request.param == "memory":
-        repo: FileTradeRepository | InMemoryTradeRepository = InMemoryTradeRepository()
+        repo = InMemoryTradeRepository()
     elif request.param == "jsonl":
         repo = FileTradeRepository(tmp_path / "trade_repo.jsonl")
+    elif request.param == "sql":
+        repo = SQLiteTradeRepository(tmp_path / "trade_repo.db")
+
     trades = [
         Trade(
             symbol="BBB",
