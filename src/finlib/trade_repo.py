@@ -114,13 +114,13 @@ class SQLiteTradeRepository:
         )
 
     @classmethod
-    def _row_to_Trade(cls, row: tuple[str, ...]) -> Trade:
+    def _row_to_Trade(cls, row: dict[str, str]) -> Trade:
         return Trade(
-            symbol=row[0],
-            quantity=Decimal(row[1]),
-            price=Decimal(row[2]),
-            side=cast(Literal["BUY", "SELL"], row[3]),
-            timestamp=datetime.fromisoformat(row[4]),
+            symbol=row["symbol"],
+            quantity=Decimal(row["quantity"]),
+            price=Decimal(row["price"]),
+            side=cast(Literal["BUY", "SELL"], row["side"]),
+            timestamp=datetime.fromisoformat(row["timestamp"]),
         )
 
     def add(self, trade: Trade) -> None:
@@ -131,12 +131,14 @@ class SQLiteTradeRepository:
 
     def get_all(self) -> list[Trade]:
         with sqlite3.connect(self._dbpath) as conn:
+            conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             rows = cur.execute("SELECT * FROM trades")
             return [SQLiteTradeRepository._row_to_Trade(row) for row in rows]
 
     def get_by_symbol(self, symbol: str) -> list[Trade]:
         with sqlite3.connect(self._dbpath) as conn:
+            conn.row_factory = sqlite3.Row
             cur = conn.cursor()
             rows = cur.execute("SELECT * FROM trades WHERE symbol = ?", (symbol,))
             return [SQLiteTradeRepository._row_to_Trade(row) for row in rows]
