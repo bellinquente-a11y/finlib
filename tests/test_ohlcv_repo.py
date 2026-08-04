@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
 from time import sleep
+from typing import cast
 
 import pandas as pd
 import pytest
@@ -150,10 +151,10 @@ def test_last_updated_add_interval(tmp_ohlcv_repo: OHLCVRepository) -> None:
             volume=Decimal(1_342),
         )
     )
-    last_updated = tmp_ohlcv_repo.last_updated
     time2 = datetime.now(tz=UTC)
-    assert last_updated["SYM2"] <= time1
-    assert last_updated["SYM1"] >= time1 and last_updated["SYM1"] <= time2
+    assert cast(datetime, tmp_ohlcv_repo.last_updated("SYM2")) <= time1
+    assert cast(datetime, tmp_ohlcv_repo.last_updated("SYM1")) >= time1
+    assert cast(datetime, tmp_ohlcv_repo.last_updated("SYM1")) <= time2
 
 
 def test_last_updated_add_intervals_batch(tmp_ohlcv_repo: OHLCVRepository) -> None:
@@ -164,7 +165,20 @@ def test_last_updated_add_intervals_batch(tmp_ohlcv_repo: OHLCVRepository) -> No
     time1 = datetime.now(tz=UTC)
     tmp_ohlcv_repo.add_intervals_batch(df)
     sleep(0.01)
-    last_updated = tmp_ohlcv_repo.last_updated
     time2 = datetime.now(tz=UTC)
-    assert last_updated["SYM2"] < time1
-    assert last_updated["SYM1"] >= time1 and last_updated["SYM1"] < time2
+    assert cast(datetime, tmp_ohlcv_repo.last_updated("SYM2")) < time1
+    assert cast(datetime, tmp_ohlcv_repo.last_updated("SYM1")) >= time1
+    assert cast(datetime, tmp_ohlcv_repo.last_updated("SYM1")) < time2
+
+
+def test_last_timestamp(tmp_ohlcv_repo: OHLCVRepository) -> None:
+    assert tmp_ohlcv_repo.last_timestamp("SYM1") == datetime(2026, 6, 3, 1, 2, 3)
+    assert tmp_ohlcv_repo.last_timestamp("SYM2") == datetime(2026, 6, 4, 1, 2, 3)
+
+
+def test_last_timestamp_missing_symbol(tmp_ohlcv_repo: OHLCVRepository) -> None:
+    assert tmp_ohlcv_repo.last_timestamp("SYM3") is None
+
+
+def test_last_updated_missing_symbol(tmp_ohlcv_repo: OHLCVRepository) -> None:
+    assert tmp_ohlcv_repo.last_updated("SYM3") is None

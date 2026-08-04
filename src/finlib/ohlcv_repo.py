@@ -65,9 +65,8 @@ class OHLCVRepository(Protocol):
     def get_data(
         self, symbol: str, start: datetime | None = None, end: datetime | None = None
     ) -> pd.DataFrame: ...
-
-    @property
-    def last_updated(self) -> dict[str, datetime]: ...
+    def last_updated(self, symbol: str) -> datetime | None: ...
+    def last_timestamp(self, symbol: str) -> datetime | None: ...
 
 
 class InMemoryOHLCVRepository:
@@ -114,6 +113,12 @@ class InMemoryOHLCVRepository:
             columns=self._fieldnames,
         ).sort_values(["timestamp", "symbol"])
 
+    def last_timestamp(self, symbol: str) -> datetime | None:
+        ts_dict = self._get_last_timestamps()
+        if symbol in ts_dict:
+            return ts_dict[symbol]
+        return None
+
     def _get_last_timestamps(self) -> dict[str, datetime]:
         res: dict[str, datetime] = {}
         for row in self._data:
@@ -126,9 +131,10 @@ class InMemoryOHLCVRepository:
     def _update_last_updated(self, symbol: str) -> None:
         self._last_updated[symbol] = datetime.now(tz=UTC)
 
-    @property
-    def last_updated(self) -> dict[str, datetime]:
-        return self._last_updated
+    def last_updated(self, symbol: str) -> datetime | None:
+        if symbol in self._last_updated:
+            return self._last_updated[symbol]
+        return None
 
 
 class FileOHLCVRepository:
@@ -202,6 +208,12 @@ class FileOHLCVRepository:
                     data.append([getattr(row_data, f) for f in self._fieldnames])
         return pd.DataFrame(data, columns=self._fieldnames).sort_values(by="timestamp")
 
+    def last_timestamp(self, symbol: str) -> datetime | None:
+        ts_dict = self._get_last_timestamps()
+        if symbol in ts_dict:
+            return ts_dict[symbol]
+        return None
+
     def _get_last_timestamps(self) -> dict[str, datetime]:
         res: dict[str, datetime] = {}
         with self._filepath.open() as f:
@@ -215,19 +227,16 @@ class FileOHLCVRepository:
                     res[row_data.symbol] = max(row_data.timestamp, res[row_data.symbol])
         return res
 
-    @property
-    def last_updated(self) -> dict[str, datetime]:
-        res: dict[str, datetime] = {}
+    def last_updated(self, symbol: str) -> datetime | None:
+        res = None
         with self._filepath.open() as f:
             _ = f.readline()
             for row_with_last_updated in f:
                 row = ",".join(row_with_last_updated.split(",")[:-1])
                 row_data = OHLCVInterval.from_string(row)
                 last_updated = datetime.fromisoformat(row_with_last_updated.split(",")[-1].strip())
-                if row_data.symbol not in res:
-                    res[row_data.symbol] = last_updated
-                else:
-                    res[row_data.symbol] = max(last_updated, res[row_data.symbol])
+                if row_data.symbol == symbol:
+                    res = last_updated if res is None else max(last_updated, res)
         return res
 
 
@@ -338,6 +347,15 @@ class SQLiteOHLCVRepository:
             columns=self._fieldnames,
         ).sort_values(by="timestamp")
 
+    def last_timestamp(self, symbol: str) -> datetime | None:
+        query = "SELECT timestamp FROM ohlcv WHERE symbol = ? ORDER BY timestamp DESC LIMIT 1"
+        with sqlite3.connect(self._dbpath) as conn:
+            cur = conn.cursor()
+            res = cur.execute(query, (symbol,)).fetchone()
+        if res is None:
+            return None
+        return datetime.fromisoformat(res[0])
+
     def _get_last_timestamps(self) -> dict[str, datetime]:
         query = "SELECT symbol, MAX(timestamp) FROM ohlcv GROUP BY symbol"
         with sqlite3.connect(self._dbpath) as conn:
@@ -357,15 +375,15 @@ class SQLiteOHLCVRepository:
             cur = conn.cursor()
             cur.execute(query, (symbol, datetime.now(tz=UTC).isoformat()))
 
-    @property
-    def last_updated(self) -> dict[str, datetime]:
-        query = "SELECT * FROM last_updated"
+    def last_updated(self, symbol: str) -> datetime | None:
+        query = "SELECT timestamp FROM last_updated WHERE symbol = ? "
         with sqlite3.connect(self._dbpath) as conn:
             conn.row_factory = sqlite3.Row
             cur = conn.cursor()
-            res = cur.execute(query)
-
-        return {r[0]: datetime.fromisoformat(r[1]) for r in res}
+            res = cur.execute(query, (symbol,)).fetchone()
+        if res is None:
+            return None
+        return datetime.fromisoformat(res[0])
 
 
 def _reformat_dataframe_for_batch_input(
