@@ -11,6 +11,7 @@ from finlib.ohlcv_repo import (
     InMemoryOHLCVRepository,
     OHLCVInterval,
     OHLCVRepository,
+    SQLiteOHLCVRepository,
 )
 
 _int1 = OHLCVInterval(
@@ -51,10 +52,12 @@ _int4 = OHLCVInterval(
 )
 
 
-@pytest.fixture(params=["memory", "csv"])
+@pytest.fixture(params=["memory", "csv", "sqlite"])
 def repo(request: pytest.FixtureRequest, tmp_path: Path) -> OHLCVRepository:
     if request.param == "memory":
         return InMemoryOHLCVRepository()
+    if request.param == "sqlite":
+        return SQLiteOHLCVRepository(tmp_path / "ohlcv_repo.db")
     return FileOHLCVRepository(tmp_path / "ohlcv_repo.csv")
 
 

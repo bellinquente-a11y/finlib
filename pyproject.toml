@@ -18,7 +18,9 @@ dependencies = [
     "structlog (>=26.1.0,<27.0.0)",
     "python-dateutil (>=2.9.0.post0,<3.0.0)",
     "types-python-dateutil (>=2.9.0.20260518,<3.0.0.0)",
-    "hypothesis (>=6.156.6,<7.0.0)"
+    "hypothesis (>=6.156.6,<7.0.0)",
+    "fastapi (>=0.141.1,<0.142.0)",
+    "uvicorn[standard] (>=0.52.1,<0.53.0)"
 ]
 
 [tool.poetry]
@@ -38,7 +40,8 @@ dev = [
     "ipykernel (>=7.3.0,<8.0.0)",
     "pandas-stubs (>=3.0.3.260530,<4.0.0.0)",
     "pytest-asyncio (>=1.4.0,<2.0.0)",
-    "pre-commit (>=4.6.0,<5.0.0)"
+    "pre-commit (>=4.6.0,<5.0.0)",
+    "httpx (>=0.28.1,<0.29.0)"
 ]
 
 [tool.mypy]
@@ -48,6 +51,9 @@ warn_return_any = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::starlette.exceptions.StarletteDeprecationWarning",
+]
 
 [tool.poetry.scripts]
 finlib-pipeline = "finlib.pipeline.cli:main"

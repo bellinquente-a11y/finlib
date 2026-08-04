@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -57,6 +57,8 @@ class Settings(BaseSettings):
     fetch_timeout_seconds: float = Field(default=10.0)
 
     binance: BinanceSettings = BinanceSettings()
+
+    api_key: SecretStr = Field(default=SecretStr(""))
 
 
 @lru_cache(1)
