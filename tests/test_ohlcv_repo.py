@@ -1,7 +1,8 @@
 import dataclasses
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
+from time import sleep
 
 import pandas as pd
 import pytest
@@ -123,3 +124,47 @@ def test_in_memory_repo_add_same_batches(repo: OHLCVRepository) -> None:
     assert set(df_out.columns) == set(exp_df.columns)
     assert all(df_out.index == exp_df.index)
     assert (df_out == exp_df).all().all()
+
+
+def test_last_updated_add_interval(tmp_ohlcv_repo: OHLCVRepository) -> None:
+    tmp_ohlcv_repo.add_interval(
+        OHLCVInterval(
+            symbol="SYM2",
+            timestamp=datetime(2026, 6, 1, 1, 2, 3),
+            open=Decimal(101.2),
+            high=Decimal(102.4),
+            low=Decimal(100.8),
+            close=Decimal(100.9),
+            volume=Decimal(1_342),
+        )
+    )
+    time1 = datetime.now(tz=UTC)
+    tmp_ohlcv_repo.add_interval(
+        OHLCVInterval(
+            symbol="SYM1",
+            timestamp=datetime(2026, 6, 1, 1, 2, 3),
+            open=Decimal(101.2),
+            high=Decimal(102.4),
+            low=Decimal(100.8),
+            close=Decimal(100.9),
+            volume=Decimal(1_342),
+        )
+    )
+    last_updated = tmp_ohlcv_repo.last_updated
+    time2 = datetime.now(tz=UTC)
+    assert last_updated["SYM2"] <= time1
+    assert last_updated["SYM1"] >= time1 and last_updated["SYM1"] <= time2
+
+
+def test_last_updated_add_intervals_batch(tmp_ohlcv_repo: OHLCVRepository) -> None:
+    df = tmp_ohlcv_repo.get_data("SYM1").assign(
+        timestamp=lambda df: df["timestamp"] + timedelta(minutes=1)
+    )
+    sleep(0.01)
+    time1 = datetime.now(tz=UTC)
+    tmp_ohlcv_repo.add_intervals_batch(df)
+    sleep(0.01)
+    last_updated = tmp_ohlcv_repo.last_updated
+    time2 = datetime.now(tz=UTC)
+    assert last_updated["SYM2"] < time1
+    assert last_updated["SYM1"] >= time1 and last_updated["SYM1"] < time2
