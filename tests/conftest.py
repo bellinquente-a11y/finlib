@@ -12,6 +12,7 @@ from finlib.ohlcv_repo import (
     InMemoryOHLCVRepository,
     OHLCVInterval,
     OHLCVRepository,
+    SQLiteOHLCVRepository,
 )
 from finlib.trade_repo import (
     FileTradeRepository,
@@ -136,12 +137,15 @@ def tmp_trade_repo(request: pytest.FixtureRequest, tmp_path: Path) -> TradeRepos
     return repo
 
 
-@pytest.fixture(params=("memory", "csv"))
+@pytest.fixture(params=("memory", "csv", "sqlite"))
 def tmp_ohlcv_repo(request: pytest.FixtureRequest, tmp_path: Path) -> OHLCVRepository:
+    repo: SQLiteOHLCVRepository | FileOHLCVRepository | InMemoryOHLCVRepository
     if request.param == "memory":
-        repo: FileOHLCVRepository | InMemoryOHLCVRepository = InMemoryOHLCVRepository()
+        repo = InMemoryOHLCVRepository()
     elif request.param == "csv":
         repo = FileOHLCVRepository(tmp_path / "ohlcv_repo.csv")
+    elif request.param == "sqlite":
+        repo = SQLiteOHLCVRepository(tmp_path / "ohlcv_repo.db")
 
     _int1 = OHLCVInterval(
         symbol="SYM1",
