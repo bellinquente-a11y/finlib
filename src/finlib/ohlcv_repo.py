@@ -1,3 +1,4 @@
+import sqlite3
 from dataclasses import dataclass, fields
 from datetime import datetime
 from decimal import Decimal
@@ -199,6 +200,110 @@ class FileOHLCVRepository:
                 else:
                     res[row_data.symbol] = max(row_data.timestamp, res[row_data.symbol])
         return res
+
+
+class SQLiteOHLCVRepository:
+    def __init__(self, dbpath: Path) -> None:
+        self._dbpath = str(dbpath)
+        self._fieldnames = [f.name for f in fields(OHLCVInterval)]
+        if not dbpath.exists():
+            query = """
+                CREATE TABLE ohlcv (
+                    symbol      TEXT NOT NULL,
+                    timestamp   TEXT NOT NULL,
+                    open        TEXT NOT NULL,
+                    high        TEXT NOT NULL,
+                    low         TEXT NOT NULL,
+                    close       TEXT NOT NULL,
+                    volume      TEXT NOT NULL
+                );
+            """
+            with sqlite3.connect(self._dbpath) as conn:
+                cur = conn.cursor()
+                cur.execute(query)
+
+    @classmethod
+    def _OHLCVInterval_to_row(cls, interval: OHLCVInterval) -> tuple[str, ...]:
+        return (
+            interval.symbol,
+            interval.timestamp.isoformat(),
+            str(interval.open),
+            str(interval.high),
+            str(interval.low),
+            str(interval.close),
+            str(interval.volume),
+        )
+
+    @classmethod
+    def _row_to_OHLCVInterval(cls, row: dict[str, str]) -> OHLCVInterval:
+        return OHLCVInterval(
+            symbol=row["symbol"],
+            timestamp=datetime.fromisoformat(row["timestamp"]),
+            open=Decimal(row["open"]),
+            high=Decimal(row["high"]),
+            low=Decimal(row["low"]),
+            close=Decimal(row["close"]),
+            volume=Decimal(row["volume"]),
+        )
+
+    def add_interval(self, data: OHLCVInterval) -> None:
+        query = (
+            "INSERT INTO ohlcv (symbol, timestamp, open, high, low, close, volume) "
+            "VALUES (?,?,?,?,?,?,?)"
+        )
+        with sqlite3.connect(self._dbpath) as conn:
+            cur = conn.cursor()
+            cur.execute(query, SQLiteOHLCVRepository._OHLCVInterval_to_row(data))
+
+    def add_intervals_batch(
+        self, df: pd.DataFrame, columns_map: dict[str, str] | None = None
+    ) -> None:
+        if columns_map is not None:
+            df = _reformat_dataframe_for_batch_input(df, self._fieldnames, columns_map)
+        if not (set(df.columns) <= set(self._fieldnames)):
+            raise ValueError
+
+        symbols = set(df["symbol"].to_list())
+        last_timestamp = self._get_last_timestamps()
+        count = 0
+        for symbol in symbols:
+            query = "symbol==@symbol"
+            if symbol in last_timestamp:
+                last_timestamp_symbol = last_timestamp[symbol]  # noqa: F841 # pandas-query false positive
+                query = f"{query} and timestamp>@last_timestamp_symbol"
+            for row in df.query(query).itertuples():
+                ohlcv_int = OHLCVInterval(**{k: getattr(row, k) for k in self._fieldnames})
+                self.add_interval(ohlcv_int)
+                count += 1
+        log.info("New rows added to ohlcv repo", count=count)
+
+    def get_data(
+        self, symbol: str, start: datetime | None = None, end: datetime | None = None
+    ) -> pd.DataFrame:
+        query = "SELECT * FROM ohlcv WHERE symbol = ?"
+        params: list[str] = [symbol]
+        if start is not None:
+            query = f"{query} AND timestamp >= ?"
+            params.append(start.isoformat())
+        if end is not None:
+            query = f"{query} AND timestamp <= ?"
+            params.append(end.isoformat())
+        with sqlite3.connect(self._dbpath) as conn:
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            rows = cur.execute(query, params)
+            intervals = [SQLiteOHLCVRepository._row_to_OHLCVInterval(row) for row in rows]
+        return pd.DataFrame(
+            [[getattr(i, f) for f in self._fieldnames] for i in intervals],
+            columns=self._fieldnames,
+        ).sort_values(by="timestamp")
+
+    def _get_last_timestamps(self) -> dict[str, datetime]:
+        query = "SELECT symbol, MAX(timestamp) FROM ohlcv GROUP BY symbol"
+        with sqlite3.connect(self._dbpath) as conn:
+            cur = conn.cursor()
+            rows = cur.execute(query).fetchall()
+        return {symbol: datetime.fromisoformat(ts) for symbol, ts in rows}
 
 
 def _reformat_dataframe_for_batch_input(
