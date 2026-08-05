@@ -30,8 +30,7 @@ def test_main_wiring(tmp_path: Path) -> None:
     with (
         patch("finlib.ohlcv_repo.FileOHLCVRepository.__init__", return_value=None),
         patch("finlib.pipeline.data.fetch_trades") as mock_fetch_trades,
-        patch("finlib.pipeline.data.fetch_market_data") as mock_fetch_market_data,
-        patch("finlib.pipeline.data.store_market_data"),
+        patch("finlib.pipeline.data.update_market_data_repo") as mock_update_market_data,
         patch("finlib.pipeline.analytics.compute_market_summary", return_value=summary),
         patch(
             "finlib.pipeline.analytics.compute_portfolio_performance_metrics",
@@ -43,4 +42,4 @@ def test_main_wiring(tmp_path: Path) -> None:
         mock_fetch_trades.return_value = (5 * [trade], ["AAA"], ts)
         main()
     mock_fetch_trades.assert_called_once()
-    mock_fetch_market_data.assert_called_once()
+    mock_update_market_data.assert_called_once()
