@@ -1,8 +1,9 @@
 # finlib
 
-[![CI](https://github.com/simone-belli/finlib/actions/workflows/ci.yml/badge.svg)](https://github.com/simone-belli/finlib/actions/workflows/ci.yml)
+[CI](https://github.com/simone-belli/finlib/actions/workflows/ci.yml)
 
 Production-grade Python for financial data modelling.
+
 - Strict type annotations (mypy --strict)
 - Protocol-based dependency injection
 - structured logging (structlog)
@@ -17,24 +18,29 @@ Production-grade Python for financial data modelling.
 - **O(1) memory streaming** — OHLCV data is consumed as a generator; no materialising full datasets before processing.
 - **Property-based testing** via Hypothesis — invariants on numeric functions (e.g. `maximum_drawdown ≤ 0` for any valid return series).
 
+
+
 ## Modules
 
-| Module | What it does |
-|---|---|
-| `models.py` | `Trade` model with Pydantic v2 field constraints |
-| `data.py` | Streaming OHLCV parser; validates rows at the ingestion boundary |
-| `async_fetch.py` | Async Binance fetcher: aiohttp, asyncio.gather, Semaphore, validated response parsing |
-| `decorators.py` | `@retry` / `@async_retry` (exp. backoff), `@timer`, `@deprecated`, `@validate_inputs` |
-| `context_managers.py` | `timer` context manager for profiling code blocks |
-| `analytics.py` | VWAP; uses `@retry` and `@validate_inputs` to enforce caller contracts |
-| `historic_analytics.py` | `resample_dataframe`, `add_rolling_stats` (annualised vol + Sharpe), `maximum_drawdown` |
-| `trade_repo.py` | `TradeRepository` Protocol (in-memory, JSONL, SQLite backends) + `PortfolioService` with injected repo |
-| `ohlcv_repo.py` | `OHLCVRepository` Protocol (in-memory, CSV, SQLite backends); `OHLCVInterval` record |
-| `portfolio.py` | `Portfolio` aggregate: historic position, cost basis, market value, and PnL as DataFrames |
-| `report.py` | `daily_trade_summary` — daily notional and trade count aggregated by symbol |
-| `config.py` | pydantic-settings config with `.env` support |
-| `pipeline/` | CLI entry point, data orchestration, analytics, formatted output |
-| `api/` | FastAPI app: market-data & portfolio routes, DI-injected repositories, API-key auth |
+
+| Module                  | What it does                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `models.py`             | `Trade` model with Pydantic v2 field constraints                                                       |
+| `data.py`               | Streaming OHLCV parser; validates rows at the ingestion boundary                                       |
+| `async_fetch.py`        | Async Binance fetcher: aiohttp, asyncio.gather, Semaphore, validated response parsing                  |
+| `decorators.py`         | `@retry` / `@async_retry` (exp. backoff), `@timer`, `@deprecated`, `@validate_inputs`                  |
+| `context_managers.py`   | `timer` context manager for profiling code blocks                                                      |
+| `analytics.py`          | VWAP; uses `@retry` and `@validate_inputs` to enforce caller contracts                                 |
+| `historic_analytics.py` | `resample_dataframe`, `add_rolling_stats` (annualised vol + Sharpe), `maximum_drawdown`                |
+| `trade_repo.py`         | `TradeRepository` Protocol (in-memory, JSONL, SQLite backends) + `PortfolioService` with injected repo |
+| `ohlcv_repo.py`         | `OHLCVRepository` Protocol (in-memory, CSV, SQLite backends); `OHLCVInterval` record                   |
+| `portfolio.py`          | `Portfolio` aggregate: historic position, cost basis, market value, and PnL as DataFrames              |
+| `report.py`             | `daily_trade_summary` — daily notional and trade count aggregated by symbol                            |
+| `config.py`             | pydantic-settings config with `.env` support                                                           |
+| `pipeline/`             | CLI entry point, data orchestration, analytics, formatted output                                       |
+| `api/`                  | FastAPI app: market-data & portfolio routes, DI-injected repositories, API-key auth                    |
+
+
 
 
 ## Installation
@@ -44,6 +50,8 @@ git clone https://github.com/simone-belli/finlib
 cd finlib && poetry install
 ```
 
+
+
 ## Portfolio analysis: quick start
 
 Reads historic trades from a JSONL file, fetches OHLCV market data from Binance, caches it locally as CSV, and computes portfolio analytics.
@@ -51,12 +59,14 @@ Reads historic trades from a JSONL file, fetches OHLCV market data from Binance,
 CLI inputs:
 
 1. Trades JSONL file path
-
 2. Quantisation frequency
+3. (optional) Market data CSV file path
 
 ```bash
-poetry run finlib-pipeline ./examples/trades.jsonl 1h
+poetry run finlib-pipeline ./examples/trades.jsonl 1h -m ./data/mkt_data_1h.csv
 ```
+
+
 
 ### trades.jsonl format
 
@@ -109,6 +119,8 @@ Portfolio PnL
 
 ```
 
+
+
 ## HTTP API
 
 A FastAPI app (`finlib.api.apps:app`) exposes the same core over REST. Repositories are injected through FastAPI dependencies and default to the SQLite backends (`data_dir/trades.db`, `data_dir/market_data.db`), so trades and market data persist across requests.
@@ -125,22 +137,25 @@ Interactive docs are then at `/docs` (Swagger UI) and `/redoc`.
 
 Every endpoint requires an `X-API-KEY` header matching the configured `api_key` (`401` if missing, `403` if wrong).
 
-| Method | Path | Purpose |
-|---|---|---|
-| `GET` | `/market-data` | Fetch OHLCV bars from Binance for one or more `symbols`. |
-| `POST` | `/trades` | Record a trade (validated as a `Trade`; `201 Created`). |
-| `GET` | `/trades` | List all recorded trades. |
-| `GET` | `/positions` | Historic position per symbol. |
-| `GET` | `/pnl` | Mark-to-market PnL per symbol. |
+
+| Method | Path           | Purpose                                                  |
+| ------ | -------------- | -------------------------------------------------------- |
+| `GET`  | `/market-data` | Fetch OHLCV bars from Binance for one or more `symbols`. |
+| `POST` | `/trades`      | Record a trade (validated as a `Trade`; `201 Created`).  |
+| `GET`  | `/trades`      | List all recorded trades.                                |
+| `GET`  | `/positions`   | Historic position per symbol.                            |
+| `GET`  | `/pnl`         | Mark-to-market PnL per symbol.                           |
+
 
 ```bash
-curl -H "X-API-KEY: $FINLIB_API_KEY" \
-  "http://127.0.0.1:8000/market-data?symbols=BTCUSDT&interval=1h&start=2026-07-01T00:00:00"
+curl -H "X-API-KEY: $FINLIB_API_KEY" http://127.0.0.1:8000/pnl
 ```
+
+
 
 ## Documentation
 
-Full per-module reference (with design rationale) lives in [`docs/`](docs/README.md): architecture, domain model, repositories, data ingestion, async & concurrency, analytics, pipeline, HTTP API, decorators, configuration, and testing.
+Full per-module reference (with design rationale) lives in `[docs/](docs/README.md)`: architecture, domain model, repositories, data ingestion, async & concurrency, analytics, pipeline, HTTP API, decorators, configuration, and testing.
 
 ## Contributing
 

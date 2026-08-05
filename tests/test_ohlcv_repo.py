@@ -182,3 +182,7 @@ def test_last_timestamp_missing_symbol(tmp_ohlcv_repo: OHLCVRepository) -> None:
 
 def test_last_updated_missing_symbol(tmp_ohlcv_repo: OHLCVRepository) -> None:
     assert tmp_ohlcv_repo.last_updated("SYM3") is None
+
+
+def test_symbols(tmp_ohlcv_repo: OHLCVRepository) -> None:
+    assert tmp_ohlcv_repo.symbols() == {"SYM1", "SYM2"}

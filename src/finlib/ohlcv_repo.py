@@ -23,6 +23,16 @@ class OHLCVInterval:
     close: Decimal
     volume: Decimal
 
+    def __post_init__(self) -> None:
+        # Enforce the declared Decimal types so prices and volume are always loaded as
+        # Decimal, even when the interval is built from a float DataFrame (e.g.
+        # add_intervals_batch fed from a CSV). str() first to avoid binary-float noise.
+        for f in fields(self):
+            if f.type is Decimal:
+                value = getattr(self, f.name)
+                if not isinstance(value, Decimal):
+                    object.__setattr__(self, f.name, Decimal(str(value)))
+
     def to_string(self) -> str:
         fields_names = [f.name for f in fields(self)]
         fields_types = [f.type for f in fields(self)]
@@ -67,6 +77,7 @@ class OHLCVRepository(Protocol):
     ) -> pd.DataFrame: ...
     def last_updated(self, symbol: str) -> datetime | None: ...
     def last_timestamp(self, symbol: str) -> datetime | None: ...
+    def symbols(self) -> set[str]: ...
 
 
 class InMemoryOHLCVRepository:
@@ -135,6 +146,12 @@ class InMemoryOHLCVRepository:
         if symbol in self._last_updated:
             return self._last_updated[symbol]
         return None
+
+    def symbols(self) -> set[str]:
+        res = set[str]()
+        for row in self._data:
+            res.add(row.symbol)
+        return res
 
 
 class FileOHLCVRepository:
@@ -237,6 +254,16 @@ class FileOHLCVRepository:
                 last_updated = datetime.fromisoformat(row_with_last_updated.split(",")[-1].strip())
                 if row_data.symbol == symbol:
                     res = last_updated if res is None else max(last_updated, res)
+        return res
+
+    def symbols(self) -> set[str]:
+        res = set[str]()
+        with self._filepath.open() as f:
+            _ = f.readline()
+            for row_with_last_updated in f:
+                row = ",".join(row_with_last_updated.split(",")[:-1])
+                row_data = OHLCVInterval.from_string(row)
+                res.add(row_data.symbol)
         return res
 
 
@@ -384,6 +411,13 @@ class SQLiteOHLCVRepository:
         if res is None:
             return None
         return datetime.fromisoformat(res[0])
+
+    def symbols(self) -> set[str]:
+        query = "SELECT symbol FROM ohlcv GROUP BY symbol"
+        with sqlite3.connect(self._dbpath) as conn:
+            cur = conn.cursor()
+            rows = cur.execute(query).fetchall()
+        return set([row[0] for row in rows])
 
 
 def _reformat_dataframe_for_batch_input(

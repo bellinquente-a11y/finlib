@@ -23,15 +23,26 @@ def main() -> None:
     then prints a market summary and portfolio performance tables (market value,
     cost basis, cumulative PnL) to stdout.
     """
+
+    settings = get_settings()
+
     parser = argparse.ArgumentParser(
         description="Fetch and analyse trades and market data \
         from Binance"
     )
-    parser.add_argument("trade_repo_path", help="Path of the JSONL trade repo")
+    parser.add_argument("trade_repo_path", type=str, help="Path of the JSONL trade repo")
     parser.add_argument("frequency", type=str, help="Market data quantisation frequency")
+    parser.add_argument(
+        "-m", "--market_data_repo_path", type=str, help="Path of the CSV market data repo"
+    )
+
     args = parser.parse_args()
 
-    settings = get_settings()
+    if args.market_data_repo_path is None:
+        mkt_data_repo_path = settings.data_dir / f"mkt_data_{args.frequency}.csv"
+    else:
+        mkt_data_repo_path = Path(args.market_data_repo_path)
+    mkt_data_repo_path.parent.mkdir(parents=True, exist_ok=True)
 
     # structlog config
     shared_processors: list[structlog.typing.Processor] = [
@@ -57,7 +68,7 @@ def main() -> None:
 
     # Create repo objects
     trade_repo = FileTradeRepository(Path(args.trade_repo_path))
-    mkt_repo = FileOHLCVRepository(settings.data_dir / f"mkt_data_{args.frequency}.csv")
+    mkt_repo = FileOHLCVRepository(mkt_data_repo_path)
 
     # Fetch and store market data
     _, symbols, first_ts = data.fetch_trades(trade_repo)
