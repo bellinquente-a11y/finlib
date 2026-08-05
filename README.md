@@ -10,7 +10,8 @@ Production-grade Python for financial data modelling.
 
 ## Design decisions
 
-- **Protocol-based repositories** — `OHLCVRepository` and `TradeRepository` are structural subtypes. Backends (in-memory vs CSV/JSONL) are swappable without touching callers.
+- **Protocol-based repositories** — `OHLCVRepository` and `TradeRepository` are structural subtypes, each with three interchangeable backends: in-memory, flat file (JSONL/CSV), and SQLite. Backends are swappable without touching callers — the CLI wires the file backends, the HTTP API wires SQLite, and tests use in-memory.
+- **HTTP API** — a FastAPI app exposes the same core over REST: market-data fetch plus trade recording, positions, and PnL, with dependency-injected repositories and API-key auth.
 - **mypy --strict** clean across `src/` and `tests/`.
 - **Async concurrency** — `asyncio.gather` with a rate-limiting `Semaphore`, plus exponential-backoff retry on both sync and async callables.
 - **O(1) memory streaming** — OHLCV data is consumed as a generator; no materialising full datasets before processing.
@@ -27,12 +28,13 @@ Production-grade Python for financial data modelling.
 | `context_managers.py` | `timer` context manager for profiling code blocks |
 | `analytics.py` | VWAP; uses `@retry` and `@validate_inputs` to enforce caller contracts |
 | `historic_analytics.py` | `resample_dataframe`, `add_rolling_stats` (annualised vol + Sharpe), `maximum_drawdown` |
-| `trade_repo.py` | `TradeRepository` Protocol; in-memory and JSONL-backed implementations |
-| `ohlcv_repo.py` | `OHLCVRepository` Protocol; in-memory and CSV-backed implementations |
-| `portfolio.py` | `PortfolioService` with injected `TradeRepository`; trade management and valuation |
+| `trade_repo.py` | `TradeRepository` Protocol (in-memory, JSONL, SQLite backends) + `PortfolioService` with injected repo |
+| `ohlcv_repo.py` | `OHLCVRepository` Protocol (in-memory, CSV, SQLite backends); `OHLCVInterval` record |
+| `portfolio.py` | `Portfolio` aggregate: historic position, cost basis, market value, and PnL as DataFrames |
 | `report.py` | `daily_trade_summary` — daily notional and trade count aggregated by symbol |
 | `config.py` | pydantic-settings config with `.env` support |
 | `pipeline/` | CLI entry point, data orchestration, analytics, formatted output |
+| `api/` | FastAPI app: market-data & portfolio routes, DI-injected repositories, API-key auth |
 
 
 ## Installation
@@ -106,6 +108,39 @@ Portfolio PnL
 2026-07-27 07:59  35,798  61,831  133,134
 
 ```
+
+## HTTP API
+
+A FastAPI app (`finlib.api.apps:app`) exposes the same core over REST. Repositories are injected through FastAPI dependencies and default to the SQLite backends (`data_dir/trades.db`, `data_dir/market_data.db`), so trades and market data persist across requests.
+
+Run it with uvicorn:
+
+```bash
+poetry run uvicorn finlib.api.apps:app --reload
+```
+
+Interactive docs are then at `/docs` (Swagger UI) and `/redoc`.
+
+### Endpoints
+
+Every endpoint requires an `X-API-KEY` header matching the configured `api_key` (`401` if missing, `403` if wrong).
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/market-data` | Fetch OHLCV bars from Binance for one or more `symbols`. |
+| `POST` | `/trades` | Record a trade (validated as a `Trade`; `201 Created`). |
+| `GET` | `/trades` | List all recorded trades. |
+| `GET` | `/positions` | Historic position per symbol. |
+| `GET` | `/pnl` | Mark-to-market PnL per symbol. |
+
+```bash
+curl -H "X-API-KEY: $FINLIB_API_KEY" \
+  "http://127.0.0.1:8000/market-data?symbols=BTCUSDT&interval=1h&start=2026-07-01T00:00:00"
+```
+
+## Documentation
+
+Full per-module reference (with design rationale) lives in [`docs/`](docs/README.md): architecture, domain model, repositories, data ingestion, async & concurrency, analytics, pipeline, HTTP API, decorators, configuration, and testing.
 
 ## Contributing
 
