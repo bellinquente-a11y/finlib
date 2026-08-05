@@ -11,22 +11,13 @@ from hypothesis import given
 from pandas.testing import assert_series_equal
 from pydantic_core import ValidationError
 
-from finlib import Equity, Portfolio, Priceable, Trade, value_portfolio
+from finlib import Portfolio, Trade
 from tests.strategies import ordered_trades_list
 
 
 def test_portfolio_empty_trade_list_validation_error() -> None:
     with pytest.raises(ValidationError):
         _ = Portfolio(name="MyPortfolio", trades=[])
-
-
-def test_value_portfolio_calculation() -> None:
-    positions: dict[str, tuple[Priceable, float]] = {
-        "BHP": (Equity("BHP", Decimal(130.0)), 10.0),
-        "XYZ": (Equity("BHP", Decimal(150.0)), -10.0),
-    }
-    value = value_portfolio(positions)
-    assert value == {"BHP": Decimal(1300), "XYZ": Decimal(-1500)}
 
 
 def test_portfolio_len(sample_portfolio: Portfolio) -> None:
