@@ -148,8 +148,7 @@ Every endpoint requires an `X-API-KEY` header matching the configured `api_key` 
 
 
 ```bash
-curl -H "X-API-KEY: $FINLIB_API_KEY" \
-  "http://127.0.0.1:8000/market-data?symbols=BTCUSDT&interval=1h&start=2026-07-01T00:00:00"
+curl -H "X-API-KEY: $FINLIB_API_KEY" http://127.0.0.1:8000/pnl
 ```
 
 
