@@ -21,7 +21,6 @@ Production-grade Python for financial data modelling.
 | Module | What it does |
 |---|---|
 | `models.py` | `Trade` model with Pydantic v2 field constraints |
-| `instruments.py` | Instrument hierarchy (ABCs + Protocols); portfolio valuation via structural subtyping |
 | `data.py` | Streaming OHLCV parser; validates rows at the ingestion boundary |
 | `async_fetch.py` | Async Binance fetcher: aiohttp, asyncio.gather, Semaphore, validated response parsing |
 | `decorators.py` | `@retry` / `@async_retry` (exp. backoff), `@timer`, `@deprecated`, `@validate_inputs` |
