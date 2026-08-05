@@ -8,15 +8,18 @@ from finlib.config import Settings, get_settings
 from finlib.ohlcv_repo import OHLCVRepository, SQLiteOHLCVRepository
 from finlib.trade_repo import SQLiteTradeRepository, TradeRepository
 
+TRADES_DB_PATH = get_settings().data_dir / "trades.db"
+MKT_DATA_DB_PATH = get_settings().data_dir / "market_data.db"
+
 api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
 
 
 def get_trade_repo() -> TradeRepository:
-    return SQLiteTradeRepository(get_settings().data_dir / "trades.db")
+    return SQLiteTradeRepository(TRADES_DB_PATH)
 
 
 def get_market_data_repo() -> OHLCVRepository:
-    return SQLiteOHLCVRepository(get_settings().data_dir / "market_data.db")
+    return SQLiteOHLCVRepository(MKT_DATA_DB_PATH)
 
 
 def require_key(

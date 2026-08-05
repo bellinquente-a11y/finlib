@@ -4,6 +4,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
+from finlib.api.deps import MKT_DATA_DB_PATH, TRADES_DB_PATH
 from finlib.api.routes import market_data, portfolio
 from finlib.config import get_settings
 from finlib.ohlcv_repo import FileOHLCVRepository, SQLiteOHLCVRepository
@@ -18,8 +19,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     repo_root = Path(__file__).resolve().parents[3]
     file_trade_repo_path = repo_root / "examples" / "trades.jsonl"
     file_mkt_repo_path = repo_root / "examples" / "mkt_data_1h.csv"
-    db_trade_repo_path = db_dir / "trades.db"
-    db_mkt_repo_path = db_dir / "mkt_data_1h.db"
 
     # Make sure the files exist
     if not file_trade_repo_path.exists():
@@ -28,17 +27,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         raise ValueError(f"Missing file {file_mkt_repo_path}")
 
     # Remove existing databases
-    db_trade_repo_path.unlink(missing_ok=True)
-    db_mkt_repo_path.unlink(missing_ok=True)
+    TRADES_DB_PATH.unlink(missing_ok=True)
+    MKT_DATA_DB_PATH.unlink(missing_ok=True)
 
     # Clone repos
     trade_repo_file = FileTradeRepository(file_trade_repo_path)
-    trade_repo_db = SQLiteTradeRepository(db_trade_repo_path)
+    trade_repo_db = SQLiteTradeRepository(TRADES_DB_PATH)
     for trade in trade_repo_file.get_all():
         trade_repo_db.add(trade)
 
     mkt_repo_file = FileOHLCVRepository(file_mkt_repo_path)
-    mkt_repo_db = SQLiteOHLCVRepository(db_mkt_repo_path)
+    mkt_repo_db = SQLiteOHLCVRepository(MKT_DATA_DB_PATH)
     for symbol in mkt_repo_file.symbols():
         mkt_repo_db.add_intervals_batch(mkt_repo_file.get_data(symbol))
     yield
