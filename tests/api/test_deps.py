@@ -17,22 +17,16 @@ def settings(tmp_path: Path) -> Settings:
     return Settings(data_dir=tmp_path, api_key=SecretStr(TEST_KEY))
 
 
-@pytest.fixture
-def patched_settings(monkeypatch: pytest.MonkeyPatch, settings: Settings) -> Settings:
-    monkeypatch.setattr(deps, "get_settings", lambda: settings)
-    return settings
-
-
-def test_get_trade_repo(patched_settings: Settings) -> None:
+def test_get_trade_repo() -> None:
     repo = deps.get_trade_repo()
     assert isinstance(repo, SQLiteTradeRepository)
-    assert repo._dbpath == str(patched_settings.data_dir / "trades.db")
+    assert repo._dbpath == str(deps.TRADES_DB_PATH)
 
 
-def test_get_market_data_repo(patched_settings: Settings) -> None:
+def test_get_market_data_repo() -> None:
     repo = deps.get_market_data_repo()
     assert isinstance(repo, SQLiteOHLCVRepository)
-    assert repo._dbpath == str(patched_settings.data_dir / "market_data.db")
+    assert repo._dbpath == str(deps.MKT_DATA_DB_PATH)
 
 
 def test_require_key_missing(settings: Settings) -> None:
