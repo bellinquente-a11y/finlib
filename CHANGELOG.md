@@ -1,5 +1,22 @@
 # CHANGELOG.md
 
+## [0.7.1] - 2026-08-05
+
+### Added
+
+- `symbols` method on OHLCV repositories for retrieving available symbols
+- FastAPI lifespan management to initialize the market data and trade repositories at startup
+- Optional market data repository path argument in the pipeline CLI
+
+### Changed
+
+- Enforce `Decimal` types in `OHLCVInterval` for consistent data handling
+
+### Fixed
+
+- Centralize database path management for trades and market data in the FastAPI lifespan
+- Remove existing databases during FastAPI lifespan management
+
 ## [0.7.0] - 2026-08-05
 
 ### Added
