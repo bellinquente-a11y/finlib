@@ -27,6 +27,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     if not file_mkt_repo_path.exists():
         raise ValueError(f"Missing file {file_mkt_repo_path}")
 
+    # Remove existing databases
+    db_trade_repo_path.unlink(missing_ok=True)
+    db_mkt_repo_path.unlink(missing_ok=True)
+
     # Clone repos
     trade_repo_file = FileTradeRepository(file_trade_repo_path)
     trade_repo_db = SQLiteTradeRepository(db_trade_repo_path)
