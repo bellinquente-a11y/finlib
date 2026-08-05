@@ -23,6 +23,16 @@ class OHLCVInterval:
     close: Decimal
     volume: Decimal
 
+    def __post_init__(self) -> None:
+        # Enforce the declared Decimal types so prices and volume are always loaded as
+        # Decimal, even when the interval is built from a float DataFrame (e.g.
+        # add_intervals_batch fed from a CSV). str() first to avoid binary-float noise.
+        for f in fields(self):
+            if f.type is Decimal:
+                value = getattr(self, f.name)
+                if not isinstance(value, Decimal):
+                    object.__setattr__(self, f.name, Decimal(str(value)))
+
     def to_string(self) -> str:
         fields_names = [f.name for f in fields(self)]
         fields_types = [f.type for f in fields(self)]
