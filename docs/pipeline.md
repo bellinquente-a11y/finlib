@@ -6,9 +6,12 @@ The `pipeline/` package is the batch CLI: it wires concrete repositories, fetche
 
 ```bash
 poetry run finlib-pipeline ./examples/trades.jsonl 1h
+poetry run finlib-pipeline ./examples/trades.jsonl 1h -m ./data/mkt_data_1h.csv
 ```
 
 Two positional arguments: the JSONL trade-repository path, and the market-data quantisation frequency (a Binance interval such as `1h` or `1d`).
+
+One optional argument, `-m`/`--market_data_repo_path`: the path of the market-data repository. When omitted it defaults to `data_dir/mkt_data_<freq>.csv` (see [configuration.md](configuration.md)); the parent directory is created if it does not exist.
 
 ## Modules
 
@@ -23,9 +26,9 @@ Two positional arguments: the JSONL trade-repository path, and the market-data q
 
 `main` does five things in order:
 
-1. **Parse** `trade_repo_path` and `frequency` (argparse).
+1. **Parse** `trade_repo_path`, `frequency`, and the optional `-m/--market_data_repo_path` (argparse).
 2. **Configure logging** — `structlog` with a `ConsoleRenderer` locally or a `JSONRenderer` in production, gated on `settings.environment`, at `settings.log_level` (see [configuration.md](configuration.md)).
-3. **Wire repositories** — a `FileTradeRepository` over the given path and a `FileOHLCVRepository` at `data_dir/mkt_data_<freq>.csv`. This is the one place concrete backends are chosen; everything downstream sees only the Protocols.
+3. **Wire repositories** — a `FileTradeRepository` over the given path and a `FileOHLCVRepository` at the market-data path (either `-m` or the `data_dir/mkt_data_<freq>.csv` default). This is the one place concrete backends are chosen; everything downstream sees only the Protocols.
 4. **Fetch & refresh** — `data.fetch_trades` then `data.update_market_data_repo` (below).
 5. **Analyse & print** — a market summary, then portfolio market value, cost basis, and cumulative PnL, each under a `_headline_title` banner.
 
