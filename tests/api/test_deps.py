@@ -17,13 +17,15 @@ def settings(tmp_path: Path) -> Settings:
     return Settings(data_dir=tmp_path, api_key=SecretStr(TEST_KEY))
 
 
-def test_get_trade_repo() -> None:
+def test_get_trade_repo(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(deps, "TRADES_DB_PATH", tmp_path / "trades.db")
     repo = deps.get_trade_repo()
     assert isinstance(repo, SQLiteTradeRepository)
     assert repo._dbpath == str(deps.TRADES_DB_PATH)
 
 
-def test_get_market_data_repo() -> None:
+def test_get_market_data_repo(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(deps, "MKT_DATA_DB_PATH", tmp_path / "mkt_data.db")
     repo = deps.get_market_data_repo()
     assert isinstance(repo, SQLiteOHLCVRepository)
     assert repo._dbpath == str(deps.MKT_DATA_DB_PATH)
