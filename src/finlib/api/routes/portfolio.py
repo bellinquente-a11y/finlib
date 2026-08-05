@@ -40,5 +40,7 @@ def pnl(
     trade_repo: Annotated[TradeRepository, Depends(get_trade_repo)],
     market_data_repo: Annotated[OHLCVRepository, Depends(get_market_data_repo)],
 ) -> dict[Hashable, dict[Hashable, Any]]:
+    # TODO on the endpoint saying "prices may be stale; refresh is deferred to a
+    # scheduled ingestion job
     pnl, _, _ = compute_portfolio_performance_metrics(trade_repo, market_data_repo)
     return pnl.to_dict("index")

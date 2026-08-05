@@ -1,6 +1,8 @@
 """Trades and market data fetching and storing"""
 
-from datetime import datetime
+import asyncio
+from datetime import UTC, datetime, timedelta
+from typing import cast
 
 import pandas as pd
 import structlog
@@ -59,4 +61,30 @@ def store_market_data(ohlcv_repo: OHLCVRepository, df: pd.DataFrame) -> None:
     columns_map = {"close_time": "timestamp"}
     log.info("Storing market data", dataframe_shape=df.shape, size=f"{df.size:,.0f}")
     ohlcv_repo.add_intervals_batch(df, columns_map=columns_map)
+    return
+
+
+def update_market_data_repo(
+    ohlcv_repo: OHLCVRepository,
+    symbols: list[str],
+    interval: binance_interval,
+    start: datetime,
+    max_update_freq: timedelta,
+) -> None:
+    """Update the OHLCV repo by fetching remotely if the data
+    was last updated since more tha 'update_freq'."""
+    symbols_to_update = []
+    for symbol in symbols:
+        last_updated = ohlcv_repo.last_updated(symbol)
+        if last_updated is None:
+            symbols_to_update.append(symbol)
+        else:
+            if last_updated < datetime.now(tz=UTC) - max_update_freq:
+                symbols_to_update.append(symbol)
+                last_timestamp = cast(datetime, ohlcv_repo.last_timestamp(symbol))
+                start = min(start, last_timestamp)
+    if symbols_to_update == []:
+        return
+    df = asyncio.run(fetch_market_data(symbols_to_update, interval, start))
+    store_market_data(ohlcv_repo, df)
     return

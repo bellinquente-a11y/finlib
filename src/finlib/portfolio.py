@@ -5,7 +5,6 @@ from itertools import groupby
 import pandas as pd
 from pydantic import BaseModel, Field
 
-from finlib.instruments import Priceable
 from finlib.models import Trade
 
 
@@ -103,11 +102,3 @@ class Portfolio(BaseModel):
         """
         cost_basis = self.historic_cost_basis().reindex(price.index, method="ffill").fillna(0)
         return self.historic_market_value(price) + cost_basis
-
-
-def value_portfolio(positions: dict[str, tuple[Priceable, float]]) -> dict[str, Decimal]:
-    """Get the value of a portfolio"""
-
-    return {
-        name: instrument.price() * Decimal(qty) for name, (instrument, qty) in positions.items()
-    }

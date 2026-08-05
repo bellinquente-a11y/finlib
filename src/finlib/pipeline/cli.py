@@ -1,7 +1,6 @@
 """CLI to run the finlib pipeline"""
 
 import argparse
-import asyncio
 import logging
 from datetime import timedelta
 from pathlib import Path
@@ -12,6 +11,8 @@ from finlib.config import get_settings
 from finlib.ohlcv_repo import FileOHLCVRepository
 from finlib.pipeline import analytics, data, output
 from finlib.trade_repo import FileTradeRepository
+
+MKT_DATA_UPDATE_FREQ = timedelta(days=1)
 
 
 def main() -> None:
@@ -60,10 +61,7 @@ def main() -> None:
 
     # Fetch and store market data
     _, symbols, first_ts = data.fetch_trades(trade_repo)
-    mkt_df = asyncio.run(
-        data.fetch_market_data(symbols, args.frequency, first_ts - timedelta(days=1))
-    )
-    data.store_market_data(mkt_repo, mkt_df)
+    data.update_market_data_repo(mkt_repo, symbols, args.frequency, first_ts, MKT_DATA_UPDATE_FREQ)
 
     # Compute market data analytics
     market_summary = analytics.compute_market_summary(mkt_repo, symbols, window=24)

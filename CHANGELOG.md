@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## [0.7.0] - 2026-08-05
+
+### Added
+
+- SQLite support for `TradeRepository` and `OHLCVRepository`
+- API submodule via FastAPI to manage HTTP requests with an API security key
+- Functionality to track the last update timestamp of the `OHLCVRepository`
+
+### Changed
+
+- Removed unusued `instruments.py` module
+
 ## [0.6.4] - 2026-07-28
 
 ### Added

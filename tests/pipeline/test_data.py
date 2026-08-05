@@ -1,5 +1,7 @@
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from typing import cast
+from unittest.mock import AsyncMock, patch
 
 import pandas as pd
 import pytest
@@ -7,8 +9,22 @@ from structlog.testing import capture_logs
 
 from finlib import Trade
 from finlib.ohlcv_repo import InMemoryOHLCVRepository
-from finlib.pipeline.data import fetch_trades, store_market_data
+from finlib.pipeline.data import (
+    fetch_trades,
+    store_market_data,
+    update_market_data_repo,
+)
 from finlib.trade_repo import InMemoryTradeRepository
+
+
+def _market_df(symbol: str, base: datetime, n: int = 3) -> pd.DataFrame:
+    """Build a market-data DataFrame shaped like the Binance fetch output."""
+    columns = ["symbol", "close_time", "open", "high", "low", "close", "volume"]
+    data = [
+        [symbol, base + i * timedelta(minutes=1), *[Decimal(100.0) for _ in range(5)]]
+        for i in range(n)
+    ]
+    return pd.DataFrame(data, columns=columns)
 
 
 def test_fetch_trades_output() -> None:
@@ -65,3 +81,69 @@ def test_fetch_trades_empty_repo_error() -> None:
     with pytest.raises(ValueError, match="Empty market data DataFrame"), capture_logs() as logs:
         store_market_data(ohlcv_repo, pd.DataFrame())
         assert logs[0]["event"] == "Empty market price dataframe"
+
+
+def test_update_market_data_repo_fetches_new_symbols() -> None:
+    """A symbol with no local data is fetched from the given start and stored."""
+    ohlcv_repo = InMemoryOHLCVRepository()
+    start = datetime(2026, 3, 1, tzinfo=UTC)
+    fetched = _market_df("AAA", start)
+
+    with patch(
+        "finlib.pipeline.data.fetch_market_data", new=AsyncMock(return_value=fetched)
+    ) as mock_fetch:
+        update_market_data_repo(
+            ohlcv_repo, ["AAA"], "1h", start, max_update_freq=timedelta(hours=1)
+        )
+
+    mock_fetch.assert_awaited_once_with(["AAA"], "1h", start)
+    assert ohlcv_repo.get_data("AAA").shape[0] == 3
+
+
+def test_update_market_data_repo_skips_fresh_symbols() -> None:
+    """A symbol updated more recently than max_update_freq is not fetched again."""
+    ohlcv_repo = InMemoryOHLCVRepository()
+    start = datetime(2026, 3, 1, tzinfo=UTC)
+    store_market_data(ohlcv_repo, _market_df("AAA", start))
+
+    with patch("finlib.pipeline.data.fetch_market_data", new=AsyncMock()) as mock_fetch:
+        update_market_data_repo(ohlcv_repo, ["AAA"], "1h", start, max_update_freq=timedelta(days=1))
+
+    mock_fetch.assert_not_awaited()
+
+
+def test_update_market_data_repo_refetches_stale_symbols() -> None:
+    """A stale symbol is re-fetched from its last stored timestamp when earlier than start."""
+    ohlcv_repo = InMemoryOHLCVRepository()
+    stored_base = datetime(2026, 1, 1, tzinfo=UTC)
+    store_market_data(ohlcv_repo, _market_df("AAA", stored_base))
+    # Force the symbol to look stale.
+    ohlcv_repo._last_updated["AAA"] = datetime(2026, 1, 1, tzinfo=UTC)
+    last_ts = cast(datetime, ohlcv_repo.last_timestamp("AAA"))
+
+    start = datetime(2026, 6, 1, tzinfo=UTC)
+    fetched = _market_df("AAA", last_ts + timedelta(minutes=1))
+
+    with patch(
+        "finlib.pipeline.data.fetch_market_data", new=AsyncMock(return_value=fetched)
+    ) as mock_fetch:
+        update_market_data_repo(
+            ohlcv_repo, ["AAA"], "1h", start, max_update_freq=timedelta(hours=1)
+        )
+
+    # start is narrowed to the last stored timestamp (min of start and last_timestamp).
+    mock_fetch.assert_awaited_once_with(["AAA"], "1h", last_ts)
+
+
+def test_update_market_data_repo_no_symbols() -> None:
+    """With no symbols there is nothing to fetch."""
+    ohlcv_repo = InMemoryOHLCVRepository()
+    with patch("finlib.pipeline.data.fetch_market_data", new=AsyncMock()) as mock_fetch:
+        update_market_data_repo(
+            ohlcv_repo,
+            [],
+            "1h",
+            datetime(2026, 3, 1, tzinfo=UTC),
+            max_update_freq=timedelta(hours=1),
+        )
+    mock_fetch.assert_not_awaited()
