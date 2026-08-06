@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## [0.7.2] - 2026-08-06
+
+### Fixed
+
+- Update type hints in API portfolio routes to use str instead of Hashable for Render docs compatibility
+
 ## [0.7.1] - 2026-08-05
 
 ### Added
