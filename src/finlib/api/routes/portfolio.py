@@ -1,5 +1,4 @@
-from collections.abc import Hashable
-from typing import Annotated, Any
+from typing import Annotated, Any, cast
 
 from fastapi import APIRouter, Depends
 
@@ -29,18 +28,22 @@ def trades(trade_repo: Annotated[TradeRepository, Depends(get_trade_repo)]) -> l
 @router.get("/positions", dependencies=[Depends(require_key)])
 def positions(
     trade_repo: Annotated[TradeRepository, Depends(get_trade_repo)],
-) -> dict[Hashable, dict[Hashable, Any]]:
+) -> dict[str, dict[str, Any]]:
     portfolio = Portfolio(name="portfolio", trades=trade_repo.get_all())
     positions = portfolio.historic_position()
-    return positions.to_dict("index")
+    positions.index = positions.index.map(lambda d: d.isoformat())
+    positions.columns = positions.columns.astype(str)
+    return cast(dict[str, dict[str, Any]], positions.to_dict("index"))
 
 
 @router.get("/pnl", dependencies=[Depends(require_key)])
 def pnl(
     trade_repo: Annotated[TradeRepository, Depends(get_trade_repo)],
     market_data_repo: Annotated[OHLCVRepository, Depends(get_market_data_repo)],
-) -> dict[Hashable, dict[Hashable, Any]]:
+) -> dict[str, dict[str, Any]]:
     # TODO on the endpoint saying "prices may be stale; refresh is deferred to a
     # scheduled ingestion job
     pnl, _, _ = compute_portfolio_performance_metrics(trade_repo, market_data_repo)
-    return pnl.to_dict("index")
+    pnl.index = pnl.index.map(lambda d: d.isoformat())
+    pnl.columns = pnl.columns.astype(str)
+    return cast(dict[str, dict[str, Any]], pnl.to_dict("index"))
